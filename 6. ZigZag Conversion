@@ -1,0 +1,31 @@
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        if(numRows==1)
+        {
+            return s;
+        }
+        int size=s.size();
+        string newstring;
+        bool is_up=false;
+        for(auto i=0;i<numRows;i++)
+        {
+            int j=i;
+            is_up=false;
+            while(j<size)
+            {
+                newstring.push_back(s[j]);
+                if(i!=0&&i!=numRows-1)
+                {
+                    j+=!is_up?2*(numRows-1-i):2*i;
+                    is_up=(!is_up);
+                }
+                else
+                {
+                    j+=2*(numRows-1);
+                }
+            }
+        }
+        return newstring;
+    }
+};
