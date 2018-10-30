@@ -1,0 +1,28 @@
+//用贪心算法，从最大的底面积开始往下减。由于容积被短的那条边所限制，因此每次移动的时候都尽可能地选择短边进行左/右移
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int vec_size=height.size();
+        int maxVal=0;
+        int left=0;
+        int right=vec_size-1;
+        int area=0;
+        bool is_right;
+        while(left!=right)
+        {
+            is_right=(height[left]>height[right]?1:0);
+            if(is_right)
+            {
+                area=height[right]*(right-left);
+                right--;
+            }
+            else
+            {
+                area=height[left]*(right-left);
+                left++;
+            }
+            maxVal=maxVal<area?area:maxVal;
+        }
+        return maxVal;
+    }
+};
