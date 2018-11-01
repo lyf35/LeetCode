@@ -1,0 +1,131 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) { //一次同时合并k个结点效率会很低
+        int lists_size=lists.size();
+        ListNode* merged_list=new ListNode(0);
+        ListNode* return_val=merged_list;
+        vector<ListNode*> list_pos(lists_size);
+        for(int i=0;i<lists_size;i++) 
+        {
+            if(lists[i]) 
+            {
+                list_pos[i]=lists[i];
+            }
+            else //此处处理空ListNode的情况
+            {
+                lists.erase(lists.begin()+i);
+                --i;
+                --lists_size;
+            }
+        }
+        while(lists_size>0)
+        {
+            int min_pos=0;
+            int min_val=INT_MAX;
+            for(int i=0;i<lists_size;i++)
+            {
+                if(lists[i]&&lists[i]->val<min_val)
+                {
+                    min_pos=i;
+                    min_val=lists[i]->val;
+                }
+            }
+            auto temp=lists[min_pos];
+            if(!(lists[min_pos]=lists[min_pos]->next))
+            {
+                lists.erase(lists.begin()+min_pos);
+                --lists_size;
+            }
+            merged_list->next=temp;
+            merged_list=merged_list->next;
+            temp->next=NULL;
+        }
+        return (return_val)->next;
+    }
+};
+
+//提高效率的方法：不能对k个结点同时合并，否则每次都要搜索k次，影响效率。如果按顺序归并的话，已归并的链段会越来越长，效率也会很低。
+//因此，需要用二分法，先对小规模的list两两组合进行归并，再慢慢两两组合归并较大的list，这样可以减小归并时的操作总次数
+
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {  
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        int lists_size=lists.size();
+        for(int i=0;i<lists_size;i++) 
+        {
+            if(!lists[i]) //此处处理空ListNode的情况
+            {
+                lists.erase(lists.begin()+i);
+                --i;
+                --lists_size;
+            }
+        }
+        if(lists_size==0)
+        {
+            return nullptr;
+        }
+        else if(lists_size==1)
+        {
+            return lists[0];
+        }
+        else
+        {
+            return mergesort(lists,0,lists_size-1);
+        }
+    }
+    ListNode* merge2Lists(ListNode* lists1,ListNode* lists2) 
+    { 
+        ListNode* merged_list=new ListNode(0);
+        ListNode* return_val=merged_list;
+        while(lists1&&lists2)
+        {
+            if(lists1->val<lists2->val)
+            {
+                merged_list->next=lists1;
+                merged_list=merged_list->next;
+                lists1=lists1->next;
+            }
+            else
+            {
+                merged_list->next=lists2;
+                merged_list=merged_list->next;
+                lists2=lists2->next;
+            }
+        }
+        if(lists1)
+        {
+            merged_list->next=lists1;
+        }
+        else
+        {
+            merged_list->next=lists2;
+        }
+        return (return_val)->next;
+    }
+    ListNode* mergesort(vector<ListNode*>& lists,int i,int j)
+    {
+        if(i==j)
+        {
+            return lists[i];
+        }
+        auto listnode1=mergesort(lists,i,(j+i)/2);
+        auto listnode2=mergesort(lists,(j+i)/2+1,j);
+        return merge2Lists(listnode1,listnode2);
+    }
+};
