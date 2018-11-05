@@ -1,0 +1,76 @@
+class Solution {
+public:
+    int divide(int dividend, int divisor) {
+        if(divisor==0)
+        {
+            return INT_MAX;
+        }
+        if(divisor==INT_MIN)
+        {
+            if(dividend==INT_MIN)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        bool is_negative=(dividend&INT_MIN)^(divisor&INT_MIN); //如果两个数其中一个的最高位是1，则说明最后的商是负数，因此要用异或运算
+        int abs_dividend;
+        int flow=0;
+        if(dividend!=INT_MIN)//将被除数和除数都变为整数，此处要对被除数是INT_MIN的情况做一些特殊处理
+        {
+            abs_dividend=(dividend&INT_MIN)!=0? -dividend:dividend; 
+        }
+        else
+        {
+            abs_dividend=INT_MAX;
+            flow=1;
+        }
+        int abs_divisor=(divisor&INT_MIN)!=0? -divisor:divisor;
+        int result=0;
+        while(abs_dividend>=abs_divisor)
+        {
+            int move_digit=upper_digit(abs_dividend,abs_divisor);
+            result+=(1<<move_digit);
+            abs_dividend-=(abs_divisor<<move_digit);
+        }
+        if((flow+abs_dividend)==divisor) //此处是对之前被除数为INT_MIN的情况做处理
+        {
+            if(result==INT_MAX&&(!is_negative)) //要考虑商是否会溢出
+            {
+                return INT_MAX;
+            }
+            else if(result==INT_MAX&&is_negative)
+            {
+                return INT_MIN;
+            }
+            else
+            {
+                ++result;
+            }
+        }
+        return is_negative? -result:result;
+    }
+    
+    int upper_digit(int dividend,int divisor) //用二分法查找商的最高位
+    {
+        int digit=0;
+        int right_move_digit=16;
+        while(right_move_digit>0)
+        {
+            if((dividend>>right_move_digit)>divisor)
+            {
+                digit+=right_move_digit;
+                dividend>>=right_move_digit;
+            }
+            right_move_digit>>=1;
+        }
+        return digit;
+    }
+};
+
+/*
+还有一种更简便的方法是把原来的32位数字先变为64位再做处理（即变为long类型），这样就不用考虑溢出的情况了
+*/
