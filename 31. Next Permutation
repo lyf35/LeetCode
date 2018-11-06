@@ -1,0 +1,31 @@
+class Solution {
+public:
+    void nextPermutation(vector<int>& nums) {
+        int arr_size=nums.size();
+        int last_incr_pos=arr_size-1; //找到最后一个nums[n]<nums[n+1]的位置n。将其默认记作是最后一个数字
+        for(int i=0;i<arr_size-1;i++)
+        {
+            if(nums[i]<nums[i+1])
+            {
+                last_incr_pos=i;
+            }
+        }
+        if(last_incr_pos==arr_size-1) //如果最后没有被修改，则代表数组的所有数字都是按照降序排列的
+        {
+            std::sort(nums.begin(),nums.end());
+        }
+        else //如果被修改，则需要做一些处理
+        {
+            int smallest_pos=last_incr_pos+1; //找到后面比nums[last_incr_pos]更大，且为其中最小者的元素
+            for(int i=last_incr_pos+1;i<arr_size;i++)
+            {
+                if(nums[smallest_pos]>nums[i]&&nums[i]>nums[last_incr_pos])
+                {
+                    smallest_pos=i;
+                }
+            }
+            std::swap(nums[last_incr_pos],nums[smallest_pos]);
+            std::sort(nums.begin()+last_incr_pos+1,nums.end());
+        }
+    }
+};
