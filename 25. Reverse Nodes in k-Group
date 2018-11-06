@@ -1,0 +1,53 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode* current=head;
+        ListNode* part_head=head; //记录某一段的头结点
+        ListNode* last_tail=nullptr; //记录上一段的尾结点
+        ListNode* return_ptr=nullptr; //记录要返回的结点，即第一段的头结点
+        int list_size=0;
+        for(auto i=head;i!=nullptr;i=i->next)
+        {
+            ++list_size;
+        }
+        int group_num=list_size/k;
+        if(group_num==0)
+        {
+            return head;
+        }
+        for(int i=0;i<group_num;++i)
+        {
+            int count=k-1;
+            auto part_tail=part_head; //记录某一段的尾结点
+            current=current->next; //直接从某一段的第二个结点开始处理即可
+            while(count>0)
+            {
+                auto temp=current;
+                current=current->next;
+                temp->next=part_head;
+                part_head=temp;
+                --count;
+            } //循环结束的时候，current指向下一段的第一个结点
+            if(last_tail) //如果不为空，说明是中间某一段的结点
+            {
+                last_tail->next=part_head;
+            }
+            else //如果为空，说明是第一段，此时设置返回值
+            {
+                return_ptr=part_head;
+            }
+            last_tail=part_tail; //记录下这一段的尾结点
+            part_head=current; //设置下一段的开头结点
+        }
+        last_tail->next=current;
+        return return_ptr;
+    }
+};
