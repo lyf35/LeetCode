@@ -108,5 +108,117 @@ public:
     }
 };
 
-方法3：利用堆栈。此方法的时间复杂度也是O(n)
+方法3：利用堆栈。此方法的时间复杂度也是O(n)，但是因为不用在数组中取值，且栈这种数据结构充分利用了局部性，可以充分利用缓存，效率更高
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int length=s.size();
+        stack<int> temp; //根据括号的匹配规则，可以用一个堆栈来存储左括号，然后每遇到一个右括号，就弹出一个数。这样在每次弹出的时候都能形成有效匹配
+        temp.push(-1);
+        int max=0;
+        int pre_length=0;
+        for(int i=0;i<length;i++)
+        {
+            int left_index=0;
+            if(s[i]=='(') //如果是左括号，就把对应的位置推入堆栈
+            {
+                temp.push(i);
+            }
+            else //如果是右括号，就要根据情况做相应操作
+            {
+                temp.pop();
+                if(temp.size()==0)//如果栈为空，则把当前元素推入栈中，从而保证栈非空
+                {
+                    pre_length=0;
+                    temp.push(i);
+                }
+                else
+                {
+                    pre_length=(i-temp.top());
+                    if(max<pre_length)
+                        max=pre_length;
+                }
+            }
+        }
+        return max;
+    }
+};
+
+方法4：只占用常数大小的空间，但是需要从左到右与从右到左循环两次，因此效率不是很高
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int length=s.size();
+        int left_parenthesis=0;
+        int right_parenthesis=0;
+        int max_val=0;
+        int temp=0;
+        for(int i=0;i<length;i++)
+        {
+            if(s[i]=='(')
+            {
+                ++left_parenthesis;
+            }
+            else
+            {
+                ++right_parenthesis;
+            }
+            if(left_parenthesis==right_parenthesis)
+            {
+                temp+=(left_parenthesis<<1);
+                left_parenthesis=0;
+                right_parenthesis=0;
+                if(max_val<temp)
+                {
+                    max_val=temp;
+                }
+            }
+            else if(left_parenthesis<right_parenthesis)
+            {
+                left_parenthesis=0;
+                right_parenthesis=0;
+                if(max_val<temp)
+                {
+                    max_val=temp;
+                }
+                temp=0;
+            }
+        }
+        temp=0;
+        left_parenthesis=0;
+        right_parenthesis=0;
+        for(int i=0;i<length;i++)
+        {
+            if(s[length-1-i]=='(')
+            {
+                ++left_parenthesis;
+            }
+            else
+            {
+                ++right_parenthesis;
+            }
+            if(left_parenthesis==right_parenthesis)
+            {
+                temp+=(left_parenthesis<<1);
+                left_parenthesis=0;
+                right_parenthesis=0;
+                if(max_val<temp)
+                {
+                    max_val=temp;
+                }
+            }
+            else if(left_parenthesis>right_parenthesis)
+            {
+                left_parenthesis=0;
+                right_parenthesis=0;
+                if(max_val<temp)
+                {
+                    max_val=temp;
+                }
+                temp=0;
+            }
+        }
+        return max_val;
+    }
+};
 
