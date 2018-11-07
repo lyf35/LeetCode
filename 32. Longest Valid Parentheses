@@ -1,0 +1,112 @@
+方法一：蛮力算法。此算法的时间复杂度为O(n^2)，故效率很低
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int length=s.size();
+        if(length==0)
+        {
+            return 0;
+        }
+        int left_parenthesis=0;
+        int right_parenthesis=0;
+        int max_length=0;
+        vector<int> left_num(length,0);
+        vector<int> right_num(length,0);
+        for(auto i=0;i<length;++i) //先记录下从0-i处共有几个左括号和右括号
+        {
+            if(s[i]=='(')
+            {
+                ++left_parenthesis;
+            }
+            else
+            {
+                ++right_parenthesis;
+            }
+            left_num[i]=left_parenthesis;
+            right_num[i]=right_parenthesis;
+        }
+        
+        int left_prev=0; //记录上一次做if判定时的左括号个数
+        bool is_first_trill=true;
+        for(auto i=0;i<length;++i) //寻找左括号的位置，并从左括号处开始做进一步的处理
+        {
+            if(left_num[i]>left_prev)
+            {
+                auto right_prev=right_num[i]; //记录此时的右括号个数，即这个左括号之前右括号的个数
+                auto sub_length=0;
+                auto diff=left_prev-right_prev;
+                auto diff2=right_num[length-1]+diff;
+                for(auto j=i;j<length;j++)
+                {
+                    if(((left_num[j]-right_num[j])>diff)&&(left_num[j]<=diff2)) //如果左括号个数一直大于等于右括号，而且左括号的数目不大于右边的最大个数（都指删除前驱所有左右括号之后），则可以继续比较下去
+                    {
+                        ++sub_length;
+                    }
+                    else if(left_num[j]-right_num[j]==diff) //如果某处左右括号数目相等，就做一次赋值操作，避免之后的回溯
+                    {
+                        ++sub_length;
+                        if(max_length<sub_length)
+                        {
+                            max_length=sub_length;
+                        }
+                    }
+                    else //如果以上情况都不满足，那么说明左括号个数小于右括号，或是左括号的个数已经大于右括号的最大数目，因此没有再循环下去的必要
+                    {
+                        break;
+                    }
+                }
+                if((sub_length==length-i)&&((left_num[length-1]-right_num[length-1])==diff)) //如果最终到了末尾，则需要再做特殊处理
+                {
+                    if(max_length<sub_length)
+                    {
+                        max_length=sub_length;
+                        if(is_first_trill) //如果是从某位置第一次搜索至结尾处且对最大长度重新赋值，那么后面的工作可以不用进行了
+                        {
+                            return max_length;
+                        }
+                    }
+                    is_first_trill=false;
+                }
+                ++left_prev;
+            }
+        }
+        return max_length;
+    }
+};
+
+方法二：动态规划。此算法的时间复杂度为O(n)，比蛮力算法要快得多
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int length=s.size();
+        int max_length=0;
+        vector<int> pos_length(length,0); //用于记录以当前字符为终点时，可以形成的最长字符串的长度
+        for(auto i=1;i<length;i++)
+        {
+            if(s[i]=='(')
+            {
+                pos_length[i]=0;
+            }
+            else
+            {
+                if(s[i-1]=='(') //之前一位是左括号，直接取i-2位置处的结果+2即可
+                {
+                    pos_length[i]=pos_length[i-2]+2;
+                }
+                else //之前一位是右括号，需要判断这个和i-1位置的右括号相匹配的前面还有没有左括号
+                {
+                    if(s[i-1-pos_length[i-1]]=='(')
+                    pos_length[i]=pos_length[i-1]+pos_length[i-pos_length[i-1]-2]+2;
+                }
+            }
+            if(max_length<pos_length[i])
+            {
+                max_length=pos_length[i];
+            }
+        }
+        return max_length;
+    }
+};
+
+方法3：利用堆栈。此方法的时间复杂度也是O(n)
+
