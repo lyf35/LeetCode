@@ -1,0 +1,53 @@
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        int length=nums.size()-1;
+        if(length<0)
+        {
+            return -1;
+        }
+        int right_pos=length;
+        int left_pos=0;
+        while(right_pos-left_pos>1)//从头尾两端用二分查找向中间搜索，找到那个下降处的位置
+        {
+            if(nums[left_pos]<nums[(left_pos+right_pos)/2]) //两个if语句每次至少成立一个
+            {
+                left_pos=(left_pos+right_pos)/2;
+            }
+            if(nums[(left_pos+right_pos)/2]<nums[right_pos])
+            {
+                right_pos=(left_pos+right_pos)/2;
+            }
+        }
+        int pos1=binary_search(nums,0,left_pos,target);
+        int pos2=binary_search(nums,right_pos,length,target);
+        if(nums[pos1]==target)
+        {
+            return pos1;
+        }
+        else if(nums[pos2]==target)
+        {
+            return pos2;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    int binary_search(vector<int>& nums,int m,int n,int target) //在一个数组的m和n位置之间做二分查找，返回查找到的位置
+    {
+        if(m==n)
+        {
+            return m;
+        }
+        int mid=(m+n)/2;
+        if(nums[mid]<target)
+        {
+            return binary_search(nums,mid+1,n,target);
+        }
+        else
+        {
+            return binary_search(nums,m,mid,target);
+        }
+    }
+};
