@@ -1,0 +1,105 @@
+class Solution {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        vector<int> isvalid(9,0); //用一个保存数字个数的向量来判断行/列/分块内是否满足条件
+        //根据高速缓存调用时的局部性，使用循环展开，以及多个变量同时存储结果，可以提高程序运行速度
+        for(int i=0;i<9;i++) //检查行
+        {
+            for(auto &temp:isvalid)
+            {
+                temp=0;
+            }
+            for(int j=0;j<9;j++)
+            {
+                if(board[i][j]!='.')
+                {
+                    ++isvalid[board[i][j]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+            }
+            for(int k=0;k<9;k++) //对一列处理完成之后，检查isvalid向量，如果存在大于1的元素
+            {
+                if(isvalid[k]>1)
+                {
+                    return false;
+                }
+            }
+        }
+        
+        for(int i=0;i<9;i++) //检查列
+        {
+            for(auto& temp:isvalid)
+            {
+                temp=0;
+            }            
+            for(int j=0;j<9;j++)
+            {
+                if(board[j][i]!='.')
+                {
+                    ++isvalid[board[j][i]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+            }
+            for(int k=0;k<9;k++) //对一列处理完成之后，检查isvalid向量，如果存在大于1的元素
+            {
+                if(isvalid[k]>1)
+                {
+                    return false;
+                }
+            }
+        }
+        
+        for(int i=0;i<9;i+=3) //检查每个分块
+        {          
+            for(int j=0;j<9;j+=3)
+            {
+                for(auto& temp:isvalid)
+                {
+                    temp=0;
+                }  
+                if(board[i][j]!='.')
+                {
+                    ++isvalid[board[i][j]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+1][j]!='.')
+                {
+                    ++isvalid[board[i+1][j]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+2][j]!='.')
+                {
+                    ++isvalid[board[i+2][j]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i][j+1]!='.')
+                {
+                    ++isvalid[board[i][j+1]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+1][j+1]!='.')
+                {
+                    ++isvalid[board[i+1][j+1]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+2][j+1]!='.')
+                {
+                    ++isvalid[board[i+2][j+1]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i][j+2]!='.')
+                {
+                    ++isvalid[board[i][j+2]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+1][j+2]!='.')
+                {
+                    ++isvalid[board[i+1][j+2]-'1']; //每遇到一个数字，就给相应位置上加1
+                }
+                if(board[i+2][j+2]!='.')
+                {
+                    ++isvalid[board[i+2][j+2]-'1']; //每遇到一个数字，就给相应位置上加1
+                }              
+                for(int k=0;k<9;k++) //对一个块处理完成之后，检查isvalid向量，如果存在大于1的元素
+                {
+                    if(isvalid[k]>1)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
