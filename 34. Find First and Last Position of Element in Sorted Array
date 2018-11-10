@@ -1,0 +1,83 @@
+class Solution {
+public:
+    vector<int> searchRange(vector<int>& nums, int target) 
+    {
+        vector<int> return_val{-1,-1};
+        int length=nums.size();
+        if(length==0) //如果向量为空，则需要做一些特殊处理
+        {
+            return return_val;
+        }
+        int left=find_last_less_pos(nums,target,0,length-1);
+        int right=find_first_larger_pos(nums,target,0,length-1);
+        if(nums[left]<target) //由于边界处可能刚好等于target，因此最终返回之前还要再确定left和right的值是否正确
+        {
+            ++left;
+        }
+        if(nums[right]>target)
+        {
+            --right;
+        }
+        if(left>right)
+        {
+            left=right=-1;
+        }
+        return_val[0]=left;
+        return_val[1]=right;
+        return return_val;
+    }
+    int find_last_less_pos(vector<int>& nums,int target,int m,int n) //找到小于target的最后一个数字的位置
+    {
+        if(m==n) //递归的基础情况，对最后只剩下一个或者两个数的情况做特殊处理
+        {
+            return m;
+        }
+        if(m+1==n)
+        {
+            if(nums[n]<target)
+            {
+                return n;
+            }
+            else 
+            {
+                return m;
+            }
+        }
+        int mid=(m+n)/2; //其余情况，可以直接按照中间值与target的对应关系来分别做递归操作
+        if(nums[mid]>=target) 
+        {
+            return find_last_less_pos(nums,target,m,mid-1);
+        }
+        else
+        {
+            return find_last_less_pos(nums,target,mid,n);
+        }
+    }
+    int find_first_larger_pos(vector<int>& nums,int target,int m,int n) //找到大于target的第一个数字的位置
+    {
+        if(m==n)
+        {
+            return m;
+        }
+        if(m+1==n)
+        {
+            if(nums[m]<=target)
+            {
+                return n;
+            }
+            else
+            {
+                return m;
+            }
+        }        
+        int mid=(m+n)/2;
+        if(nums[mid]>target)
+        {
+            return find_first_larger_pos(nums,target,m,mid);
+        }
+        else
+        {
+            return find_first_larger_pos(nums,target,mid+1,n);
+        }        
+    }    
+};
