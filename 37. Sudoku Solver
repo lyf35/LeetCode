@@ -1,0 +1,229 @@
+//一个自己写的算法，先用数字不能重复的规定尽可能地填充数字，然后再去回溯，这样避免了试探的时候产生的递归运算过多
+class Solution {
+public:
+    void solveSudoku(vector<vector<char>>& board) {
+        int missing_num=0;
+        for(int i=0;i<9;i++)
+        {
+            for(int j=0;j<9;j++)
+            {
+                if(board[i][j]=='.')
+                {
+                    ++missing_num;
+                }
+            }
+        }
+        while(missing_num>0)
+        {
+            auto number_count=fill_value_unique(board,missing_num); //先使用普通的推理法进行填充
+            if(get<0>(number_count)>1) //如果循环做完之后，可以填写数字最少的那个位置大于1，说明此时用普通的推理法进行填充已经不起作用，需要用试探-回溯的办法进行填充。
+            {
+                fill_value_backtrack(board,number_count,missing_num);
+            }
+        }
+    }
+    tuple<int,int,int,vector<bool>> fill_value_unique(vector<vector<char>>& board,int& missing_num) //只有当某个位置可以填的值唯一时，才进行填充，否则返回值的第一个代表这一位置可填写值的个数，第二和第三个位置代表对应的位置，用于后续的试探-回溯步骤
+    {
+        tuple<int,int,int,vector<bool>> number_count(INT_MAX,0,0,vector<bool>(1,0)); //保存缺失值处可以填写数字的最小可能数
+        for(int i=0;i<9;i++) //遍历每一个位置
+        {
+            for(int j=0;j<9;j++)
+            {
+                if(board[i][j]=='.') //遇到某个位置为空的时候调用函数看是否能够填充
+                {
+                    vector<bool> isnumfill(9,0); //用一个布尔变量保存某个数字是否空着
+                    vector<bool> isnumfill_row(9,0);
+                    vector<bool> isnumfill_column(9,0);
+                    vector<bool> isnumfill_section(9,0);
+                    for(int k=0;k<9;k++)
+                    {
+                        if(board[i][k]!='.') //处理第i行的数据
+                        {
+                            if(isnumfill_row[board[i][k]-'1']==0)
+                            {
+                                isnumfill_row[board[i][k]-'1']=1;
+                            }
+                            else //如果发现某一行有重复数据
+                            {
+                                return make_tuple(INT_MIN,0,0,vector<bool>(1,0));
+                            }
+                        }
+                        if(board[k][j]!='.') //处理第j列的数据
+                        {
+                            if(isnumfill_column[board[k][j]-'1']==0)
+                            {
+                                isnumfill_column[board[k][j]-'1']=1;
+                            }
+                            else //发现重复数据
+                            {
+                                return make_tuple(INT_MIN,0,0,vector<bool>(1,0));
+                            }
+                        }
+                    }
+                    int left=3*(i/3); //处理这个位置所在分块的数据
+                    int up=3*(j/3);
+                    for(int x=0;x<3;x++)
+                    {
+                        for(int y=0;y<3;y++)
+                        {
+                            if(board[left+x][up+y]!='.')
+                            {
+                                if(isnumfill_section[board[left+x][up+y]-'1']==0)
+                                {
+                                    isnumfill_section[board[left+x][up+y]-'1']=1;
+                                }
+                                else //发现重复数据
+                                {
+                                    return make_tuple(INT_MIN,0,0,vector<bool>(1,0));
+                                }
+                            }
+                        }
+                    }
+                    int empty_pos=-1;
+                    int empty_count=0;
+                    for(int k=0;k<9;k++)
+                    {
+                        isnumfill[k]=(isnumfill_row[k]|(isnumfill_column[k]|isnumfill_section[k]));
+                        if(isnumfill[k]==0) //记录下每个位置取0的个数
+                        {
+                            empty_pos=k;
+                            ++empty_count;
+                        }
+                    }
+                    if(empty_count==1) //如果某个位置只能填一个数，说明此时根据推理的办法可以填充
+                    {
+                        board[i][j]='1'+empty_pos;
+                        --missing_num;
+                    }
+                    if(empty_count==0) //如果某个位置填充任何数都重复，说明试探时填错，需要返回特殊值作为回溯的判定条件
+                    {
+                        return make_tuple(INT_MIN,0,0,vector<bool>(1,0));
+                    }
+                    if(empty_count<get<0>(number_count))
+                    {
+                        number_count=make_tuple(empty_count,i,j,isnumfill);
+                    }
+                }
+            }
+        }
+        cout<<missing_num<<endl;
+        return number_count;
+    }
+    void fill_value_backtrack(vector<vector<char>>& board,tuple<int,int,int,vector<bool>> info,int& missing_num) //用试探-回溯法来填充，返回值是某一步开始试探之前的数独和剩余空位数
+    {
+        int i=get<1>(info);
+        int j=get<2>(info);
+        int k=0;
+        vector<bool> numfill=get<3>(info);
+        stack<tuple<vector<vector<char>>,int,int,tuple<int,int,vector<bool>>>> previous_val; //用一个堆栈保存某次试探之前的状态，栈中存储的元素依次为：某个时刻的数独表，某个时刻的剩余元素个数，某个时刻的k值，以及某个时刻的位置信息
+        while(k<9) 
+        {
+            if(numfill[k]==0) //代表某个位置可以向下做试探
+            {
+                previous_val.push(make_tuple(board,missing_num,k,make_tuple(i,j,numfill))); //将此时的状态压入栈中
+                board[i][j]='1'+k; //暂时先按此元素填充
+                --missing_num; //填充时记得给缺失值也减1！
+                tuple<int,int,int,vector<bool>> number_count(0,0,0,vector<bool>(1,0));
+                while(get<0>(number_count)<2&&get<0>(number_count)!=INT_MIN&&missing_num>0) //先使用普通的推理法进行填充。进行循环直到填充完毕，或是需要继续试探，也或是需要回溯
+                {
+                    number_count=fill_value_unique(board,missing_num);
+                }
+                if(missing_num==0)
+                {
+                    return;
+                }
+                if(get<0>(number_count)>1) //如果可以填写数字最少的那个位置仍大于1，需要继续试探，此时对之前的状态进行保存
+                {
+                    previous_val.push(make_tuple(board,missing_num-1,k,make_tuple(i,j,numfill)));
+                    i=get<1>(number_count);
+                    j=get<2>(number_count);
+                    k=-1;
+                    numfill=get<3>(number_count);
+                }
+                else if(get<0>(number_count)==INT_MIN)//如果试探到某一步的时候出错，则将变量恢复为原来的值，然后再继续尝试
+                {
+                    auto temp=previous_val.top();
+                    board=get<0>(temp);
+                    missing_num=get<1>(temp);
+                    k=get<2>(temp);
+                    auto temp2=get<3>(temp);
+                    i=get<0>(temp2);
+                    j=get<1>(temp2);
+                    numfill=get<2>(temp2);  
+                    previous_val.pop();
+                }
+            }
+            k++;
+            if(k==9&&previous_val.size()>0) //如果某个位置所有的可能性都尝试过，但是依然不成立，也需要回溯
+            {
+                auto temp=previous_val.top();
+                board=get<0>(temp);
+                missing_num=get<1>(temp);
+                k=get<2>(temp);
+                k++; //此处要注意，如果不对k进行+1处理的话，下一步循环仍会重复之前的结果
+                auto temp2=get<3>(temp);
+                i=get<0>(temp2);
+                j=get<1>(temp2);
+                numfill=get<2>(temp2);
+                previous_val.pop();
+            }
+        }
+    }
+};
+
+//也可以直接从第一个位置开始就使用试探-回溯来处理，但是这样所需的时间大于上面的算法
+class Solution {
+public:
+    void solveSudoku(vector<vector<char>>& board) {
+        backtrace(board,0);
+    }
+    bool is_valid(vector<vector<char>>& board,int i,int j,char c)
+    {
+        int corner_row=3*(i/3);
+        int corner_column=3*(j/3);
+        for(int m=0;m<9;m++)
+        {
+            if(board[i][j]=='.')
+            {
+                if(board[i][m]==c||board[m][j]==c||board[corner_row+m/3][corner_column+m%3]==c)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    bool backtrace(vector<vector<char>>& board,int count)
+    {
+        if(count==81)
+        {
+            return true;
+        }
+        int row=count/9;
+        int col=count%9;
+        if(board[row][col]=='.') //如果某个位置为空，就在这个位置上做试探
+        {
+            for(int i=0;i<9;i++)
+            {
+                char test='1'+i;
+                if(is_valid(board,row,col,test)) //如果某个位置这个数字可以填，就进入下一个位置
+                {
+                    board[row][col]=test;
+                    if(!backtrace(board,count+1))
+                    {
+                        board[row][col]='.'; //代表某个位置的解不成立，把数字还原回去，相当于回溯
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        else //如果某个位置不为空，则直接进入下一个位置
+        {
+            return backtrace(board,count+1);
+        }
+    }
+};
