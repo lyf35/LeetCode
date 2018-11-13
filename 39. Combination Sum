@@ -1,0 +1,89 @@
+//使用试探-回溯算法，由于程序结构简单，每次递归的临时变量较少，因此不会因为递归层数过深而导致求解时间变得很大
+class Solution {
+public:
+    void combinationSum(vector<vector<int>>& res, vector<int>& c, vector<int> s, int target, int idx) {
+        //res代表存储返回值的vector，c代表候选值的vector，s代表存储可行组合的vector，target代表要寻找的目标值，idx对应于c中的指数
+        if (target == 0) res.push_back(s); //递归的基础情况，如果target==0说明找到了一组可行解
+        else if (idx >= c.size() || c[idx] > target) return; //如果候选值搜索完毕，或者是候选值已经大于目标值，可以直接结束
+        else { //递归情况
+            combinationSum(res, c, s, target, idx + 1); //不要当前值，搜索下一个位置的值
+            s.push_back(c[idx]); //要当前值，然后继续搜索
+            combinationSum(res, c, s, target - c[idx], idx);
+        }
+    }
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<int>> res; //保存返回值
+        sort(begin(candidates), end(candidates)); //先对原数组排序
+        combinationSum(res, candidates, vector<int>() = {}, target, 0); //试探-回溯，并把结构保存到res中
+        return res;
+    }
+};
+
+
+//如果使用穷举的办法去求解，每次递归时都要产生大量的临时变量，当vector规模变大时，求解所需时间会急剧增大，无法满足时间要求
+class Solution {
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        sort(candidates.begin(),candidates.end());
+        vector<bool> is_found(target+1,0); //用一个布尔类型的变量来存储已经求解过的值，从而避免重复求解
+        auto result_set=find_result(candidates,target,is_found);
+        vector<vector<int>> return_val;
+        for(auto i=result_set.begin();i!=result_set.end();i++)
+        {
+            return_val.push_back(*i);
+        }
+        return return_val;
+    }
+    set<vector<int>> find_result(vector<int>& candidates, int target,vector<bool> is_found)
+    {
+        set<vector<int>> result;
+        for(auto i:candidates)
+        {
+            if(i<target&&(!is_found[i])) //如果某处的值比目标值要小
+            {
+                auto result1=find_result(candidates,i,is_found);
+                auto result2=find_result(candidates,target-i,is_found);
+                auto temp_result=result_combine(result1,result2);
+                if(temp_result.size()>0)
+                {
+                    is_found[i]=1;
+                    is_found[target-i]=1;
+                    result.insert(temp_result.begin(),temp_result.end());
+                } 
+            }
+            else if(i==target) //如果某处的值刚好等于目标值，由于值没有重复，此时也可以在插入值之后返回
+            {
+                result.insert(vector<int>{target});
+                is_found[i]=1;
+                return result;
+            }
+            else if(i>target)
+            {
+                return result;
+            }
+        }
+        return result;     
+    }
+    set<vector<int>> result_combine(set<vector<int>>& result1,set<vector<int>>& result2) //合并两个数组
+    {
+        set<vector<int>> combination_result;
+        if(result1.size()==0||result2.size()==0)
+        {
+            return combination_result;
+        }
+        else
+        {
+            for(auto i=result1.begin();i!=result1.end();i++)
+            {
+                for(auto j=result2.begin();j!=result2.end();j++)
+                {
+                    vector<int> temp=*i;
+                    temp.insert(temp.end(),j->begin(),j->end());
+                    sort(temp.begin(),temp.end());
+                    combination_result.insert(temp);
+                }
+            }
+        }
+        return combination_result;
+    }
+};
