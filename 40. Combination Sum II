@@ -1,0 +1,73 @@
+//自己写的DFS搜索算法，因为每次调用函数时复制result变量而导致求解效率较低
+class Solution {
+public:
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) { //使用试探-回溯的方法求解
+        sort(candidates.begin(),candidates.end());
+        vector<vector<int>> return_val;
+        find_solution(return_val,candidates,vector<int>{},target,0);
+        return return_val;
+    }
+    void find_solution(vector<vector<int>>& solution_set,vector<int>& cand,vector<int> result,int target,int pos)
+    {   
+        if(pos==cand.size())
+        {
+            return;
+        }
+        int temp=pos+1;
+        while(temp<cand.size()&&cand[temp]==cand[temp-1]) //如果有相同元素的话，需要跳过这些相同元素
+        {
+            ++temp;
+        }
+        if(temp<cand.size())
+        {
+            find_solution(solution_set,cand,result,target,temp); //不加入当前元素，直接跳到下一个元素
+        }
+        if(cand[pos]==target) //考虑当前元素的两种情况
+        {
+            result.push_back(target);
+            solution_set.push_back(result);
+        }
+        else if(cand[pos]<target)
+        {
+            result.push_back(cand[pos]);
+            find_solution(solution_set,cand,result,target-cand[pos],pos+1);
+        }
+    }
+};
+
+//加入回溯过程，可以提高效率，并且代码更加紧凑
+class Solution {
+public:
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) { //使用试探-回溯的方法求解
+        sort(candidates.begin(),candidates.end());
+        vector<vector<int>> return_val;
+        vector<int> result;
+        find_solution(return_val,candidates,result,target,0);
+        return return_val;
+    }
+    void find_solution(vector<vector<int>>& solution_set,vector<int>& cand,vector<int>& result,int target,int pos)
+    {   
+        if(target<0)
+        {
+            return;
+        }
+        else if(target==0)
+        {
+            solution_set.push_back(result);
+        }
+        else
+        {
+            for(int i=pos;i<cand.size();i++)
+            {
+                if(i>pos&&cand[i]==cand[i-1])
+                {
+                    continue;
+                }
+                result.push_back(cand[i]); //试探步
+                find_solution(solution_set,cand,result,target-cand[i],i+1); //用试探之后的结果再做搜索
+                result.pop_back(); //相当于去掉这一次的试探。由于每次递归都要先加入一个元素，最后弹出元素，因此函数中即使使用&来引用，
+                //在上一步递归调用结束之后，result中仍是比这一次循环开始之前多了一个cand[i]，此时把这个元素弹出然后进行下一次循环
+            }
+        }
+    }
+};
