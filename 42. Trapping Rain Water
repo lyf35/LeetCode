@@ -1,0 +1,103 @@
+//一个比较容易理解的蛮力算法，但是这样会使得最坏情况下的时间复杂度为O(n^2)
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int max=INT_MIN;
+        int max_pos=0;
+        int length=height.size();
+        if(length<2)
+        {
+            return 0;
+        }
+        for(auto i=0;i<length;i++) //先找到所有“挡板”的最大值
+        {
+            if(max<height[i])
+            {
+                max=height[i];
+                max_pos=i;
+            }
+        }
+        int left_max_pos=max_pos;
+        int right_max_pos=max_pos;
+        vector<int> water_capacity(height.size(),0);
+        water_capacity[max_pos]=max;
+        while(left_max_pos>0) //从挡板的左右两侧逐阶寻找max_pos左边的最大值及其位置，这两个挡板对应的位置中间可以用于“装水”。寻找完之后，再从找到的这个最大值左侧继续找
+        {
+            int left_pos=find_max_pos(height,left_max_pos,1);
+            for(auto i=left_pos;i<left_max_pos;++i)
+            {
+                water_capacity[i]=height[left_pos];
+            }
+            left_max_pos=left_pos;
+        }
+        while(right_max_pos<length-1) //右侧的方法同左侧
+        {
+            int right_pos=find_max_pos(height,right_max_pos,0);
+            for(auto i=right_pos;i>right_max_pos;--i)
+            {
+                water_capacity[i]=height[right_pos];
+            }
+            right_max_pos=right_pos;
+        }
+        int capacity=0;
+        for(auto i=0;i<length;i++)
+        {
+            capacity+=water_capacity[i]-height[i];
+        }
+        return capacity;
+    }
+    int find_max_pos(vector<int>& height,int pos,bool is_left) //搜索pos以左/右的最大值
+    {
+        int return_pos;
+        int max_val=INT_MIN;
+        int incr=is_left?-1:1;
+        int bound=is_left?-1:height.size();
+        int i=is_left?pos-1:pos+1;
+        while(i!=bound)
+        {
+            if(height[i]>max_val)
+            {
+                max_val=height[i];
+                return_pos=i;
+            }
+            i+=incr;
+        }
+        return return_pos;
+    }
+};
+
+//为了降低时间复杂度，可以采用动态规划的算法来寻找“台阶”。分别从左侧和右侧开始寻找每一级的最大高度，然后二者取较小值。这样可使得时间复杂度为O(n)
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int length=height.size();
+        if(length<2)
+        {
+            return 0;
+        }
+        vector<int> left_max_height(length,0); //从左起开始数所得到的最大高度
+        int left_curr_max=0;
+        vector<int> right_max_height(length,0); //从右起开始数所得到得最大高度
+        int right_curr_max=0;
+        for(int i=0;i<length;i++)
+        {
+            if(height[i]>left_curr_max)
+            {
+                left_curr_max=height[i];
+            }
+            left_max_height[i]=left_curr_max;
+            if(height[length-i-1]>right_curr_max)
+            {
+                right_curr_max=height[length-i-1];
+            }
+            right_max_height[length-i-1]=right_curr_max;
+        }
+        int capacity=0;
+        for(int i=0;i<length;i++)
+        {
+            capacity+=min(left_max_height[i],right_max_height[i])-height[i];
+        }
+        return capacity;
+    }
+};
+
