@@ -1,0 +1,62 @@
+class Solution {
+public:
+    string multiply(string num1, string num2) {
+        int size1=num1.size();
+        int size2=num2.size();
+        if(size1==0||size2==0)
+        {
+            return string("");
+        }
+        if(num1=="0"||num2=="0")
+        {
+            return string("0");
+        }
+        string result;
+        for(auto i=0;i<size2;i++) //用num2各个位置上的数字去乘num1
+        {
+            if(num2[size2-1-i]!='0')
+            {
+                result=add_string(result,multiply_string(num1,num2[size2-1-i],i));
+            }
+        }
+        return result;
+    }
+    string multiply_string(string num1,char num2,int digit) //计算一个字符串num1和num2后面接digit个0的乘积
+    {
+        int multi_times=num2-'0'; //代表被乘数
+        string result;
+        for(int i=0;i<multi_times;i++)
+        {
+            result=add_string(result,num1);
+        }
+        result.insert(result.size(),digit,'0');
+        return result;
+    }
+    string add_string(string num1,string num2) //计算两个字符串的相加和
+    {
+        int digit1=num1.size();
+        int digit2=num2.size();
+        int add_digit=digit1>digit2?digit1:digit2;
+        string add_result(add_digit+1,'0'); //先额外多加一位，如果最后是0就删掉
+        while(digit1>0||digit2>0) //按照从低位到高位的顺序相加
+        {
+            char curr_pos1=digit1>0?num1[digit1-1]:'0';
+            char curr_pos2=digit2>0?num2[digit2-1]:'0';
+            int sum=curr_pos1+curr_pos2+add_result[add_digit]-'0'-'0'-'0'; //ASCII码的数字从0开始
+            if(sum>=10)
+            {
+                sum=sum-10;
+                add_result[add_digit-1]='1';
+            }
+            add_result[add_digit]=sum+'0';
+            --digit1;
+            --digit2;
+            --add_digit;
+        }
+        if(add_result[0]=='0')
+        {
+            add_result.erase(0,1);
+        }
+        return add_result;
+    }
+};
