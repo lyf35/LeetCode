@@ -1,0 +1,74 @@
+//一个比较容易想到的办法，先排序并去重，然后再对数组做遍历。这样时间复杂度为O(n*lg n)，不满足时间复杂度的要求
+class Solution {
+public:
+    int firstMissingPositive(vector<int>& nums) {
+        if(nums.size()==0)
+        {
+            return 1;
+        }
+        sort(nums.begin(),nums.end());
+        auto i=unique(nums.begin(),nums.end());
+        nums.erase(i,nums.end());
+        int current_val=1;
+        for(auto i:nums)
+        {
+            if(i<=0)
+            {
+                continue;
+            }
+            else
+            {
+                if(i!=current_val)
+                {
+                    return current_val;
+                }
+                else
+                {
+                    ++current_val;
+                }
+            }
+        }
+        return current_val;
+    }
+};
+  
+
+//一个满足时间复杂度为O(n)，空间复杂度为常数的算法
+//证明其时间复杂度为O(n)：使用摊还分析的思想，为每个元素赋予2个代价用于交换。
+//对于每个元素来说，至多被交换两次可以到它应该在的位置，第一次是判断到第i个位置时，被交换到此处，第二次是从第i个位置处被交换到它正确的位置
+class Solution {
+public:
+    int firstMissingPositive(vector<int>& nums) {
+        int length=nums.size();
+        if(length==0)
+        {
+            return 1;
+        }
+        for(auto i=0;i<length;i++) //由于nums中至多只有从1~length的整数，因此可以在遍历nums的时候把对应的数放在对应的位置0~length-1上
+        {
+            if(nums[i]>0&&nums[i]<i+1&&nums[nums[i]-1]!=nums[i]) //如果某个位置的数字小于它对应的编号，就把它与对应位置的数字交换
+            {
+                swap(nums[nums[i]-1],nums[i]); 
+                --i; //还需要再判断被交换到当前位置的数字是否满足要求，因此下一次循环要再进入到这个位置           
+            }
+            else 
+            {
+                continue;
+            }
+        }
+        int missing_val=1;
+        for(auto i=0;i<length;i++)
+        {
+            if(nums[i]==i+1)
+            {
+                ++missing_val;
+            }
+            else
+            {
+                return missing_val;
+            }
+        }
+        return missing_val;
+    }
+};
+  
