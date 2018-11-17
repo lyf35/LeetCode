@@ -1,0 +1,38 @@
+class Solution {
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+        int num_size=nums.size();
+        vector<vector<int>> return_val;
+        if(num_size==0)
+        {
+            return return_val;
+        }
+        else if(num_size==1)
+        {
+            return_val.push_back(nums);
+            return return_val;
+        }
+        else if(num_size==2)
+        {
+            return_val.push_back(vector<int>{nums[0],nums[1]});
+            return_val.push_back(vector<int>{nums[1],nums[0]});
+            return return_val;
+        }
+        else
+        {
+            for(auto i=0;i<num_size;i++)
+            {
+                int tail_num=nums[i];
+                vector<int> temp=nums;
+                temp.erase(temp.begin()+i);
+                auto part_result=permute(temp);
+                for(auto& vec:part_result)
+                {
+                    vec.push_back(tail_num);
+                }
+                return_val.insert(return_val.end(),part_result.begin(),part_result.end());
+            }
+            return return_val;
+        }
+    }
+};
