@@ -1,0 +1,37 @@
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int s_length=s.size();
+        int p_length=p.size();
+        vector<vector<bool>> result(s_length+1,vector<bool>(p_length+1,false)); //位置i，j处代表s的第i个元素与p的第j个元素对比
+        //先对数组初始化
+        result[0][0]=true;
+        if(p[1]=='*') //如果第二个元素是*，代表第一个元素可以没有，因此可以把(0,0)~(0,2)两个位置初始化为真
+        {
+            for(int i=0;i<=2;i++)
+            {
+                result[0][i]=true;
+            }
+        }
+        //用动态规划的方法计算每个位置的值，类似于LCS的计算
+        for(int i=0;i<=s_length;i++)
+        {
+            for(int j=1;j<=p_length;j++)
+            {
+                if(i>0&&(p[j-1]==s[i-1]||p[j-1]=='.')) //p的第j-1个字符和s的第i-1个字符可以匹配
+                {
+                    result[i][j]=result[i-1][j-1];
+                }
+                else if(p[j-1]=='*') //如果p的第j-1个字符是*，代表它可以匹配任意个字符。如果匹配0个字符，则结果与p的第j-2个字符一样；如果匹配一个及以上字符，需要使用到i-1个字符处的值，即考虑重复值
+                {
+                    result[i][j]=result[i][j-2]||(i>0&&result[i-1][j]&&(s[i-1]==p[j-2]||p[j-2]=='.'));
+                }
+                else
+                {
+                    result[i][j]=false;
+                }
+            }
+        }
+        return result[s_length][p_length];
+    }
+};
