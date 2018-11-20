@@ -1,0 +1,373 @@
+//使用动态规划的方法，与LCS类似
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int s_length=s.size();
+        int p_length=p.size();
+        vector<vector<bool>> result_arr(s_length+1,vector<bool>(p_length+1,false)); //存储动态规划的结果
+        result_arr[s_length][p_length]=true;
+        for(int i=p_length-1;i>=0;i--){ //数组的初始化
+            if(p[i]!='*')
+                break;
+            else
+                result_arr[s_length][i]=true;
+        }
+        for(int i=s_length-1;i>=0;i--){
+            for(int j=p_length-1;j>=0;j--){
+                if(s[i]==p[j]||p[j]=='?') //如果某个位置可以匹配
+                        result_arr[i][j]=result_arr[i+1][j+1];
+                else if(p[j]=='*') //遇到‘*’时，需要根据之前的结果来判断
+                        result_arr[i][j]=result_arr[i+1][j]||result_arr[i][j+1]; //左边代表忽略这个位置的字符，右边代表此处的字符与上一个字符已经匹配，即通配符不匹配
+                else
+                    result_arr[i][j]=false;
+            }
+        }
+        return result_arr[0][0];
+    }
+};
+       
+
+
+//效率较低的朴素匹配算法，会超出时间界限。主要是由于每当遇到“*”时，对下一个不为“*”的元素进行判定时，所花费的时间太多
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int s_length=s.size();
+        int p_length=p.size();
+        int s_pos=0;
+        int p_pos=0;
+        //先处理3种s或p为空的情况
+        if(s_length==0&&p_length==0) //s和p都为空
+        {
+            return true;
+        }
+        if(s_length!=0&&p_length==0) //s不为空，p为空，此时一定无法匹配
+        {
+            return false;
+        }
+        if(s_length==0&&p_length!=0) //s为空，p不为空，此时只有当p中的字符全部为*的时候才能匹配
+        {
+            int i=0;
+            while(i!=p_length)
+            {
+                if(p[i]=='*')
+                {
+                    i++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if(i==p_length)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        //p和s都不为空，需要按照从左到右的顺序进行判断
+        if(p[p_length-1]!='*'&&p[p_length-1]!='?'&&p[p_length-1]!=s[s_length-1]) //为了不使字符串过长的时候浪费时间，先判断尾部的最后一个字符，如果不满足可以直接退出
+        {
+            return false;
+        }
+        vector<int> not_star(p_length,0); //计算p中从0开始到某个位置处非‘*’元素的个数，从而简化接下来的计算
+        int count=0;
+        for(int i=0;i<p_length;i++)
+        {
+            if(p[i]!='*')
+            {
+                count++;
+            }
+            not_star[i]=count;
+        }
+        while(s_pos!=s_length&&p_pos!=p_length)
+        {
+            if(p[p_pos]=='*') //如果p中某处为*，可以匹配任意个字符，故此时的情况稍微复杂一些
+            {
+                int post_not_star=p_pos; //代表从pos向后的某个位置之后不是*
+                while(post_not_star<p_length&&p[post_not_star]=='*')
+                {
+                    post_not_star++;
+                }
+                if(post_not_star==p_length) //说明p_pos及以后全部为*，可以直接返回true
+                {
+                    return true;
+                }
+                //如果p_pos之后还有除了*之外的其它字符，则需要再做判断
+                char p_pos_nextchar=p[post_not_star]; //记录p_pos处非*的下一个字符
+                vector<int> s_pos_match;
+                int diff=not_star[p_length-1]-not_star[p_pos];
+                while(s_length-s_pos>=diff) //由于*可以匹配任意长度的字符，故此处需要一直匹配到s中*的下一个字符等于p中的某个字符；同时只有当s中剩余字符串的长度大于p剩余部分非*元素的数目时，才有必要对此位置做计算
+                {
+                    if(s[s_pos]==p_pos_nextchar||p_pos_nextchar=='?') 
+                    {
+                        s_pos_match.push_back(s_pos+1);
+                    }
+                    s_pos++;
+                }
+                bool result=false;
+                for(auto pos:s_pos_match) //此处需要把后面的结果全部加起来
+                {
+                    result=result||isMatch(s.substr(pos),p.substr(post_not_star+1));
+                    if(result) //如果某处可以匹配，就直接返回即可
+                    {
+                        return result;
+                    }
+                }
+                return result;
+            }
+            else if(p[p_pos]=='?') //如果p中某处为？，可以匹配任意一个字符，因此可以直接跳过
+            {
+                s_pos++;
+                p_pos++;
+            }
+            else //其余情况，代表p中某处是一个特定的小写字符，如果无法匹配就可以退出
+            {
+                if(s[s_pos]==p[p_pos]) 
+                {
+                    s_pos++;
+                    p_pos++;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        if(p_pos==p_length&&s_pos==s_length) //如果两个字符串都能到末尾，说明成功匹配
+        {
+            return true;
+        }
+        else 
+        {
+            if(p_pos!=p_length) //当p未匹配到末尾，需要检查p后面是否都是*
+            {
+                while(p_pos!=p_length)
+                {
+                    if(p[p_pos]!='*')
+                    {
+                        return false;
+                    }
+                    p_pos++;
+                }
+                return true;
+            }
+            else
+            {
+                return false; //s未匹配到末尾，可以直接退出
+            } 
+        }
+    }
+};
+
+//即使是使用匹配字符串效率较高的kmp算法也会出现超出时间上限的错误
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int s_length=s.size();
+        int p_length=p.size();
+        int s_pos=0;
+        int p_pos=0;
+        //先处理3种s或p为空的情况
+        if(s_length==0&&p_length==0) //s和p都为空
+        {
+            return true;
+        }
+        if(s_length!=0&&p_length==0) //s不为空，p为空，此时一定无法匹配
+        {
+            return false;
+        }
+        if(s_length==0&&p_length!=0) //s为空，p不为空，此时只有当p中的字符全部为*的时候才能匹配
+        {
+            int i=0;
+            while(i!=p_length)
+            {
+                if(p[i]=='*')
+                {
+                    i++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if(i==p_length)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        //p和s都不为空，需要按照从左到右的顺序进行判断
+        vector<int> star_pos(1,-1);
+        int star_count=0;
+        int last_char_pos=0; //记录最后一个字符的位置
+        for(auto i=0;i<p_length;i++)
+        {
+            if(p[i]=='*')
+            {
+                star_count++;
+                star_pos.push_back(i);
+            }
+            else
+            {
+                last_char_pos=i;
+            }
+        }
+        if(star_count==p_length) //如果pattern全部是*，则可以匹配
+        {
+            return true;
+        }
+        star_pos.push_back(p_length);
+        int star_num=star_pos.size();
+        vector<int> startsearch_pos(1,-1); //保存每个子字符串开始搜索的位置
+        for(int i=1;i<star_num;i++) //将pattern拆分为若干个不带有“*”的字符串，每一步循环代表匹配一个子字符串
+        {
+            int char_num=star_pos[i]-star_pos[i-1]-1; //判断两个*之间的字符串个数
+            if(char_num>0)
+            {
+                vector<int> temp;
+                for(int j=0;j<startsearch_pos.size();j++) //代表处理每一个开始搜索的位置
+                {
+                    {
+                        vector<int> result;
+                        if(star_pos[i]<last_char_pos)
+                        {
+                            if(i==1) //代表第一个字符，必须从s的第一个字符开始匹配
+                            {
+                                result=string_matcher(s,p.substr(star_pos[i-1]+1,char_num),startsearch_pos[j]+1,1); 
+                            }
+                            else
+                            {
+                                result=string_matcher(s,p.substr(star_pos[i-1]+1,char_num),startsearch_pos[j]+1); 
+                            }  
+                        }
+                        else
+                        {
+                            if(i==1) //代表第一个字符，必须从s的第一个字符开始匹配
+                            {
+                                result=string_matcher(s,p.substr(star_pos[i-1]+1,char_num),startsearch_pos[j]+1,1,1); //既为第一个也为最后一个
+                            }
+                            else
+                            {
+                                result=string_matcher(s,p.substr(star_pos[i-1]+1,char_num),startsearch_pos[j]+1,0,1);
+                            }  
+                        }
+                        if(result.size())
+                        {
+                            temp.insert(temp.end(),result.begin(),result.end());
+                        }
+                    }
+
+                }
+                if(temp.size()==0) //代表某一步没有搜索到可以匹配的字符串
+                {
+                    return false;
+                }
+                startsearch_pos=temp; 
+            }
+            else
+            {
+                continue;
+            }
+        }
+        if(p[p_length-1]=='*') //如果p前面的部分都可以匹配到，且最后一个是*，那么说明可以匹配
+        {
+            return true;
+        }
+        for(auto val:startsearch_pos)
+        {
+            if(val==s_length-1) //最后一部分匹配完之后，如果存在可以匹配至s末尾的子字符串，才说明可以匹配
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+        vector<int> string_matcher(string s,string p,int pos=0,bool is_first=false,bool is_last=false) //用kmp算法，从s的pos处开始匹配，默认从开头处匹配。倒数第二个参数代表p是否为第一个子字符串，最后一个参数代表如果待匹配字符串是子字符串的最后一个，那么结果只返回第一个匹配位置
+    {
+        int s_length=s.size();
+        int p_length=p.size();
+        if(p_length==0||s_length==0)
+        {
+            return vector<int>{};
+        }
+        vector<int> jump_table(p_length,0); //kmp算法的跳转表
+        int temp=-1;
+        jump_table[0]=temp;
+        for(int i=1;i<p_length;i++) //先构造跳转表，即比较到第i个位置失败时可以往回跳到哪一个位置继续比较，相当于是从p+i处开始到末尾作为待匹配字符串，与p（相当于pattern）进行比较
+        {
+            while(p[i]!=p[temp+1]&&temp>=0&&p[temp+1]!='?') //如果某处不能匹配，就按照跳转表向前寻找直到可以匹配或是到第一个元素。
+            {
+                temp=jump_table[temp];
+            }
+            if(p[i]==p[temp+1]||p[temp+1]=='?') //判断上一步while循环是因为什么原因而退出的
+            {
+                temp++;
+            }
+            jump_table[i]=temp;
+        }
+        vector<int> match_table(s_length,-1);
+        int pos_match=-1; //代表p中匹配的位置
+        for(int i=pos;i<s_length;i++)
+        {
+            while(s[i]!=p[pos_match+1]&&pos_match>=0&&p[pos_match+1]!='?')
+            {
+                pos_match=jump_table[pos_match];
+            }
+            if(s[i]==p[pos_match+1]||p[pos_match+1]=='?')
+            {
+                pos_match++;
+            }
+            match_table[i]=pos_match;
+            if(pos_match==p_length-1) //如果某一步匹配成功，在继续查找之前要先做一次跳转。由于匹配字符串中可能含有？，因此需要做一些特殊处理
+            {
+                int start_pos=i-p_length+1;//代表字符串匹配成功的开始位置
+                int max_match_number=0;
+                for(int k=1;k<p_length;k++) //寻找s的子串能匹配的最大长度。由于子串中含有？，因此不能直接通过跳转表来赋值，需要逐位做判断挑出最优解
+                {
+                    int m=0;
+                    while(m<p_length-k)
+                    {
+                        if(s[start_pos+k+m]!=p[m]&&p[m]!='?')
+                        {
+                            break;
+                        }
+                        m++;
+                    }
+                    if(m==p_length-k&&m>max_match_number)
+                    {
+                        max_match_number=m;
+                    }
+                }
+                pos_match=max_match_number-1;
+            }
+        }
+        vector<int> result;
+        int iter_end=is_last?s_length:s_length-1; //如果p的子字符串还没有匹配到最后一个，那么必须忽略掉s的最后一个字符，否则会出错
+        for(int j=0;j<iter_end;j++) //将结果中能够正确匹配的字符串位置输出来
+        {
+            if(match_table[j]==p_length-1)
+            {
+                if(is_first) //如果匹配的为p的第一个子字符串，则只输出第一个匹配到的即可，而且要求必须从s的第一位开始匹配，其余的可以全部舍弃
+                {
+                    if(j==p_length-1)
+                    {
+                        result.push_back(j);
+                    }
+                    break;
+                }
+                else
+                {
+                    result.push_back(j);
+                }
+            }
+        }
+        return result;
+    }
+};
