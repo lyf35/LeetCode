@@ -1,0 +1,34 @@
+class Solution {
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        int number_count=nums.size();
+        sort(nums.begin(),nums.end()); //先对原数组做排序
+        set<vector<int>> result; //存放结果 
+        for(int i=0;i<number_count;i++)
+        {
+            for(int j=i+1;j<number_count;j++)
+            {
+                for(int k=j+1;k<number_count;k++)
+                {
+                    for(int m=k+1;m<number_count;m++)
+                    {
+                        if(nums[i]+nums[j]+nums[k]+nums[m]==target)
+                        {
+                            result.insert(vector<int>{nums[i],nums[j],nums[k],nums[m]});
+                        }
+                        else if(nums[i]+nums[j]+nums[k]+nums[m]>target)
+                        {
+                            break;
+                        }              
+                    }
+                }
+            }
+        }
+        vector<vector<int>> return_val;
+        for(auto elem:result)
+        {
+            return_val.push_back(elem);
+        }
+        return return_val;
+    }
+};
