@@ -1,0 +1,75 @@
+class Solution {
+public:
+    string intToRoman(int num) {
+        string result;
+        int m_count=num/1000; //处理1000的倍数
+        num=num%1000;
+        result.append(m_count,'M');
+        int c_count=num/100; //处理100的倍数
+        num=num%100;
+        if(c_count==9)
+        {
+            result.append("CM");
+        }
+        else if(c_count>=4)
+        {
+            if(c_count==4)
+            {
+                result.append("CD");
+            }
+            else
+            {
+                result.append("D");
+                result.append(c_count-5,'C');
+            }
+        }
+        else if(c_count>0)
+        {
+            result.append(c_count,'C');
+        }
+        int x_count=num/10; //处理10的倍数
+        int i_count=num%10;
+        if(x_count==9)
+        {
+            result.append("XC");
+        }
+        else if(x_count>=4)
+        {
+            if(x_count==4)
+            {
+                result.append("XL");
+            }
+            else
+            {
+                result.append("L");
+                result.append(x_count-5,'X');
+            }
+        }
+        else if(x_count>0)
+        {
+            result.append(x_count,'X');
+        }
+        //处理1的倍数
+        if(i_count==9)
+        {
+            result.append("IX");
+        }
+        else if(i_count>=4)
+        {
+            if(i_count==4)
+            {
+                result.append("IV");
+            }
+            else
+            {
+                result.append("V");
+                result.append(i_count-5,'I');
+            }
+        }
+        else if(i_count>0)
+        {
+            result.append(i_count,'I');
+        }
+        return result;
+    }
+};
