@@ -1,0 +1,144 @@
+//按照从前往回的处理策略进行处理
+class Solution {
+public:
+    int myAtoi(string str) {
+        int first_num=str.find_first_of("0123456789",0); //第一个数字的开始位置
+        int last_num=str.find_first_not_of("0123456789",first_num); //第一个数字结束的位置，如果最后一个字符是数字，那么会返回-1，需要做特殊处理
+        if(first_num<0) //代表没有找到数字
+        {
+            return 0;
+        }
+        else if(last_num<0)
+        {
+            last_num=str.size();
+        }
+        bool is_negative=false; //是否为负数
+        if(first_num>0) //代表第一个数字不是出现在开头处，此时需要对数字前面的字符逐个做检查
+        {
+            int check_pos=first_num-1;
+            if(str[check_pos]=='-') //先检查前面是否有负号
+            {
+                is_negative=true;
+                check_pos--;
+            }
+            else if(str[check_pos]=='+') //如果有正号，直接忽略掉
+            {
+                check_pos--;
+            }
+            while(check_pos>=0) //然后检查数字前面是否全部都是空格，如果存在非空格的字符就可以直接返回0
+            {
+                if(str[check_pos]!=' ')
+                {
+                    return 0;
+                }
+                check_pos--;
+            }
+        }
+        int result=0; //记录结果的值
+        int i=first_num;
+        for(;i<last_num;i++)
+        {
+            long temp=(long)result*10+(str[i]-'0');
+            if(temp<INT_MAX)
+            {
+                result=(int)temp;
+            }
+            else
+            {
+                result=INT_MAX;
+                break;
+            }
+        }
+        if(is_negative)
+        {
+            if(result==INT_MAX) //对溢出值做处理
+            {
+                result=(str.substr(i-9,10)!="2147483647")? INT_MIN:-result;
+            }
+            else
+            {
+                result=-result;
+            }
+        }
+        return result;
+    }
+};
+
+//如果按照从后往前的处理策略进行处理，需要考虑到的特殊情况会比较多，不如从前往后的处理策略
+class Solution {
+public:
+    int myAtoi(string str) {
+        int first_num=str.find_first_of("0123456789",0); //第一个数字的开始位置
+        int last_num=str.find_first_not_of("0123456789",first_num); //第一个数字结束的位置，如果最后一个字符是数字，那么会返回-1，需要做特殊处理
+        if(first_num<0) //代表没有找到数字
+        {
+            return 0;
+        }
+        else if(last_num<0)
+        {
+            last_num=str.size();
+        }
+        bool is_negative=false; //是否为负数
+        int exceed=0; //如果发生上溢，上溢的大小
+        if(first_num>0) //代表第一个数字不是出现在开头处，此时需要对数字前面的字符逐个做检查
+        {
+            int check_pos=first_num-1;
+            if(str[check_pos]=='-') //先检查前面是否有负号
+            {
+                is_negative=true;
+                check_pos--;
+            }
+            else if(str[check_pos]=='+') //如果有正号，直接忽略掉
+            {
+                check_pos--;
+            }
+            while(check_pos>=0) //然后检查数字前面是否全部都是空格，如果存在非空格的字符就可以直接返回0
+            {
+                if(str[check_pos]!=' ')
+                {
+                    return 0;
+                }
+                check_pos--;
+            }
+        }
+        int result=0; //记录结果的值
+        int first_nonzero=str.find_first_of("123456789",first_num); //代表数字中的第一个非零数字的位置
+        if(first_nonzero>=0&&(last_num-first_nonzero>10||(last_num-first_nonzero==10&&(str[first_nonzero]-'0')>2))) //由于INT_MAX用十进制表示为2147483647，因此数字的位数如果大于10；或者位数等于10，但是最高位是大于2的数，可以直接返回
+        {
+            return is_negative? INT_MIN:INT_MAX;
+        }
+        for(int i=last_num-1;i>=first_num;i--)
+        {
+            
+            long temp=(str[i]-'0')*pow(10,last_num-i-1);
+            if(temp<INT_MAX&&int(result+temp)>=result)
+            {
+                result=result+temp;
+            }
+            else
+            {
+                result=INT_MAX;
+                break;
+            }
+        }
+        if(is_negative)//如果数字前面有负号，要做特殊处理
+        {
+            if(result==INT_MAX)
+            {
+                if(str.substr(first_num,last_num-first_num)=="2147483647")
+                {
+                    result=-result;
+                }
+                else
+                {
+                    result=INT_MIN;
+                }
+            }
+            else
+            {
+                result=-result;
+            }
+        }
+        return result;
+    }
+};
