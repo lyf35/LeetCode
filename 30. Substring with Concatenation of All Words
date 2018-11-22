@@ -1,0 +1,256 @@
+
+class Solution {   
+public:
+    vector<int> findSubstring(string s, vector<string>& words) {
+        vector<int> return_val;
+        int words_num=words.size();
+        vector<vector<int>> match_place; //存储每个子字符串可以匹配的位置
+        vector<int> words_length; //存储每个子字符串的长度
+        map<string,int> duplicate_num; //保存每个字符串重复的数目 
+        if(s.size()==0||words_num==0)
+        {
+            return return_val;
+        }
+        for(auto str:words) //记录每个元素的重复次数
+        {
+            if(duplicate_num.find(str)==duplicate_num.end())
+            {
+                duplicate_num[str]=1;
+            }
+            else
+            {
+                ++duplicate_num[str];
+            }
+        }
+        sort(words.begin(),words.end()); //对字符串列表排序，并更新字符串列表的大小
+        auto iter=unique(words.begin(),words.end());
+        words.erase(iter,words.end());
+        int unique_words_num=words.size();
+        int total_length=0; //保存匹配字符串的总长度
+        for(auto i=0;i<unique_words_num;i++) //先找出每个子字符串可以匹配的位置
+        {
+            int ith_size=words[i].size();
+            words_length.push_back(ith_size);
+            auto temp=findstring(s,words[i]);
+            if(!temp.size()) //代表某个字符没有匹配上
+            {
+                return return_val;
+            }
+            else
+            {
+                match_place.push_back(temp);
+            }
+            total_length+=ith_size*duplicate_num[words[i]];
+        }
+        while(true)
+        {
+            int min_pos=INT_MAX; //字符串匹配的最小位置
+            int words_pos=0; //最小位置匹配对应的那个子字符串
+            for(auto i=0;i<unique_words_num;i++) //先找到最小匹配位置
+            {
+                if(match_place[i][0]<min_pos)
+                {
+                    min_pos=match_place[i][0];
+                    words_pos=i;
+                }
+            }
+            if(min_pos+total_length>s.size()) //说明剩余字符串的长度小于待匹配字符串的总长度，可以直接退出
+            {
+                break;
+            }
+            int concatenate_count=1; //记录已经匹配到的字符个数
+            vector<int> is_found(unique_words_num,0); //记录匹配到的是哪一个字符
+            vector<int> next_search_place(unique_words_num,0); //记录下一次开始搜索的时候从哪一个位置开始，以节省时间
+            next_search_place[words_pos]=1;
+            is_found[words_pos]=1;
+            int next_pos=min_pos+words_length[words_pos];
+            if(concatenate_count==words_num) //相当于只有一个字符串
+            {
+                return_val.push_back(min_pos);
+            }
+            while(concatenate_count!=words_num&&next_pos<s.size()) //如果字符串个数多于1个，还需要继续做搜索
+            {
+                for(int i=0;i<unique_words_num;i++) //从字符列表里面选一个字符串
+                {
+                    for(int j=next_search_place[i];j<match_place[i].size();j++) //遍历字符串的每一个匹配位置
+                    {
+                        if(match_place[i][j]==next_pos) //相当于找到了一个可以匹配的位置
+                        {
+                            if(is_found[i]==duplicate_num[words[i]]) //代表某个字符被重复找到
+                            {
+                                goto fail;
+                            }
+                            else
+                            {
+                                concatenate_count++;
+                                ++is_found[i];
+                                next_pos+=words_length[i];
+                                if(concatenate_count==words_num)
+                                {
+                                    return_val.push_back(min_pos);
+                                }
+                                next_search_place[i]=j+1;
+                                goto next;
+                            }
+
+                        }
+                        else if(match_place[i][j]>next_pos) //由于匹配按照递增顺序排列，如果某处可匹配的位置已经大于应该匹配的位置，可以直接进入下一步循环
+                        {
+                            break;
+                        }
+                    }
+                }
+                fail:
+                break; //相当于搜索一遍之后没有搜索到，因此可以退出循环
+                next:
+                ;
+            }
+            match_place[words_pos].erase(match_place[words_pos].begin()); //删除掉那个最小的元素
+            if(!match_place[words_pos].size()) //如果为空，可以直接退出循环并返回
+            {
+                break;
+            }
+        }
+        return return_val;
+    }
+    
+    vector<int> findstring(string& s,string& p) //一个在s中查找子字符串p并返回其位置的代码
+    {
+        vector<int> jump_table(p.size(),-1);
+        int pos=-1;
+        for(int i=1;i<p.size();i++) //构造跳转表
+        {
+            while(p[pos+1]!=p[i]&&pos>=0)
+            {
+                pos=jump_table[pos];
+            }
+            if(p[pos+1]==p[i])
+            {
+                pos++;
+            }
+            jump_table[i]=pos;
+        }
+        vector<int> result;
+        pos=-1;
+        for(int i=0;i<s.size();i++)
+        {
+            while(p[pos+1]!=s[i]&&pos>=0)
+            {
+                pos=jump_table[pos];
+            }
+            if(p[pos+1]==s[i])
+            {
+                pos++;
+            }
+            if(pos==p.size()-1)
+            {
+                result.push_back(i-p.size()+1);
+                pos=jump_table[pos];
+            }
+        }    
+        return result;
+    }
+};
+
+//一个效率较低的算法，构造所有字符的全排列，然后用kmp算法进行匹配。这样在遇到较长字符串的时候就会超出时间限制
+class Solution {
+public:
+    vector<int> findSubstring(string s, vector<string>& words) {
+        vector<int> return_val;
+        int words_num=words.size();
+        vector<int> val;
+        for(int i=0;i<words_num;i++)
+        {
+            val.push_back(i);
+        }
+        vector<vector<int>> permutation=yield_permutation(val);
+        for(auto num_seq:permutation)
+        {
+            string combination=str_concatenation(words,num_seq);
+            auto match_pos=findstring(s,combination);
+            return_val.insert(return_val.end(),match_pos.begin(),match_pos.end());
+        }
+        sort(return_val.begin(),return_val.end());
+        auto p=unique(return_val.begin(),return_val.end());
+        return_val.erase(p,return_val.end());
+        return return_val;
+    }
+    
+    vector<int> findstring(string& s,string& p) //一个在s中查找子字符串p并返回其位置的代码
+    {
+        vector<int> jump_table(p.size(),-1);
+        int pos=-1;
+        for(int i=1;i<p.size();i++) //构造跳转表
+        {
+            while(p[pos+1]!=p[i]&&pos>=0)
+            {
+                pos=jump_table[pos];
+            }
+            if(p[pos+1]==p[i])
+            {
+                pos++;
+            }
+            jump_table[i]=pos;
+        }
+        vector<int> result;
+        pos=-1;
+        for(int i=0;i<s.size();i++)
+        {
+            while(p[pos+1]!=s[i]&&pos>=0)
+            {
+                pos=jump_table[pos];
+            }
+            if(p[pos+1]==s[i])
+            {
+                pos++;
+            }
+            if(pos==p.size()-1)
+            {
+                result.push_back(i-p.size()+1);
+                pos=jump_table[pos];
+            }
+        }    
+        return result;
+    }
+    
+    vector<vector<int>> yield_permutation(vector<int> num)
+    {
+        int size_num=num.size();
+        vector<vector<int>> result;
+        if(size_num==1)
+        {
+            result.push_back(vector<int>{num[0]});
+        }
+        else if(size_num==2)
+        {
+            result.push_back(vector<int>{num[0],num[1]});
+            result.push_back(vector<int>{num[1],num[0]});
+        }
+        else
+        {
+            for(int i=0;i<size_num;i++)
+            {
+                vector<int> temp=num;
+                int select_num=temp[i];
+                temp.erase(temp.begin()+i);
+                auto temp_result=yield_permutation(temp);
+                for_each(temp_result.begin(),temp_result.end(),[select_num](vector<int>& vec){vec.push_back(select_num);});
+                for(auto vec:temp_result)
+                {
+                    result.push_back(vec);
+                }
+            }
+        }
+        return result;
+    }
+    
+    string str_concatenation(vector<string>& words,vector<int>& num_seq)
+    {
+        string concat_result;
+        for(auto i:num_seq)
+        {
+            concat_result=concat_result+words[i];
+        }
+        return concat_result;
+    }
+};
