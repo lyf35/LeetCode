@@ -1,4 +1,63 @@
+//由于题目中设定words中每个字符串的长度都相等，因此使用hashmap可以很容易地解决问题
+class Solution {
+public:
+    vector<int> findSubstring(string S, vector<string> &L) {
+        vector<int> ans; 
+        int n = S.size(), cnt = L.size(); 
+        if (n <= 0 || cnt <= 0) return ans;
+        
+        unordered_map<string, int> dict;
+        for (int i = 0; i < cnt; ++i) dict[L[i]]++; //把L中所有的字符串都放到hashmap中
+        
+        int wl = L[0].size(); //取第一个字符串的长度
+        for (int i = 0; i < wl; ++i) //每次错开一个位置，直至与之前的错位重合
+        {
+            int left = i, count = 0; //left代表从左侧开始搜索的位置，
+            unordered_map<string, int> tdict; //保存s中的搜索结果
+            for (int j = i; j <= n - wl; j += wl) //每次移动的距离为字符串长度
+            {
+                string str = S.substr(j, wl); //取字符串长度个字符
+                
+                if (dict.count(str)) //判断所取字符是否在hashmap中，如果在，则需要进一步处理
+                {
+                    tdict[str]++; //在第二个hashmap中对字符串的数量+1
+                    if (tdict[str] <= dict[str]) //说明这一分段中的某一字符串数目不够，或是刚好够
+                        count++; //对字符串的数量做累计
+                    else //如果某个字符串的数量超了
+                    {
+                        while (tdict[str] > dict[str]) //对字符串的范围进行缩小，直到S中所选的那个范围内这个字符串的个数正好等于L中这个字符串的个数
+                        {
+                            string str1 = S.substr(left, wl); //从搜索位置的最左侧开始
+                            tdict[str1]--; //减小某个子字符串的数量
+                            if (tdict[str1] < dict[str1]) count--; //由于要移动标记，因此这一子字符串不被包括进去，要相应地减掉
+                            left += wl; //将左侧标记向右移动
+                        }
+                    }
+                    
+                    if (count == cnt) //如果某处字符串刚好全部匹配上
+                    {
+                        ans.push_back(left); //把结果加入到vector中
+                        // advance one word
+                        tdict[S.substr(left, wl)]--; //将left标记右移，同时去掉右移时被去掉的字符串
+                        count--;
+                        left += wl;
+                    }
+                }
+                
+                else //如果取的字符不在hashmap中，则直接右移，并将所有变量全部复位 
+                {
+                    tdict.clear();
+                    count = 0;
+                    left = j + wl;
+                }
+            }
+        }
+        return ans;
+    }
+};
 
+
+//一种通用的办法，不必要求words中每个字符串的长度都相等，先逐一对每个字符串检查匹配，然后检查这些字符串是否能串起来
 class Solution {   
 public:
     vector<int> findSubstring(string s, vector<string>& words) {
@@ -6,23 +65,16 @@ public:
         int words_num=words.size();
         vector<vector<int>> match_place; //存储每个子字符串可以匹配的位置
         vector<int> words_length; //存储每个子字符串的长度
-        map<string,int> duplicate_num; //保存每个字符串重复的数目 
+        unordered_map<string,int> duplicate_num; //保存每个字符串重复的数目 
         if(s.size()==0||words_num==0)
         {
             return return_val;
         }
         for(auto str:words) //记录每个元素的重复次数
         {
-            if(duplicate_num.find(str)==duplicate_num.end())
-            {
-                duplicate_num[str]=1;
-            }
-            else
-            {
-                ++duplicate_num[str];
-            }
+            ++duplicate_num[str];
         }
-        sort(words.begin(),words.end()); //对字符串列表排序，并更新字符串列表的大小
+        sort(words.begin(),words.end()); //对字符串列表去重
         auto iter=unique(words.begin(),words.end());
         words.erase(iter,words.end());
         int unique_words_num=words.size();
@@ -152,7 +204,7 @@ public:
     }
 };
 
-//一个效率较低的算法，构造所有字符的全排列，然后用kmp算法进行匹配。这样在遇到较长字符串的时候就会超出时间限制
+//一个效率较低的通用算法，不必要求words中的全部字符长度都相等。构造所有字符的全排列，然后用kmp算法进行匹配。这样在遇到较长字符串的时候就会超出时间限制
 class Solution {
 public:
     vector<int> findSubstring(string s, vector<string>& words) {
