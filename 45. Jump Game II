@@ -1,0 +1,116 @@
+//如果每次只考虑最远能够到达的位置，并且在搜索的时候从后往前搜索，就可以减小多余操作
+class Solution { 
+public:
+    int jump(vector<int>& nums) {
+        int size_num=nums.size();
+        if(size_num<2) //三种特殊情况可以直接返回
+        {
+            return 0;
+        }
+        int max_pos=nums[0]; //代表每一步可以到达的最远距离
+        if(max_pos>=size_num-1)
+        {
+            return 1;
+        }
+        for(int i=1;i<size_num;i++)
+        {
+            int temp=max_pos;
+            for(int j=i;j<=max_pos;j++) //代表每一步可以到达的范围。走i+1步可以到达i~max_pos范围内的任何位置
+            {
+                int new_border=nums[j]+j;
+                if(new_border>temp)
+                {
+                    temp=new_border;
+                    if(temp>=size_num-1)
+                    {
+                        return i+1;
+                    }
+                }
+            }
+            max_pos=temp;
+        }
+    }
+};
+
+//一个效率稍高的算法，利用了BFS的思想，但是当输入规模过大的时候，由于每次都需要遍历vector的大部分元素，造成多余操作太多，还是会超出时间限制。
+class Solution { 
+public:
+    int jump(vector<int>& nums) {
+        int size_num=nums.size();
+        vector<bool> jump_table(size_num,0); //位置i代表可以到达第i个数字
+        jump_table[0]=1; //代表第一个数没有跳跃时可以到达的位置，即第一个数字处
+        if(size_num<2)
+        {
+            return 0;
+        }
+        for(int i=0;i<size_num;i++)
+        {
+            vector<bool> step_result(size_num,0);//记录每多走一步时可以到达的位置
+            for(int j=i;j<size_num;j++)
+            {
+                if(jump_table[j]) //代表上一步可以走到这个位置来
+                {
+                    int right_lim=nums[j]+j;
+                    for(int k=j+1;k<=right_lim;k++)
+                    {
+                        step_result[k]=1;
+                    }
+                }
+            }
+            if(step_result[size_num-1]) //代表这一步可以走到最后
+            {
+                return i+1;
+            }
+            else //如果这一步还走不到最后，就令这一步的结果为下一步的跳转表
+            {
+                jump_table=step_result;
+            }
+        }
+    }
+};
+
+//从前往后用穷举法进行搜索，效率很低
+class Solution { 
+public:
+    int jump(vector<int>& nums) {
+        return find_least_jump(nums,0);
+    }
+    int find_least_jump(vector<int>& nums,int pos)
+    {
+        int numbers=nums.size();
+        if(numbers<2) //如果只有一个数字，那么不需要跳跃
+        {
+            return 0;
+        }
+        if(pos>=numbers-1) //代表已经到了最后一个位置，或是超出了最后一个位置
+        {
+            return 0;
+        }
+        else //如果pos不在最后一个位置，需要在之前的位置搜索
+        {
+            if(nums[pos]==0) //代表某一处无法跳跃
+            {
+                return INT_MAX;
+            }
+            vector<int> jump_steps(nums[pos],1); //构造一个向量，大小为此处最大跳跃次数
+            for(int i=0;i<nums[pos];i++)
+            {
+                int temp=find_least_jump(nums,pos+i+1);
+                if(temp==INT_MAX)
+                {
+                    jump_steps[i]=INT_MAX;
+                }
+                else
+                {
+                    jump_steps[i]+=temp;
+                }
+            }
+            int min_step=INT_MAX;
+            for(auto val:jump_steps)
+            {
+                min_step=val<min_step? val:min_step;
+            }
+            return min_step;
+        }
+    }
+};
