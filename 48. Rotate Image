@@ -1,0 +1,17 @@
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int size=matrix.size();
+        for(int i=0;i<size/2;i++) //将原矩阵拆分成一圈一圈的结构
+        {
+            for(int j=i;j<size-1-i;j++) //在每一圈内，要旋转的元素个数
+            {
+                int temp=matrix[i][j]; //先记录下原来的元素(上面的边)
+                matrix[i][j]=matrix[size-1-j][i];//左->上
+                matrix[size-1-j][i]=matrix[size-1-i][size-1-j];//下->左
+                matrix[size-1-i][size-1-j]=matrix[j][size-1-i];//右->下
+                matrix[j][size-1-i]=temp;//上->右
+            }
+        }
+    }
+};
