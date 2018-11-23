@@ -1,0 +1,34 @@
+class Solution {
+public:
+    double myPow(double x, int n) {
+        unsigned power; //用一个非符号数来保存指数
+        if(n<0) //如果n是负数，那么就先对x取倒数，然后将其转换为除法运算
+        {
+            x=1/x;
+            if(n==INT_MIN)
+            {
+                power=INT_MAX+1;
+            }
+            else
+            {
+                power=-n;
+            }
+        }
+        else
+        {
+            power=n;
+        }
+        double result=1.0; //记录结果
+        double x_multi_val=x; //记录x的2^i次幂
+        while(power>0)
+        {
+            if(power&1) //代表power的个位数上为1
+            {
+                result*=x_multi_val;
+            }
+            x_multi_val*=x_multi_val; //每次都是自己与自己相乘，代表x的2^i次幂
+            power>>=1; //每次运算完成之后，将power右移一位，由于power是非符号数，因此是算术右移，会拿0填补
+        }
+        return result;
+    }
+};
