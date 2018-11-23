@@ -1,0 +1,80 @@
+//直接对原字符串做排序，然后按照排序后的字符串对它们做分类，这样可以达到更高的效率
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        vector<vector<string>> result;
+        int string_num=strs.size();
+        if(string_num==0)
+        {
+            return result;
+        }
+        map<string,vector<string>> group_by_letters;
+        for(auto i=0;i<string_num;i++)
+        {
+            string temp=strs[i];
+            sort(temp.begin(),temp.end());
+            group_by_letters[temp].push_back(strs[i]);
+        }
+        for(auto i=group_by_letters.begin();i!=group_by_letters.end();i++)
+        {
+            result.push_back((*i).second);
+        }
+        return result;
+    }
+};
+
+
+//一个效率较低的算法，用map将每个字符串的字符分开，然后比较它们是否具有相同的元素
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        int str_num=strs.size();
+        vector<vector<string>> result;
+        if(str_num==0)
+        {
+            return result;
+        }
+        vector<map<char,int>> partition(str_num); //此处使用红黑树结构的map效率更高一些
+        for(auto cnt=0;cnt!=str_num;cnt++) //将每个字符串拆分为单个字符，放入一个map中，因此有多少字符串就有多少个map
+        {
+            for(char letters:strs[cnt])
+            {
+                partition[cnt][letters]++;
+            }
+        }
+        vector<bool> has_classified(str_num,0);//记录已经被归类的字符串
+        while(true)
+        {
+            int pos=find_first_unclassified(has_classified); //代表一个未归类的字符串，下面的归类以此为基准
+            if(pos==str_num)
+            {
+                break;
+            }
+            vector<string> anagram;
+            anagram.push_back(strs[pos]);
+            for(int i=pos+1;i<str_num;i++)
+            {
+                if(!has_classified[i]&&partition[pos]==partition[i])
+                {
+                    anagram.push_back(strs[i]);
+                    has_classified[i]=1;
+                }
+            }
+            result.push_back(anagram);
+        }
+        return result;
+    }
+    int find_first_unclassified(vector<bool>& vec)
+    {
+        int i=0;
+        for(;i<vec.size();i++)
+        {
+            if(!vec[i])
+            {
+                vec[i]=1;
+                return i;
+            }
+        }
+        return i;
+    }
+};
