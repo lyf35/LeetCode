@@ -1,0 +1,68 @@
+class Solution {
+public:
+    int totalNQueens(int n) {
+        int result=0;
+        if(n==1)
+        {
+            return 1;
+        }
+        vector<int> place_queens(n,-1); //-1代表某一行没有放置皇后
+        for(int i=0;i<n;i++)//尝试第一行的n个位置
+        {
+            place_queens[0]=i;
+            int j=0; //代表某一层放在第j个位置处
+            int size=1;
+            while(size>=1)
+            {
+                while(j<n)
+                {
+                    if(check_valid_place(place_queens,size,j,n))
+                    {
+                        place_queens[size]=j;
+                        size++;
+                        //将结果保存起来，然后继续循环。此处一定不能直接将结果清空，因为对这个i值可能还有其它的摆放方法，直接清空结果会导致结果不全
+                        if(size==n) 
+                        {
+                            result++;
+                            j=n;
+                        }
+                        else //如果还没有满，需要从下一行的起始位置开始继续循环
+                        {
+                            j=0; 
+                        }
+                    }
+                    else
+                    {
+                        j++;
+                    }
+                }
+                if(j==n) //代表这一行的所有位置都不能放，因此需要回溯
+                {
+                    size--;
+                    j=place_queens[size]+1; //从上一层失败位置的后一位开始搜索即可
+                    place_queens[size]=-1;
+                }
+            }
+        }
+        return result;
+    }
+    bool check_valid_place(vector<int>& place_queens,int i,int j,int n) //代表在已知的棋盘上再放一个新的皇后于i，j处是否可行。由于是按照
+    {
+        for(int x=-(n-1);x<n;x++) 
+        {
+            if(x>=0&&place_queens[x]==j) //检查纵向
+            {
+                return false;
+            }
+            if(i+x>=0&&i+x<n&&j+x>=0&&j+x<n&&place_queens[i+x]==j+x) //左上-右下对角
+            {
+                return false;
+            }
+            if(i-x>=0&&i-x<n&&j+x>=0&&j+x<n&&place_queens[i-x]==j+x) //左下-右上对角
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+};
