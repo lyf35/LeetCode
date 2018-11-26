@@ -1,0 +1,53 @@
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<int> result;
+        int row_num,col_num;
+        row_num=matrix.size();
+        if(!row_num)
+        {
+            return result;
+        }
+        else
+        {
+            col_num=matrix.begin()->size();
+            if(!col_num)
+            {
+                return result;
+            }
+        }
+        for(int i=0;i<=min(row_num,col_num)/2;i++) //把原矩阵拆成圈状结构
+        {
+            //对于每一圈分别做处理
+            if(i<row_num-1-i||(i==row_num-1-i&&row_num%2))
+            {
+                for(int j=i;j<col_num-i;j++) //一圈中的上面
+                {
+                    result.push_back(matrix[i][j]);
+                }
+            }
+            if(i<col_num-1-i||(i==col_num-1-i&&col_num%2))
+            {
+                for(int j=i+1;j<row_num-i-1;j++) //一圈中的右边
+                {
+                    result.push_back(matrix[j][col_num-1-i]);
+                }
+            }
+            if(i<row_num-1-i) //防止与之前的结果冲突
+            {
+                for(int j=col_num-i-1;j>=i;--j) //一圈中的下面
+                {
+                    result.push_back(matrix[row_num-1-i][j]);
+                }
+            }
+            if(i<col_num-1-i)
+            {
+                for(int j=row_num-i-2;j>i;--j) //一圈中的左边
+                {
+                    result.push_back(matrix[j][i]);
+                }
+            }
+        }
+        return result;
+    }
+};
