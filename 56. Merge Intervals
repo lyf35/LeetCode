@@ -1,0 +1,40 @@
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    vector<Interval> merge(vector<Interval>& intervals) {
+        int pre_size=intervals.size();
+        if(pre_size==0)
+        {
+            return vector<Interval>();
+        }
+        sort(intervals.begin(),intervals.end(),[](Interval a,Interval b){return a.start<b.start;});
+        return merge_interval(intervals);
+    }
+    vector<Interval> merge_interval(vector<Interval>& intervals)
+    {
+        vector<Interval> result;
+        int i=0;
+        while(i<intervals.size())
+        {
+            int beg=intervals[i].start;
+            int end=intervals[i].end;
+            int temp=i+1;
+            while(temp<intervals.size()&&intervals[temp].start<=end) //如果前一个的末尾大于等于后一个的开头，代表可以合并
+            {
+                end=max(intervals[temp].end,end);
+                temp++;
+            }
+            result.emplace_back(beg,end);
+            i=temp; //while循环结束之后，代表某个区间无法再合并，可以进行下一区间的判断
+        }
+        return result;
+    }
+};
