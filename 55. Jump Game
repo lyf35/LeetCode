@@ -1,0 +1,40 @@
+//本题类似于前面一道求最小跳跃步数的题目，用相同的解决方法即可
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int number_cnt=nums.size();
+        if(number_cnt==1) //只有一个数，不必跳跃
+        {
+            return true;
+        }
+        if(!number_cnt)
+        {
+            return false;
+        }
+        int max_pos=0; //记录每一步循环中最远可以到达的位置，在这一位置之后的所有位置都可以到达
+        for(auto i=0;i<number_cnt;i++)
+        {
+            int max_temp=max_pos;
+            for(auto j=i;j<=max_pos;j++)
+            {
+                int temp=j+nums[j];
+                if(temp>max_temp)
+                {
+                    max_temp=temp;
+                }
+            }
+            if(max_pos==max_temp) //说明到达某个位置之后无法再继续行走下去
+            {
+                return false;
+            }
+            else
+            {
+                if(max_temp>=number_cnt-1)
+                {
+                    return true;
+                }
+                max_pos=max_temp;
+            }
+        }
+    }
+};
