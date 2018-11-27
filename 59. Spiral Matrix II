@@ -1,0 +1,41 @@
+//与之前那个螺旋矩阵的算法类似
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> result(n,vector<int>(n,1));
+        if(n<2)
+        {
+            return result;
+        }
+        int cnt=1;
+        for(int i=0;i<n/2;i++) //把原矩阵拆成圈状结构
+        {
+            //对于每一圈分别做处理
+            for(int j=i;j<n-i;j++) //一圈中的上面
+            {
+                result[i][j]=cnt;
+                cnt++;
+            }
+            for(int j=i+1;j<n-i-1;j++) //一圈中的右边
+            {
+                result[j][n-1-i]=cnt;
+                cnt++;
+            }
+            for(int j=n-i-1;j>=i;--j) //一圈中的下面
+            {
+                result[n-1-i][j]=cnt;
+                cnt++;
+            }
+            for(int j=n-i-2;j>i;--j) //一圈中的左边
+            {
+                result[j][i]=cnt;
+                cnt++;
+            }
+        }
+        if(n%2) //奇数偶数做不同处理
+        {
+            result[n/2][n/2]=cnt;
+        }
+        return result;
+    }
+};
