@@ -1,0 +1,76 @@
+/**
+ * Definition for an interval.
+ * struct Interval {
+ *     int start;
+ *     int end;
+ *     Interval() : start(0), end(0) {}
+ *     Interval(int s, int e) : start(s), end(e) {}
+ * };
+ */
+class Solution {
+public:
+    vector<Interval> insert(vector<Interval>& intervals, Interval newInterval) {
+        if(intervals.size()==0)
+        {
+            intervals.push_back(newInterval);
+            return intervals;
+        }
+        sort(intervals.begin(),intervals.end(),[](Interval& a,Interval& b){return a.start<b.start;});
+        int insert_pos=search_pos(intervals,newInterval,0,intervals.size()-1);
+        intervals.insert(intervals.begin()+insert_pos,newInterval); 
+        return merge_interval(intervals); //插入完成之后，由于间隙是按照顺序排列的，因此可以通过按序搜索然后合并。由于插入的位置一定是正确的，而这一位置之前和之后在此前都无法合并，因此插入之后的合并过程中，在判断到它之前的元素时，如果可以，则新插入的元素一定可以被合并
+    }
+    int search_pos(vector<Interval>& intervals, Interval& newInterval,int i,int j) //寻找这个新的间隙应该插入的位置。由于原来的间隙无法合并，因此不可能在查找时出现相等的情况，返回值代表在某个位置的元素之前可以做插入操作而不会使间隙的排序发生变化，大小在i~j之间
+    {
+        int mid_pos=(i+j)/2;
+        if(i==mid_pos) //说明查找范围缩小到只剩下两个元素或一个元素
+        {
+            if(intervals[i].start<newInterval.start)
+            {
+                if(i<j&&intervals[i+1].start<newInterval.start)
+                {
+                    return i+2;
+                }
+                else
+                {
+                    return i+1;
+                }
+            }
+            else
+            {
+                return i;
+            }
+        }
+        else
+        {
+            if(intervals[mid_pos].start<newInterval.start)
+            {
+                return search_pos(intervals,newInterval,mid_pos,j);
+            }
+            else
+            {
+                return search_pos(intervals,newInterval,0,mid_pos);
+            }
+        }
+
+    }
+    vector<Interval> merge_interval(vector<Interval>& intervals) 
+    {
+        vector<Interval> result;
+        int i=0;
+        while(i<intervals.size())
+        {
+            int beg=intervals[i].start;
+            int end=intervals[i].end;
+            int temp=i+1;
+            while(temp<intervals.size()&&intervals[temp].start<=end) //如果前一个的末尾大于等于后一个的开头，代表可以合并
+            {
+                end=max(intervals[temp].end,end);
+                temp++;
+            }
+            result.emplace_back(beg,end);
+            i=temp; //while循环结束之后，代表某个区间无法再合并，可以进行下一区间的判断
+        }
+        return result;
+    }
+};
