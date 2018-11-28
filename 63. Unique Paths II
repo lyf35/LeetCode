@@ -1,0 +1,24 @@
+//与第62题的方法类似，只不过对于结果矩阵的初始化方式要稍微修改一下，同时计算矩阵内每个元素的值时也需要做一些修改
+class Solution {
+public:
+    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        vector<vector<int>> result(obstacleGrid.size(),vector<int>(obstacleGrid.begin()->size(),0));
+        result[0][0]=obstacleGrid[0][0]==0?1:0;
+        for(auto i=1;i<obstacleGrid.size();i++) //有可能会在边缘处存在障碍，因此需要逐一初始化
+        {
+            result[i][0]=obstacleGrid[i][0]==0?result[i-1][0]:0;
+        }
+        for(auto j=1;j<obstacleGrid.begin()->size();j++)
+        {
+            result[0][j]=obstacleGrid[0][j]==0?result[0][j-1]:0;
+        }
+        for(auto i=1;i<obstacleGrid.size();i++)
+        {
+            for(auto j=1;j<obstacleGrid.begin()->size();j++)
+            {
+                result[i][j]=obstacleGrid[i][j]==0?result[i-1][j]+result[i][j-1]:0;
+            }
+        }
+        return result[obstacleGrid.size()-1][obstacleGrid.begin()->size()-1];
+    }
+};
