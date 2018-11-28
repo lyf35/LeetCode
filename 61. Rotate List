@@ -1,0 +1,40 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* rotateRight(ListNode* head, int k) {
+        if(!head)
+        {
+            return NULL;
+        }
+        int length=1;
+        auto previous_tail=head;
+        while(previous_tail->next) //先计算这个链表的长度，然后再决定如何移动
+        {
+            previous_tail=previous_tail->next;
+            length++;
+        }
+        int move_length=k%length; //代表链表需要移动的距离（介于0-length之间）
+        if(!move_length)
+        {
+            return head;
+        }
+        int find_pos=length-move_length;
+        auto new_tail=head;
+        while(find_pos>1)
+        {
+            new_tail=new_tail->next;
+            find_pos--;
+        }
+        auto new_head=new_tail->next;
+        previous_tail->next=head;
+        new_tail->next=NULL;
+        return new_head;
+    }
+};
