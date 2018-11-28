@@ -1,0 +1,52 @@
+//使用动态规划算法，可以很容易地解决问题
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
+        int rows=grid.size();
+        int cols=grid.begin()->size();
+        vector<vector<int>> result_matrix(rows,vector<int>(cols,0));
+        result_matrix[0][0]=grid[0][0];
+        for(auto i=1;i<rows;i++)
+        {
+            result_matrix[i][0]=grid[i][0]+result_matrix[i-1][0];
+        }
+        for(auto j=1;j<cols;j++)
+        {
+            result_matrix[0][j]=grid[0][j]+result_matrix[0][j-1];
+        }
+        for(auto i=1;i<rows;i++)
+        {
+            for(auto j=1;j<cols;j++)
+            {
+                result_matrix[i][j]=min(result_matrix[i-1][j],result_matrix[i][j-1])+grid[i][j];
+            }
+        }
+        return result_matrix[rows-1][cols-1];
+    }
+};
+
+//对于此问题来说，每一步的公式还可以进一步简化成如下的样子：
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
+        int rows=grid.size();
+        int cols=grid.begin()->size();
+        vector<vector<int>> result_matrix=grid;
+        for(auto i=1;i<rows;i++)
+        {
+            result_matrix[i][0]+=result_matrix[i-1][0];
+        }
+        for(auto j=1;j<cols;j++)
+        {
+            result_matrix[0][j]+=result_matrix[0][j-1];
+        }
+        for(auto i=1;i<rows;i++)
+        {
+            for(auto j=1;j<cols;j++)
+            {
+                result_matrix[i][j]+=min(result_matrix[i-1][j],result_matrix[i][j-1]);
+            }
+        }
+        return result_matrix[rows-1][cols-1];
+    }
+};
