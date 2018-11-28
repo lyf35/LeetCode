@@ -1,0 +1,66 @@
+class Solution {
+public:
+    //基于贪心算法，将每一行的输出设为固定宽度，然后用空格填充中间的空隙
+    vector<string> fullJustify(vector<string>& words, int maxWidth) {
+        vector<string> result;
+        int words_num=words.size();
+        if(words_num==0)
+        {
+            result.emplace_back(maxWidth+1,' ');
+            return result;
+        }
+        int words_pos=0;
+        while(words_pos!=words_num)
+        {
+            int start_line_pos=words_pos; //代表每一行开始时对应的字符串
+            int width_cnt=0; //计算字符串中间带有一个空格的字符串长度。每个字符串后面至少跟一个空格
+            int width_cnt_withoutspace=0; //计算不带有空格的字符串长度
+            while(words_pos!=words_num)
+            {
+                if(words[words_pos].size()+width_cnt<=maxWidth) //不加1是因为每次判断的时候都要把新加入的这个字符串当作是一行的最后一个字符串
+                {
+                    width_cnt+=words[words_pos].size()+1;
+                    width_cnt_withoutspace+=words[words_pos].size();
+                    words_pos++;
+                }
+                else //按照贪心算法，说明下一个字符串不能再加进去了，因此退出
+                {
+                    break;
+                }
+            }
+            if(words_pos!=words_num)
+            {
+                result.push_back(construct_line(words,maxWidth,start_line_pos,words_pos,width_cnt_withoutspace));
+            }
+            
+        }
+        return result;
+    }
+    string construct_line(vector<string>& words,int maxWidth,int start_pos,int end_pos,int width_withoutspace) //
+    {
+        int string_num=end_pos-start_pos; //代表一行里可以插入空格的位置数
+        int space_cnt=maxWidth-width_withoutspace; //代表一行里面的空格个数
+        int space_num=string_num==1?space_cnt:space_cnt/(string_num-1); //代表两个字符中间插入的空格个数
+        int extra_space_num=string_num!=1?space_cnt%(string_num-1):0; //代表有多少个多余的空格，需要在前面的几个空位置各自多填充一个
+        string result;
+        for(int i=start_pos;i<end_pos-1;i++)
+        {
+            result+=words[i];
+            if(extra_space_num>0)
+            {
+                result.append(space_num+1,' ');
+                extra_space_num--;
+            }
+            else
+            {
+                result.append(space_num,' ');
+            }
+        }
+        result+=words[end_pos-1];
+        if(result.size()<maxWidth) //处理最后一行，或是只有一个字符串的情况
+        {
+            result.append(maxWidth-result.size(),' ');
+        }
+        return result;
+    }
+};
