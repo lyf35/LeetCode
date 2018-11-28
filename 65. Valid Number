@@ -1,0 +1,77 @@
+class Solution {
+public:
+    bool isNumber(string s) {
+        //先找到第一个有效位置，这个有效位置必须对应一个数字或是小数点
+        auto first_num_pos=s.find_first_of("1234567890."); //注意返回值是64位的数字，在构造变量的时候要写对类型
+        if(first_num_pos==string::npos) //如果没有找到任何数字，则直接返回
+        {
+            return false;
+        }
+        //对数字前面的字符串做处理，这一位置之前只能有一个符号，且符号必须紧挨着数字，其余必须都为空格
+        int i=first_num_pos-1;
+        if(s[i]=='+'||s[i]=='-')
+        {
+            i--;
+        }
+        for(;i>=0;i--) 
+        {
+            if(s[i]==' ') //前面所有字符必须都是空格，如果有其它字符都不可以
+            {
+                continue;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        //判断数字的组成是否合法，即空格的位置是否正确，以及是否出现不该有的字符
+        auto first_illegal_char=s.find_first_not_of("1234567890e.+-",first_num_pos); 
+        if(first_illegal_char!=string::npos) //如果可以找到非法字符
+        {        
+            for(auto i=first_illegal_char;i!=s.size();i++) //对这一位置之后的所有字符做分析，只要出现一个不是空格的字符，就代表非法
+            {
+                if(s[i]!=' ')
+                {
+                    return false;
+                }
+            }
+        }
+        //判断小数点是否合法
+        auto first_dec_point=s.find_first_of('.',first_num_pos);
+        if(first_dec_point!=string::npos) //代表有小数点
+        {
+            if((first_dec_point==s.size()-1||s[first_dec_point+1]!=' ')&&first_dec_point==first_num_pos)//小数点之后和之前不能都为空
+            {
+                return false;
+            }
+            if(s.find_first_of('.',first_dec_point+1)!=string::npos) //在第一个小数点之后又寻找到了另一个小数点，说明不正确
+            {
+                return false;
+            }
+        }
+        //判断数字内的符号出现的位置是否合法
+        auto find_sig=s.find_first_of("+-",first_num_pos);
+        if(find_sig!=string::npos&&s[find_sig-1]!='e')
+        {
+            return false;
+        }
+        //判断指数e的位置是否合法
+        auto first_exp_pos=s.find_first_of('e',first_num_pos);
+        if(first_exp_pos!=string::npos) //代表有指数e的出现
+        {
+            if(s[first_exp_pos+1]=='+'||s[first_exp_pos+1]=='-')
+            {
+                first_exp_pos++;
+            }
+            if(first_exp_pos==s.size()-1||s[first_exp_pos+1]==' ')//指数符号之后不能为空
+            {
+                return false;
+            }
+            if(s.find_first_not_of("0123456789",first_exp_pos+1)!=first_illegal_char) //由于e的后面跟的是纯数字，即一个整数，而且整数结束之后代表整个数字结束，因此这里如果到不了数字的结尾，就说明结果是错误的
+            {
+                return false;
+            }
+        }
+        return true; //通过以上的测试之后，说明数字是合法的，可以返回
+    }
+};
