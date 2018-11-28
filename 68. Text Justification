@@ -28,15 +28,29 @@ public:
                     break;
                 }
             }
-            if(words_pos!=words_num)
+            if(words_pos!=words_num) //没有到最后一行
             {
                 result.push_back(construct_line(words,maxWidth,start_line_pos,words_pos,width_cnt_withoutspace));
             }
-            
+            else //最后一行需要特殊处理，此时每个元素的后面都是一个空格
+            {
+                string temp;
+                for(int i=start_line_pos;i!=words_pos-1;i++)
+                {
+                    temp+=words[i];
+                    temp+=" ";
+                }
+                temp+=words[words_pos-1];
+                if(maxWidth>temp.size())
+                {
+                    temp.append(maxWidth-temp.size(),' ');
+                } 
+                result.push_back(temp);
+            }
         }
         return result;
     }
-    string construct_line(vector<string>& words,int maxWidth,int start_pos,int end_pos,int width_withoutspace) //
+    string construct_line(vector<string>& words,int maxWidth,int start_pos,int end_pos,int width_withoutspace) //只能用于处理非结束行的情况
     {
         int string_num=end_pos-start_pos; //代表一行里可以插入空格的位置数
         int space_cnt=maxWidth-width_withoutspace; //代表一行里面的空格个数
@@ -57,7 +71,7 @@ public:
             }
         }
         result+=words[end_pos-1];
-        if(result.size()<maxWidth) //处理最后一行，或是只有一个字符串的情况
+        if(result.size()<maxWidth) //处理只有一个字符串的情况
         {
             result.append(maxWidth-result.size(),' ');
         }
