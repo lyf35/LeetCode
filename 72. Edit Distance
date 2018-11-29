@@ -1,0 +1,128 @@
+//使用动态规划的方法来解决问题
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int size1=word1.size();
+        int size2=word2.size();
+        if(size1==0||size2==0) //如果其中一个字符串为空，则返回最大字符串的长度
+        {
+            return max(size1,size2);
+        }
+        vector<vector<int>> dist(size1,vector<int>(size2,0));
+        for(auto i=0;i<size1;i++) //给第一行赋值
+        {
+            //如果word1的第i个位置与word2的第0个位置匹配，则word1的0~i-1处都要删除，对应于距离
+            //如果不匹配，则要对i-1处的结果加1，代表第i个位置处的字符串应该删除掉
+            dist[i][0]=word1[i]==word2[0]?i:i>0?dist[i-1][0]+1:1; 
+        }
+        for(auto j=0;j<size2;j++) //给第一列赋值，原理同上
+        {
+            dist[0][j]=word1[0]==word2[j]?j:j>0?dist[0][j-1]+1:1;
+        }
+        for(auto i=1;i<size1;i++) //用动态规划的方法构造dist表
+        {
+            for(auto j=1;j<size2;j++)
+            {
+                /*
+                word1的第i个字符和word2的第j个字符处取下列几种情况的最小值：
+                如果不匹配，有四种修改方式：
+                1. 将i，j处的字符串做替换（对应于i-1，j-1处的值+1，如果i，j的值相等则不用+1）
+                2. 删除第i个字符串（对应于i-1，j处的值+1）
+                3. 删除第j个字符串（对应于i，j-1处的值+1）
+                4. 如果字符串长度不匹配，则需要插入（对应于i-1，j或i，j-1处的值+1）
+                */
+                dist[i][j]=word1[i]==word2[j]?min(dist[i-1][j-1],min(dist[i][j-1],dist[i-1][j])+1):min(min(dist[i][j-1],dist[i-1][j]),dist[i-1][j-1])+1;
+            }
+        }
+        return dist[size1-1][size2-1];
+    }
+};
+
+
+//一个错误的方法，只有当lcs唯一的时候才能得到正确答案，否则因为匹配位置的差别，会导致答案不一定是最小值
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        /*
+        先对word1和word2求lcs，求出lcs及其匹配位置之后，每个匹配字符之间不可能再有可以匹配上的字符，此时需要做如下调整：
+        1.如果两个相等字符之间的间隔n相等，则全部替换（距离加n）
+        2.如果两个相等字符之间的间隔满足n1大于n2，则将1中多余部分删除，然后替换（距离加上n1）
+        3.如果两个相等字符之间的间隔满足n1小于n2，则将1中替换并插入（距离加上n2）
+        */
+        int size1=word1.size();
+        int size2=word2.size();
+        if(size1==0||size2==0) //如果其中一个字符串为空，则返回最大字符串的长度
+        {
+            return max(size1,size2);
+        }
+        vector<vector<int>> lcs(size1,vector<int>(size2,0));
+        for(auto i=0;i<size1;i++) //先给第一行和第一列赋值
+        {
+            lcs[i][0]=word1[i]==word2[0]?1:i>0?lcs[i-1][0]:0; //此处注意初始化的时候直接给不相等的位置设为0是错误的
+        }
+        for(auto j=0;j<size2;j++)
+        {
+            lcs[0][j]=word1[0]==word2[j]?1:j>0?lcs[0][j-1]:0;
+        }
+        for(auto i=1;i<size1;i++) //用动态规划的方法构造lcs表
+        {
+            for(auto j=1;j<size2;j++)
+            {
+                lcs[i][j]=word1[i]==word2[j]?lcs[i-1][j-1]+1:max(lcs[i][j-1],lcs[i-1][j]);
+            }
+        }
+        int lcs_length=lcs[size1-1][size2-1]; //记录lcs的长度
+        //word1_matchpos和word2_matchpos中的第一个和最后一个是两个假想的匹配位置，其余元素是word1和word2中相同字符对应的匹配位置
+        vector<int> word1_matchpos(lcs_length+1,-1); 
+        vector<int> word2_matchpos(lcs_length+1,-1);
+        int i=size1-1; //从最后一个位置开始，对lcs表做一次搜索，找出lcs对应的匹配位置
+        int j=size2-1;
+        while(lcs_length>0) //当i和j都大于等于0的时候需要一直搜索下去
+        {
+            //此处需要留意当i或j的其中一个为0时的情形，如果直接用lcs表做判断可能会越界
+            if(word1[i]==word2[j]) //说明i和j处匹配到了，不用lcs表的原因是防止越界
+            {
+                word1_matchpos[lcs_length]=i;
+                word2_matchpos[lcs_length]=j;
+                i--;
+                j--;
+                lcs_length--;
+            }
+            else 
+            {
+                if(i==0) j--; //如果i或j等于0时还没有结束，那么i或j的第一个元素一定能匹配，此时可以直接对另一个的位置相减
+                else if(j==0) i--;
+                else
+                {
+                    if(lcs[i][j]==lcs[i-1][j]&&lcs[i][j]!=lcs[i][j-1]) i--; //只能减i
+                    else if(lcs[i][j]==lcs[i][j-1]&&lcs[i][j]!=lcs[i-1][j]) j--; //只能减j
+                    else //减去二者中的任意一个都可以，此时需要保持i或j不动然后向前寻找，取i或j中较大者
+                    {
+                        int i_temp=i-1;
+                        int j_temp=j-1;
+                        while(i_temp>0) //在这一列中寻找匹配位置
+                        {
+                            if(lcs[i_temp-1][j]<lcs[i_temp][j]) break;
+                            else i_temp--;
+                        }
+                        while(j_temp>0) //在这一行中寻找匹配位置
+                        {
+                            if(lcs[i][j_temp-1]<lcs[i][j_temp]) break;
+                            else j_temp--;
+                        }
+                        if(i_temp>0||j_temp>0) i_temp>j_temp? i=i_temp:j=j_temp;
+                        else i>j?i--:j--;
+                    }
+                }
+            }
+        }
+        word1_matchpos.push_back(size1);
+        word2_matchpos.push_back(size2);
+        int distance=0;
+        for(int i=0;i<=lcs[size1-1][size2-1];i++) 
+        {
+            distance+=max((word1_matchpos[i+1]-word1_matchpos[i]-1),(word2_matchpos[i+1]-word2_matchpos[i]-1));
+        }
+        return distance;
+    }
+};
