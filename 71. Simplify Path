@@ -1,0 +1,47 @@
+class Solution {
+public:
+    string simplifyPath(string path) {
+        list<string> path_seq; //此处用list比vector更快一些
+        unsigned long path_pos=0; //保存不是/符号的位置
+        while(true)
+        {
+            auto str_start=path.find_first_not_of('/',path_pos); //按照上次的位置，找到下一个合法的路径
+            auto str_end=path.find_first_of('/',path_pos);
+            if(str_start>path.size())
+            {
+                break;
+            }
+            while(str_end<str_start) //可能会出现重复的//，这一步处理这种情况
+            {
+                str_end=path.find_first_of('/',str_end+1);
+            }
+            string path_extraction=path.substr(str_start,str_end-str_start); //提取出路径
+            if(path_extraction=="..") //代表返回上级路径，即删除list中的最后一个结点
+            {
+                if(path_seq.size()>0)
+                {
+                    path_seq.pop_back();
+                }
+            }
+            else if(path_extraction!=".") //如果不是当前路径，需要将新路径插入到list末尾
+            {
+                path_seq.push_back(path_extraction);
+            }
+            path_pos=str_end;
+        }
+        string result;
+        if(path_seq.begin()==path_seq.end())
+        {
+            result+="/";
+        }
+        else
+        {
+            for(auto iter=path_seq.begin();iter!=path_seq.end();iter++)
+            {
+                result+="/";
+                result+=(*iter);
+            }
+        }
+        return result;
+    }
+};
