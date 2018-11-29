@@ -1,0 +1,163 @@
+//使用第一行和第一列做标记行/列，从而使得空间复杂度变为O(1)
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        int rows=matrix.size();
+        int cols=matrix.begin()->size();
+        if(rows==0||cols==0)
+        {
+            return;
+        }
+        //用第一行和第一列保存这一行是否会被置零，空间复杂度为O(1)
+        bool first_row_zero=0;
+        bool first_col_zero=0;
+        for(int i=0;i<cols;i++) //先处理第一行和第一列，如果第一行和第一列本来就有0，则应该等到最后再将其置零
+        {
+            if(matrix[0][i]==0)
+            {
+                first_row_zero=1;
+                break;
+            }
+        } 
+        for(int i=0;i<rows;i++) 
+        {
+            if(matrix[i][0]==0)
+            {
+                first_col_zero=1;
+                break;
+            }
+        }
+        for(int i=1;i<rows;i++) //注意要从1开始，否则最后可能会导致有些不该被置零的行被置零
+        {
+            for(int j=1;j<cols;j++)
+            {
+                if(matrix[i][j]==0)
+                {
+                    matrix[i][0]=0;
+                    matrix[0][j]=0;
+                }
+            }
+        }
+        for(int i=1;i<cols;i++) //对列做修改，注意在循环时，要从第二个数开始，否则会破坏第一列，导致结果错误
+        {
+            if(matrix[0][i]==0)
+            {
+                for(int j=1;j<rows;j++)
+                {
+                    matrix[j][i]=0;
+                }
+            }
+        }
+        for(int i=1;i<rows;i++) //对行做修改，循环的时候也要防止破坏第一行
+        {
+            if(matrix[i][0]==0)
+            {
+                for(int j=1;j<cols;j++)
+                {
+                    matrix[i][j]=0;
+                }
+            }
+        }
+        if(first_row_zero) //没有对第一行和第一列做修改，要将这一步骤放在最后，以避免冲突
+        {
+            for(int j=0;j<cols;j++)
+            {
+                matrix[0][j]=0;
+            }
+        }
+        if(first_col_zero)
+        {
+            for(int j=0;j<rows;j++)
+            {
+                matrix[j][0]=0;
+            }
+        }
+    }
+};
+
+//一个空间复杂度为O(m+n)的算法
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        int rows=matrix.size();
+        int cols=matrix.begin()->size();
+        if(rows==0||cols==0)
+        {
+            return;
+        }
+        vector<bool> has_zero_col(cols,0);
+        for(int i=0;i<rows;i++)
+        {
+            bool zero_row=0;
+            for(int j=0;j<cols;j++)
+            {
+                if(matrix[i][j]==0)
+                {
+                    zero_row=1;
+                    has_zero_col[j]=1;
+                }
+            }
+            if(zero_row)
+            {
+                for(int j=0;j<cols;j++)
+                {
+                    matrix[i][j]=0;
+                }
+            }
+        }
+        for(int i=0;i<cols;i++)
+        {
+            if(has_zero_col[i])
+            {
+                for(int j=0;j<rows;j++)
+                {
+                    matrix[j][i]=0;
+                }
+            }
+        }
+    }
+};
+
+
+//如果可以确保某些矩阵中不含某些元素，如INT_MIN，则可以把即将被改为0的数替换为INT_MIN，这样的空间复杂度为O(1)
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        int rows=matrix.size();
+        int cols=matrix.begin()->size();
+        if(rows==0||cols==0)
+        {
+            return;
+        }
+        for(int i=0;i<rows;i++)
+        {
+            for(int j=0;j<cols;j++)
+            {
+                if(matrix[i][j]==0)
+                {
+                    for(int x=0;x<cols;x++)
+                    {
+                        if(matrix[i][x]!=0)
+                        {
+                            matrix[i][x]=INT_MIN;
+                        }
+                    }
+                    for(int x=0;x<rows;x++)
+                    {
+                        if(matrix[x][j]!=0)
+                        {
+                            matrix[x][j]=INT_MIN;
+                        }
+                    }                   
+                }
+            }
+        }
+        for(int i=0;i<rows;i++)
+        {
+            for(int j=0;j<cols;j++)
+            {
+                matrix[i][j]=matrix[i][j]==INT_MIN? 0:matrix[i][j];
+            }
+        }
+    }
+};
