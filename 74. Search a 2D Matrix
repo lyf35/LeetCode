@@ -1,0 +1,50 @@
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int rows=matrix.size();
+        if(rows==0)
+        {
+            return false;
+        }
+        int cols=matrix.begin()->size();
+        if(cols==0)
+        {
+            return false;
+        }
+        return binary_search_2d(matrix,0,rows*cols-1,target);
+    }
+    pair<int,int> pos_transform(int pos,int col_num) //将一个一维顺序的坐标按照一行有col_num个数字转化为二维格式
+    {
+        int row=pos/col_num;
+        int col=pos%col_num;
+        return make_pair(row,col);
+    }
+    bool binary_search_2d(vector<vector<int>>& matrix,int pos1,int pos2,int target)
+    {
+        int cols=matrix.begin()->size();
+        int mid_pos=(pos1+pos2)/2; 
+        auto mid_pos_2d=pos_transform(mid_pos,cols);
+        if(pos1==pos2)
+        {
+            if(matrix[mid_pos_2d.first][mid_pos_2d.second]==target)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {   //如果只剩下两个数字的时候，相当于只取第一个数字做判断，因此if和else的区间有所不同
+            if(matrix[mid_pos_2d.first][mid_pos_2d.second]<target)
+            {
+                return binary_search_2d(matrix,mid_pos+1,pos2,target);
+            }
+            else
+            {
+                return binary_search_2d(matrix,pos1,mid_pos,target);
+            }
+        }  
+    }
+};
