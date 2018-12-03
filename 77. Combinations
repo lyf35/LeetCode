@@ -1,0 +1,109 @@
+//试探-回溯算法
+class Solution {
+public:
+    void dfs(int dep,int mx,vector<int>&now,vector<vector<int>>&ans,int n,int k){
+        if(dep==k+1){
+            ans.push_back(now);
+            return ;
+        }
+        else{
+            if(n-mx<k-dep) return ;
+            else{
+                for(int i=mx;i<=n;i++){
+                    now.push_back(i);
+                    dfs(dep+1,i+1,now,ans,n,k);
+                    now.pop_back();
+                }
+            }
+        }
+    }
+    vector<vector<int>> combine(int n, int k) {
+        vector<vector<int>>ans;
+        vector<int>pos;
+        dfs(1,1,pos,ans,n,k);
+        return ans;
+    }
+};
+
+
+//使用公式C(n,k)=C(n-1,k-1)+C(n-1,k)
+class Solution {
+public:
+    vector<vector<int>> combine(int n, int k) {
+        vector<vector<int>> result;
+        if(n==k)
+        {
+            vector<int> temp;
+            for(int i=1;i<=n;i++)
+            {
+                temp.push_back(i);
+            }
+            result.push_back(temp);
+            return result;
+        }
+        if(k==1)
+        {
+            for(int i=1;i<=n;i++)
+            {
+                result.push_back(vector<int>{i});
+            }
+            return result;
+        }
+        else
+        {
+            auto part_result1=combine(n-1,k-1); //从前n-1个里面挑出k-1个，然后第n个必选
+            for(auto& iter:part_result1)
+            {
+                iter.push_back(n);
+            }
+            auto part_result2=combine(n-1,k); //从前n-1个字里面挑出k个
+            result.insert(result.end(),part_result1.begin(),part_result1.end());
+            result.insert(result.end(),part_result2.begin(),part_result2.end());
+            return result;
+        }
+    }
+};
+
+//用int的二进制表示来记录选择的数字
+class Solution {
+public:
+    vector<vector<int>> combine(int n, int k) {
+        vector<vector<int>> result;
+        if(n<k||k==0)
+        {
+            return result;
+        }
+        for(int i=1;i<=(1<<n);i++)
+        {
+            if(one_combination(i,n,k))
+            {
+                vector<int> number;
+                int mask=1;
+                for(int j=0;j<n;j++)
+                {
+                    if(i&mask)
+                    {
+                        number.push_back(j+1);
+                    }
+                    mask<<=1;
+                }
+                result.push_back(number);
+            }
+        }
+        return result;
+    }
+    bool one_combination(int num,int n,int k)
+    {
+        int mask=1;
+        int one_cnt=0;
+        for(int i=0;i<n;i++)
+        {
+            if(num&mask)
+            {
+                one_cnt++;
+            }
+            mask<<=1;
+        }
+        return one_cnt==k;
+    }
+};
