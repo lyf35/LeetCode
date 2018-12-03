@@ -1,0 +1,178 @@
+//由于要匹配的是字符串，为char类型，因此也可以使用一个长度128的Vector来作为散列表
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        vector<int> map(128,0);
+        for(auto c: t) map[c]++;
+        int counter=t.size(), begin=0, end=0, d=INT_MAX, head=0;
+        while(end<s.size()){
+            if(map[s[end++]]-->0) counter--; //in t
+            while(counter==0){ //valid
+                if(end-begin<d)  d=end-(head=begin);
+                if(map[s[begin++]]++==0) counter++;  //make it invalid
+            }  
+        }
+        return d==INT_MAX? "":s.substr(head, d);
+    }
+};
+
+
+
+//一个效率较低的移动窗口算法
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        if(s.size()<t.size()||s.size()==0||t.size()==0) //如果s的长度小于t的长度，那么肯定不成立
+        {
+            return string("");
+        }
+        int ptr_left=0;
+        int ptr_right=0;
+        int min_ptr_left=0; //用于保存最短字符串的两个ptr
+        int min_ptr_right=INT_MAX;
+        unordered_map<char,int> letters_window; //保存两个ptr内所包含的全部字符串
+        unordered_map<char,int> letters_t; //保存字符串t中所含字符
+        for(auto i:t)
+        {
+            letters_t[i]++;
+        }
+        while(ptr_right!=s.size()) //只要右指针不指向最后一个字符，就代表找到一个满足条件的字符串
+        {
+            while(!check_valid(letters_window,letters_t)&&ptr_right!=s.size()) //当右指针没有指向终点，或是没有找到一个满足条件的字符串，就一直循环下去
+            {
+                letters_window[s[ptr_right]]++;
+                ++ptr_right;
+            }
+            if(check_valid(letters_window,letters_t)&&ptr_right-ptr_left<min_ptr_right-min_ptr_left)
+            {
+                min_ptr_right=ptr_right;
+                min_ptr_left=ptr_left;
+            }
+            while(true)
+            {
+                if(letters_window[s[ptr_left]]>1)
+                {
+                    letters_window[s[ptr_left]]--;
+                }
+                else
+                {
+                    letters_window.erase(s[ptr_left]);
+                }
+                ptr_left++;
+                if(check_valid(letters_window,letters_t))
+                {
+                    if(ptr_right-ptr_left<min_ptr_right-min_ptr_left)
+                    {
+                        min_ptr_right=ptr_right;
+                        min_ptr_left=ptr_left;
+                    }
+                }
+                else //删去一个字符之后不成立，则跳出循环，移动右指针寻找下一个满足条件的窗口
+                {
+                    break;
+                }
+            }
+        }
+        if(min_ptr_right-min_ptr_left<=s.size())
+        {
+            return s.substr(min_ptr_left,min_ptr_right-min_ptr_left);
+        }
+        else
+        {
+            return string("");
+        }
+    }
+    bool check_valid(unordered_map<char,int>& letters_window,unordered_map<char,int>& letters_t)
+    {
+        for(auto iter=letters_t.begin();iter!=letters_t.end();iter++)
+        {
+            if(letters_window[(*iter).first]<(*iter).second)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        if(s.size()<t.size()||s.size()==0||t.size()==0) //如果s的长度小于t的长度，那么肯定不成立
+        {
+            return string("");
+        }
+        int ptr_left=0;
+        int ptr_right=0;
+        int min_ptr_left=0; //用于保存最短字符串的起始ptr
+        int min_length=INT_MAX;
+        unordered_map<char,int> letters_window; //保存两个ptr内所包含的全部字符串
+        unordered_map<char,int> letters_t; //保存字符串t中所含字符
+        for(auto i:t)
+        {
+            letters_t[i]++;
+        }
+        vector<pair<char,int>> char_in_t;
+        for(int i=0;i<s.size();i++)
+        {
+            if(t.find_first_of(s[i])<t.size())
+            {
+                char_in_t.emplace_back(s[i],i);
+            }
+        }
+        while(ptr_right!=char_in_t.size()) //只要右指针不指向最后一个字符，就代表找到一个满足条件的字符串
+        {
+            while(!check_valid(letters_window,letters_t)&&ptr_right!=char_in_t.size()) //当右指针没有指向终点，或是没有找到一个满足条件的字符串，就一直循环下去
+            {
+                letters_window[char_in_t[ptr_right].first]++;
+                ++ptr_right;
+            }
+            if(check_valid(letters_window,letters_t))
+            {
+                int new_length=char_in_t[ptr_right-1].second-char_in_t[ptr_left].second+1;
+                if(new_length<min_length)
+                {
+                    min_length=new_length;
+                    min_ptr_left=ptr_left;
+                }              
+            }
+            while(true)
+            {
+                letters_window[char_in_t[ptr_left].first]--;
+                ptr_left++;
+                if(check_valid(letters_window,letters_t))
+                {
+                    int new_length=char_in_t[ptr_right-1].second-char_in_t[ptr_left].second+1;
+                    if(new_length<min_length)
+                    {
+                        min_length=new_length;
+                        min_ptr_left=ptr_left;
+                    }              
+                }
+                else //删去一个字符之后不成立，则跳出循环，移动右指针寻找下一个满足条件的窗口
+                {
+                    break;
+                }
+            }
+        }
+        if(min_length<=s.size())
+        {
+            return s.substr(char_in_t[min_ptr_left].second,min_length);    
+        }
+        else
+        {
+            return string("");
+        }
+    }
+    bool check_valid(unordered_map<char,int>& letters_window,unordered_map<char,int>& letters_t)
+    {
+        for(auto iter=letters_t.begin();iter!=letters_t.end();iter++)
+        {
+            if(letters_window[(*iter).first]<(*iter).second)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+};
