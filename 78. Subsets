@@ -1,0 +1,57 @@
+class Solution {
+public:
+    //结合77题的组合数算法，即可得到结果
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> result;
+        for(int i=0;i<=nums.size();i++)
+        {
+            auto temp=find_subsets(nums,i);
+            result.insert(result.end(),temp.begin(),temp.end());
+        }
+        return result;
+    }
+    vector<vector<int>> find_subsets(vector<int>& nums, int n) //代表含有n个数的子集
+    {
+        vector<vector<int>> result;
+        if(n==0)
+        {
+            result.push_back(vector<int>{});
+        }
+        else if(n==1)
+        {
+            for(auto iter:nums)
+            {
+                result.push_back(vector<int>{iter});
+            }
+        }
+        else
+        {
+            vector<int> temp;
+            dfs(nums,n,result,temp,0);
+        }
+        return result;
+    }
+    void dfs(vector<int>& nums, int n,vector<vector<int>>& result,vector<int>& stk,int k)//stk用作保存当前数的堆栈，k代表从第k个数开始查找，n代表集合一共包含n个元素
+    {
+        if(stk.size()==n)
+        {
+            vector<int> temp;
+            for(auto i:stk)
+            {
+                temp.push_back(nums[i]);
+            }
+            result.push_back(temp);
+            return;
+        }
+        else
+        {
+            for(int i=k;i<nums.size();i++)
+            {
+                stk.push_back(i);
+                dfs(nums,n,result,stk,i+1);
+                stk.pop_back();
+            }
+        }
+
+    }
+};
