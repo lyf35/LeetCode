@@ -1,0 +1,28 @@
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int dup_start;
+        int dup_end;
+        bool is_triple=false;
+        int i=0;
+        while(nums.begin()+i!=nums.end())
+        {
+            if((nums.begin()+i+1!=nums.end()&&nums[i]==nums[i+1])&&(nums.begin()+i+2!=nums.end()&&nums[i+1]==nums[i+2]))
+            {
+                dup_start=i+2;
+                dup_end=i+3;
+                while(nums.begin()+dup_end!=nums.end()&&nums[dup_start]==nums[dup_end])
+                {
+                    dup_end++;
+                }
+                nums.erase(nums.begin()+dup_start,nums.begin()+dup_end);
+                i=dup_start;
+            }
+            else
+            {
+                ++i;
+            }
+        }
+        return nums.size();
+    }
+};
