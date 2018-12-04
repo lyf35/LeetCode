@@ -1,0 +1,68 @@
+class Solution {
+public:
+    bool search(vector<int>& nums, int target) {
+        if(!nums.size())
+        {
+            return false;
+        }
+        int pivot=find_pivot(nums);
+        return binary_search(nums,target,0,pivot-1)||binary_search(nums,target,pivot,nums.size()-1);
+    }
+    bool binary_search(vector<int>& nums, int target,int beg,int end)
+    {
+        if(beg>end)
+        {
+            return false;
+        }
+        if(beg==end)
+        {
+            return (nums[beg]==target);           
+        }
+        int mid_val=(beg+end)/2;
+        if(target<=nums[mid_val])
+        {
+            return binary_search(nums,target,beg,mid_val);
+        }
+        else
+        {
+            return binary_search(nums,target,mid_val+1,end);
+        }
+    }
+    int find_pivot(vector<int>& nums) //找到前一个值最大，当前值最小的那个位置。由于可能会有大量的重复数据，因此使用线性查找与二分查找结合的方式
+    {
+        int beg=0;
+        int end=nums.size()-1;
+        while(end-beg>1)
+        {
+            int mid=(beg+end)/2;
+            if(nums[beg]<nums[mid]) //可以确定mid处于第一个上升区间
+            {
+                beg=mid;
+            }
+            else if(nums[beg]>nums[mid]) //可以确定mid处于第二个上升区间
+            {
+                end=mid;
+            }
+            else //beg与mid的值相等，无法确定究竟是在哪一个上升区间
+            {
+                if(nums[beg]<=nums[beg+1]) //视情况将beg向右移动一个位置
+                {
+                    beg++;
+                }
+                else
+                {
+                    return beg+1;
+                }
+                if(nums[end]>=nums[end-1]) //视情况对end向左移动一个位置
+                {
+                    end--;
+                }
+                else
+                {
+                    return end;
+                }
+            }
+        }
+        return end;
+    }
+};
