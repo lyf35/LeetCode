@@ -1,0 +1,72 @@
+//使用堆栈进行辅助，可以将时间复杂度缩小至O(n)
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        if(heights.size()==0)
+        {
+            return 0;
+        }
+        int max_area=0;
+        stack<int> pts; //用一个堆栈来存储下标，如果搜索时某个位置的高度大于栈顶元素的高度，就往栈中加入元素；如果某个位置高度低于栈顶元素高度，就不断将栈中的元素弹出，直到栈顶元素高度小于这个位置的高度。也就是说，栈中两个相邻元素之间的高度为升序排列；同时可以保证，两个元素的下标（i，j]之间的所有数字都大于等于j处的数值
+        for(int i=0;i<=heights.size();i++)
+        {
+            int h=i==heights.size()?0:heights[i];
+            if(pts.size()==0||heights[pts.top()]<=h)
+            {
+                pts.push(i);
+            }
+            else
+            {
+                int pos;
+                while(pts.size()>0&&heights[pos=pts.top()]>h)
+                {
+                    pts.pop();
+                    int area=heights[pos]*(pts.size()==0?i:i-1-pts.top()); //此时每从堆栈中出去一个数据，都要算一次面积
+                    if(max_area<area)
+                    {
+                        max_area=area;
+                    }
+                }
+                pts.push(i);
+            }
+        }
+        return max_area;
+    }
+};
+
+//思路最简单的穷举算法，效率较低
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        if(heights.size()==0)
+        {
+            return 0;
+        }
+        int max_area=INT_MIN;
+        for(int i=0;i<heights.size();i++) //每次从第i个直方图开始
+        {
+            if(i>0&&heights[i-1]>heights[i]) //如果开始时直方图的长度小于前一个，可以直接跳到下一步循环
+            {
+                continue;
+            }
+            int min_height=heights[i];
+            if(max_area<min_height)
+            {
+                max_area=min_height;
+            }
+            for(int j=i+1;j<heights.size();j++) //对应于i~j的直方图的最小面积
+            {
+                if(heights[j]<min_height)
+                {
+                    min_height=heights[j];
+                }
+                int area=min_height*(j-i+1);
+                if(max_area<area)
+                {
+                    max_area=area;
+                }
+            }
+        }
+        return max_area;
+    }
+};
