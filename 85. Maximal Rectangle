@@ -1,0 +1,57 @@
+class Solution {
+public:
+    //可以借助84题中找到最高直方图的方法，对于每一行都分别进行构造，高度代表的是当前位置往上所能到的最大高度
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        int row=matrix.size();
+        if(!row) return 0;
+        int col=matrix.begin()->size();
+        if(!col) return 0;
+        vector<vector<int>> height_by_row(row,vector<int>(col,0));
+        int max_area=0;
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<col;j++)
+            {
+                if(matrix[i][j]=='1')
+                {
+                    height_by_row[i][j]=i==0?1:height_by_row[i-1][j]+1;
+                }
+            }
+            int temp=largestRectangleArea(height_by_row[i]);
+            max_area=max(temp,max_area);
+        }
+        return max_area;
+    }
+    int largestRectangleArea(vector<int>& heights) //此处借用84题中寻找最高直方图的函数
+    {
+        if(heights.size()==0)
+        {
+            return 0;
+        }
+        int max_area=0;
+        stack<int> pts; 
+        for(int i=0;i<=heights.size();i++)
+        {
+            int h=i==heights.size()?0:heights[i];
+            if(pts.size()==0||heights[pts.top()]<=h)
+            {
+                pts.push(i);
+            }
+            else
+            {
+                int pos;
+                while(pts.size()>0&&heights[pos=pts.top()]>h)
+                {
+                    pts.pop();
+                    int area=heights[pos]*(pts.size()==0?i:i-1-pts.top()); //此时每从堆栈中出去一个数据，都要算一次面积
+                    if(max_area<area)
+                    {
+                        max_area=area;
+                    }
+                }
+                pts.push(i);
+            }
+        }
+        return max_area;
+    }
+};
