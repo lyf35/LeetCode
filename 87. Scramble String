@@ -1,0 +1,51 @@
+class Solution {
+public:
+    bool isScramble(string s1, string s2) {
+        if(s1.size()!=s2.size())
+        {
+            return 0;
+        }
+        int length=s1.size();
+        if(length==1)
+        {
+            return s1[0]==s2[0];
+        }
+        else //由于从字符串的任意一个位置都能分出两个子树，因此需要遍历每一种情况，并对最后可能的结果求并集
+        {
+            bool result=0;
+            vector<char> hashtable1(128,0); //由于字符串类型的数为8个字节，因此创建一个长度为128的散列表即可将字符散列开，且没有冲突
+            vector<char> hashtable2(128,0);
+            vector<char> hashtable2_backward(128,0);
+            for(int i=1;i<length;i++)
+            {
+                hashtable1[s1[i-1]]++;
+                hashtable2[s2[i-1]]++;
+                hashtable2_backward[s2[length-i]]++;
+                if(has_same_char(hashtable1,hashtable2)) //前段和前段可以匹配
+                {
+                    result|=(isScramble(s1.substr(0,i),s2.substr(0,i))&&isScramble(s1.substr(i,length-i),s2.substr(i,length-i)));
+                }
+                if(has_same_char(hashtable1,hashtable2_backward)) //前段和后段可以匹配
+                {
+                    result|=(isScramble(s1.substr(0,i),s2.substr(length-i,i))&&isScramble(s1.substr(i,length-i),s2.substr(0,length-i)));
+                }
+                if(result==1) //如果某处已经验证成功，则接下来的操作不用再继续进行。如果不做这一操作，则程序会穷举所有情况，浪费很多不必要的时间
+                {
+                    break;
+                }
+            }
+            return result;
+        }
+    }
+    bool has_same_char(vector<char>& hashtable1,vector<char>& hashtable2) //比较两个字符串的字符是否是相同的（不考虑顺序）
+    {
+        for(int i=0;i<128;i++)
+        {
+            if(hashtable1[i]!=hashtable2[i])
+            {
+                return 0;
+            }
+        }
+        return 1;
+    }
+};
