@@ -1,0 +1,57 @@
+//用dfs搜索，效率较高
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        vector<vector<int>> result;
+        int length=nums.size();
+        sort(nums.begin(),nums.end());
+        vector<int> subset{};
+        dfs(result,subset,nums,0);
+        return result;
+    }
+    void dfs(vector<vector<int>>& result,vector<int>& subset,vector<int>& nums,int beg)
+    {
+        result.push_back(subset);
+        if(beg==nums.size())
+        {
+            return;
+        }
+        for(int i=beg;i!=nums.size();i++)
+        { 
+            if(i>beg&&nums[i]==nums[i-1]) //保证相同元素中只有第一个会做dfs搜索
+            {
+                continue;
+            }
+            subset.push_back(nums[i]);
+            dfs(result,subset,nums,i+1);
+            subset.pop_back();
+        }
+    }
+};
+
+//效率较低的算法，最后去重会浪费较多时间
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        vector<vector<int>> result;
+        result.push_back(vector<int>{});
+        int length=nums.size();
+        sort(nums.begin(),nums.end());
+        for(int i=1;i<(1<<length);i++) //由于已经加入空集，因此可以从1开始循环
+        {
+            vector<int> i_subset;
+            for(int j=0;j<length;j++)
+            {
+                if(i&((1<<j)))
+                {
+                    i_subset.push_back(nums[j]);
+                }
+            }
+            result.push_back(i_subset);
+        }
+        sort(result.begin(),result.end()); //创建完集合之后，需要对它进行排序并去重
+        auto iter=unique(result.begin(),result.end());
+        result.erase(iter,result.end());
+        return result;
+    }
+};
