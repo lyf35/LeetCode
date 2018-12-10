@@ -1,0 +1,59 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseBetween(ListNode* head, int m, int n) { //要求对整个list只搜索一次
+        if(m==n)
+        {
+            return head;
+        }
+        auto beg=head; //翻转之后结点的头部
+        auto end=head; //作为翻转之后结点的尾部
+        auto iter=head;
+        auto pts_break=head;
+        auto return_val=head;
+        for(int i=1;i<=n;i++)
+        {
+            if(i==m)
+            {
+                beg=end=iter;
+                iter=iter->next;
+            }
+            else if(i==m-1)
+            {
+                pts_break=iter;
+                iter=iter->next;
+            }
+            else if(i>m&&iter)
+            {
+                auto temp=iter;
+                if(iter)
+                {
+                    iter=iter->next;
+                    temp->next=beg;
+                }
+                beg=temp;
+            }
+            else
+            {
+                iter=iter->next;
+            }
+        }
+        if(m>1)
+        {
+            pts_break->next=beg;
+        }
+        else
+        {
+            head=beg;
+        }
+        end->next=iter;
+        return head;
+    }
+};
