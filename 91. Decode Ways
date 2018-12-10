@@ -1,0 +1,37 @@
+class Solution {
+public:
+    int numDecodings(string s) {
+        int length=s.size();
+        if(!length||s[0]=='0') //如果第一个数字是0，或是s为空，可以直接退出
+        {
+            return 0;
+        }
+        else
+        {
+            vector<int> nums(length,1);
+            for(int i=1;i<length;i++)
+            {
+                if(s[i]=='0') //如果某一位是0，那么它前面必须是1或2，否则可以直接返回0
+                {
+                    if(s[i-1]=='0'||s[i-1]>'2')
+                    {
+                        return 0;
+                    }
+                    else //此时，由于i-1和i必须组合在一起，因此数量为i-2处的值
+                    {
+                        nums[i]=i>1?nums[i-2]:1;
+                    }
+                }
+                else if(s[i]<='6') 
+                {
+                    nums[i]=s[i-1]=='1'||s[i-1]=='2'?(i>1?nums[i-1]+nums[i-2]:2):nums[i-1];
+                }
+                else
+                {
+                    nums[i]=s[i-1]=='1'?(i>1?nums[i-1]+nums[i-2]:2):nums[i-1];
+                }
+            }
+            return nums[length-1];
+        } 
+    }
+};
