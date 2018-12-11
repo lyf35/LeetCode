@@ -1,0 +1,37 @@
+//用试探-回溯的办法，可以很容易地解决问题
+class Solution {
+public:
+    vector<string> restoreIpAddresses(string s) {
+        vector<string> result;
+        vector<int> temp;
+        find_possible_ipaddress(s,result,temp);
+        return result;
+    }
+    void find_possible_ipaddress(string s,vector<string>& result,vector<int>& sep_digits)
+    {
+        if(sep_digits.size()==4)
+        {
+            if(sep_digits[3]==s.size()&&stoi(s.substr(0,sep_digits[0]))<256&&stoi(s.substr(sep_digits[0],sep_digits[1]-sep_digits[0]))<256&&stoi(s.substr(sep_digits[1],sep_digits[2]-sep_digits[1]))<256&&stoi(s.substr(sep_digits[2],sep_digits[3]-sep_digits[2]))<256)
+            {
+                result.push_back(s.substr(0,sep_digits[0])+"."+s.substr(sep_digits[0],sep_digits[1]-sep_digits[0])+"."+s.substr(sep_digits[1],sep_digits[2]-sep_digits[1])+"."+s.substr(sep_digits[2],sep_digits[3]-sep_digits[2]));
+            }
+        }
+        else
+        {
+            int last_pos=sep_digits.size()?sep_digits[sep_digits.size()-1]:0;
+            for(auto i=1;i<=3;i++)
+            {
+                if(last_pos+i<=s.size())
+                {
+                    sep_digits.push_back(last_pos+i);
+                    if(s[last_pos]=='0') //如果ip地址的某一段为0的话，那么这一段就只能有0，不能有其余的任意数字
+                    {
+                        i=3;
+                    }
+                    find_possible_ipaddress(s,result,sep_digits);
+                    sep_digits.pop_back();
+                }
+            }
+        }                     
+    }
+};
