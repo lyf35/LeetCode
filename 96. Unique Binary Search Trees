@@ -1,0 +1,23 @@
+class Solution {
+public:
+    int numTrees(int n) {
+        //由于计算较大n值的时候需要用到之前算过的较小的n值，因此用动态规划算法比递归要更加节省时间
+        if(n<2)
+        {
+            return 1;
+        }
+        else
+        {
+            vector<int> sums(n+1,0);
+            sums[0]=sums[1]=1;
+            for(int i=2;i<=n;i++)
+            {
+                for(int j=1;j<=i;j++)
+                {
+                    sums[i]+=sums[j-1]*sums[i-j]; //选取某一个数字作为根结点，然后构造子结点
+                }
+            }
+            return sums[n];
+        }
+    }
+};
