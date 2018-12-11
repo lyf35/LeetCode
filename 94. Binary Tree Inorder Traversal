@@ -1,0 +1,69 @@
+//使用递归的中序遍历，很容易写
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> result;
+        inorder_traversal_recursive(root,result);
+        return result;
+    }
+    void inorder_traversal_recursive(TreeNode* root,vector<int>& result)
+    {
+        if(!root)
+        {
+            return;
+        }
+        if(root->left)
+        {
+            inorder_traversal_recursive(root->left,result);
+        }
+        result.push_back(root->val);
+        if(root->right)
+        {
+            inorder_traversal_recursive(root->right,result);
+        }
+    }
+};
+
+//使用一个堆栈辅助，可以将递归改为迭代，从而节约内存开销
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> result;
+        stack<TreeNode*> container; //用一个堆栈保存中序遍历时经过的所有左结点
+        leftmost_trace(root,container); //先搜索一遍，将根节点以及根节点沿着左侧路径上的所有结点全部加入进去
+        while(container.size())
+        {
+            auto node=container.top();
+            container.pop();
+            result.push_back(node->val);
+            leftmost_trace(node->right,container);
+        }
+        return result;
+    }
+    void leftmost_trace(TreeNode* node,stack<TreeNode*>& container) //在某个结点处一直沿着左侧进行搜索，直到没有左子
+    {
+        while(node)
+        {
+            container.push(node);
+            node=node->left;
+        }
+    }
+};
