@@ -1,0 +1,45 @@
+//使用递归的方法生成所有的最小生成树
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<TreeNode*> generateTrees(int n) {
+        if(n==0)
+        {
+            return vector<TreeNode*>{};
+        }
+        return generateTrees_section(1,n);
+    }
+    vector<TreeNode*> generateTrees_section(int m,int n) //在m和n两数之间生成最小生成树
+    {
+        vector<TreeNode*> result;
+        if(m>n)
+        {
+            result.push_back(nullptr);
+            return result;
+        }
+        for(int i=m;i<=n;i++)
+        {
+            auto left_node=generateTrees_section(m,i-1);
+            auto right_node=generateTrees_section(i+1,n);
+            for(int x=0;x<left_node.size();x++)
+            {
+                for(int y=0;y<right_node.size();y++)
+                {
+                    TreeNode* newnode=new TreeNode(i);
+                    newnode->left=left_node[x];
+                    newnode->right=right_node[y];
+                    result.push_back(newnode);
+                }
+            }
+        }
+        return result;
+    }
+};
