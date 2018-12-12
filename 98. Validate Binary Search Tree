@@ -1,0 +1,52 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        //如果是一个正确的二叉搜索树，那么它的中序遍历是按照顺序排列的
+        if(!root)
+        {
+            return true;
+        }
+        int val=INT_MIN;
+        bool beg=true;
+        stack<TreeNode*> container;
+        auto temp=root;
+        while(true)
+        {
+            leftmost_search(container,temp);
+            if(!container.size())
+            {
+                return true;
+            }
+            temp=container.top();
+            container.pop();
+            if(val<temp->val||beg)
+            {
+                val=temp->val;
+                temp=temp->right;
+                beg=false;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+    }
+    void leftmost_search(stack<TreeNode*>& nodes,TreeNode* rootnode) //把某个结点及其沿着左子树一直向左搜索的所有结点都加进去
+    {
+        while(rootnode)
+        {
+            nodes.push(rootnode);
+            rootnode=rootnode->left;
+        }
+    }
+};
