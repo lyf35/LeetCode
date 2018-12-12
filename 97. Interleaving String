@@ -1,0 +1,81 @@
+//使用动态规划，避免了回溯，可以大大提高求解速度
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        if(s1.size()+s2.size()!=s3.size())
+        {
+            return false;
+        }
+        vector<vector<bool>> result(s1.size()+1,vector<bool>(s2.size()+1,0)); //代表s1到第i个字符与s2到第j个字符的时候能否与s3的第i+j个字符匹配
+        result[0][0]=true;
+        for(int i=1;i<=s1.size();i++)
+        {
+            result[i][0]=result[i-1][0]&&(s1[i-1]==s3[i-1]);
+        }
+        for(int j=1;j<=s2.size();j++)
+        {
+            result[0][j]=result[0][j-1]&&(s2[j-1]==s3[j-1]);
+        }
+        for(int i=1;i<=s1.size();i++)
+        {
+            for(int j=1;j<=s2.size();j++)
+            {
+                result[i][j]=(result[i][j-1]&&s2[j-1]==s3[i+j-1])||(result[i-1][j]&&s1[i-1]==s3[i+j-1]);
+            }
+        }
+        return result[s1.size()][s2.size()];
+    }
+};
+
+//蛮力求解的方法，效率较低
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int iter1=0; //记录s1,s2和s3中搜索到了哪个位置
+        int iter2=0;
+        int iter3=0; 
+        stack<tuple<int,int,int>> status; //保存三个“指针”某一时刻的位置
+        while(iter3<s3.size()) //只要s3没有被搜索完，就一直循环下去
+        {
+            if(iter1<s1.size()&&iter2<s2.size()&&s1[iter1]==s3[iter3]&&s2[iter2]==s3[iter3]) //可能会出现某个位置处两个数字都可以匹配
+            {
+                status.push(make_tuple(iter1,iter2+1,iter3+1)); //推入堆栈中的匹配方式为匹配s2中的字符
+                iter1++;
+                iter3++;
+            }
+            else if(iter1<s1.size()&&s1[iter1]==s3[iter3])
+            {
+                iter1++;
+                iter3++;
+            }
+            else if(iter2<s2.size()&&s2[iter2]==s3[iter3])
+            {
+                iter2++;
+                iter3++;
+            }
+            else
+            {
+                if(status.size()) //如果堆栈中还有未判断的情形，则接着判断
+                {
+                    auto temp=status.top();
+                    status.pop();
+                    iter1=get<0>(temp);
+                    iter2=get<1>(temp);
+                    iter3=get<2>(temp);
+                }
+                else //如果堆栈中也没有未判断的情形，则可以直接返回错误
+                {
+                    return false;
+                }
+            }
+        }
+        if(iter1==s1.size()&&iter2==s2.size()&&iter3==s3.size()) //最后必须全部到达末端才代表可以匹配
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+};
