@@ -1,0 +1,120 @@
+//经过优化的代码，更加简洁
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+static const auto speedup = []() { std::ios::sync_with_stdio(false); std::cin.tie(nullptr); return 0; }();
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        //按照中序遍历，所有的数字应该是从小到大的顺序。如果被调换，其中有一个是形成一个波谷，另一个是形成一个波峰。因此只需找到两个突降的位置即可得到两个异常值。但是要注意波峰和波谷紧挨着的情况
+        TreeNode* next=nullptr;
+        TreeNode* iter=nullptr;
+        TreeNode* larger_node=nullptr;
+        TreeNode* smaller_node=nullptr;
+        auto temp=root;
+        stack<TreeNode*> container;
+        while(temp||container.size())
+        {
+            while(temp)
+            {
+                container.push(temp);
+                temp=temp->left;
+            }
+            next=container.top();
+            container.pop();
+            if(iter&&next&&iter->val>next->val) 
+            {
+                if(!larger_node) //第一个找到的一定是那个较大的异常值
+                {
+                    larger_node=iter;
+                    smaller_node=next; //可能会出现波峰和波谷紧挨着的情况，此时只能找到一处满足iter->val>next->val的地方
+                }
+                else //第二个找到的一定是较小的异常值
+                {
+                    smaller_node=next;
+                    break;
+                }
+            }
+            temp=next->right;
+            iter=next;
+        }
+        swap(larger_node->val,smaller_node->val); 
+    }
+};
+
+
+//最初的未优化版本，效率不是很高，而且代码略复杂
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        //按照中序遍历，所有的数字应该是从小到大的顺序。如果被调换，其中有一个是形成一个波谷，另一个是形成一个波峰。特别要注意，如果单从数字的变化趋势上来看，其实是有两个波峰和两个波谷的，所以在判断异常值的时候还要保证异常值两端仍是递增趋势
+        TreeNode* prev=nullptr;
+        TreeNode* next=nullptr;
+        TreeNode* iter=nullptr;
+        TreeNode* larger_node=nullptr;
+        TreeNode* smaller_node=nullptr;
+        auto temp=root;
+        stack<TreeNode*> container;
+        while(true)
+        {
+            leftmost_trace(temp,container);
+            if(container.size())
+            {
+                next=container.top();
+                container.pop();
+                if(prev&&iter&&next&&iter->val>next->val&&prev->val<next->val) //被调换的元素在中间
+                {
+                    larger_node=iter;
+                }
+                else if(!prev&&iter&&next&&iter->val>next->val) //代表被调换的元素在第一个
+                {
+                    larger_node=iter;
+                }
+                if(prev&&iter&&next&&prev->val>iter->val&&prev->val<next->val) //被调换的元素在中间
+                {
+                    smaller_node=iter;
+                    break; //由于被交换的较大元素一定在它之前被找到，因此可以直接退出循环
+                }
+                prev=iter;
+                temp=next;
+                iter=next;
+                temp=temp->right;
+            }
+            else
+            {
+                if(prev&&iter&&prev->val>iter->val) //由于波谷可能在最后一个元素，因此最后退出的时候，需要再判断一次
+                {
+                    smaller_node=iter;
+                }
+                break;
+            }
+        }
+        if(larger_node&&smaller_node)
+        {
+            swap(larger_node->val,smaller_node->val);
+        }   
+    }
+    inline void leftmost_trace(TreeNode* node,stack<TreeNode*>& container)
+    {
+        while(node)
+        {
+            container.push(node);
+            node=node->left;
+        }
+    }
+};
