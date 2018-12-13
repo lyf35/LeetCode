@@ -1,0 +1,64 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> result;
+        queue<TreeNode*> level_val_odd;
+        queue<TreeNode*> level_val_even;
+        bool is_odd=1;
+        if(root)
+        {
+            level_val_odd.push(root);
+        }
+        while(level_val_odd.size()||level_val_even.size())
+        {
+            vector<int> level_result;
+            if(is_odd)
+            {
+                while(level_val_odd.size())
+                {
+                    auto temp=level_val_odd.front();
+                    level_val_odd.pop();
+                    level_result.push_back(temp->val);
+                    if(temp->left)
+                    {
+                        level_val_even.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        level_val_even.push(temp->right);
+                    }
+                }
+                is_odd=0;
+            }
+            else
+            {
+                while(level_val_even.size())
+                {
+                    auto temp=level_val_even.front();
+                    level_val_even.pop();
+                    level_result.push_back(temp->val);
+                    if(temp->left)
+                    {
+                        level_val_odd.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        level_val_odd.push(temp->right);
+                    }
+                }
+                is_odd=1;                
+            }
+            result.push_back(level_result);
+        }
+        return result;
+    }
+};
