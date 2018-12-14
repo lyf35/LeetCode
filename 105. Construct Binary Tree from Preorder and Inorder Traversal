@@ -1,0 +1,47 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        //先序遍历的第一个结点一定是根结点，然后在中序遍历中找到这一结点，中序遍历在它之前的所有结点都是其左子。可据此进行递归来构造
+        if(preorder.size()==0||inorder.size()==0||preorder.size()!=inorder.size())
+        {
+            return nullptr;
+        }
+        return construct_tree_interval(preorder,inorder,0,preorder.size()-1,0,preorder.size()-1);
+    }
+    int find_elem(int elem,vector<int>& inorder,int m,int n) //在第m和n个元素内搜索elem所在的位置
+    {
+        for(int i=m;i<=n;i++)
+        {
+            if(inorder[i]==elem)
+            {
+                return i;
+            }
+        }
+    }
+    TreeNode* construct_tree_interval(vector<int>& preorder, vector<int>& inorder,int pre_m,int pre_n,int in_m,int in_n) //用指定区间内的元素构造一个树结点，二者对应的区间大小必须相等
+    {
+        TreeNode* return_val=new TreeNode(preorder[pre_m]); //前序遍历的第一个结点一定是根结点
+        if(pre_m!=pre_n) //如果区间内不止一个结点，则需要递归构造左右结点
+        {
+            int pos=find_elem(preorder[pre_m],inorder,in_m,in_n);
+            if(in_m<pos) //说明有左子树
+            {
+                return_val->left=construct_tree_interval(preorder,inorder,pre_m+1,pre_m+(pos-in_m),in_m,pos-1);
+            }
+            if(pos<in_n) //说明有右子树
+            {
+                return_val->right=construct_tree_interval(preorder,inorder,pre_m+(pos-in_m)+1,pre_n,pos+1,in_n);
+            } 
+        }
+        return return_val;
+    }
+};
