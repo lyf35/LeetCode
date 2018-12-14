@@ -11,7 +11,7 @@ class Solution {
 public:
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
         //先序遍历的第一个结点一定是根结点，然后在中序遍历中找到这一结点，中序遍历在它之前的所有结点都是其左子。可据此进行递归来构造
-        if(preorder.size()==0||inorder.size()==0||preorder.size()!=inorder.size())
+        if(preorder.size()==0||inorder.size()==0)
         {
             return nullptr;
         }
