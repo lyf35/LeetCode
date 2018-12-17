@@ -1,0 +1,45 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* sortedListToBST(ListNode* head) {
+        auto temp=head;
+        vector<int> elements;
+        while(temp)
+        {
+            elements.push_back(temp->val);
+            temp=temp->next;
+        }
+        return construct_tree(elements,0,elements.size()-1);
+    }
+    TreeNode* construct_tree(vector<int>& elem,int m,int n) //代表取m~n之间所有的数字来构造一个平衡二叉树
+    {
+        if(m>n)
+        {
+            return nullptr;
+        }
+        else
+        {
+            int mid=(m+n)/2;
+            auto root=new TreeNode(elem[mid]);
+            root->left=construct_tree(elem,m,mid-1);
+            root->right=construct_tree(elem,mid+1,n);
+            return root;
+        }
+    }
+};
