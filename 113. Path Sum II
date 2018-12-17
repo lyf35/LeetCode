@@ -1,0 +1,43 @@
+//用试探-回溯法很容易解决
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> pathSum(TreeNode* root, int sum) {
+        vector<vector<int>> result;
+        if(!root)
+        {
+            return result;
+        }
+        vector<int> container;
+        add_elements(result,root,sum,container);
+        return result;
+    }
+    void add_elements(vector<vector<int>>& path,TreeNode* root,int sum,vector<int>& container)
+    {
+        if(root&&!root->left&&!root->right&&sum==root->val) //已经搜索完一条路径，且满足要求
+        {
+            container.push_back(sum);
+            path.push_back(container);
+            container.pop_back();
+        }
+        else
+        {
+            if(!root) //如果已经搜索完一条路径，但还是不满足要求
+            {
+                return;
+            }
+            container.push_back(root->val);
+            add_elements(path,root->left,sum-root->val,container);
+            add_elements(path,root->right,sum-root->val,container);
+            container.pop_back();
+        }
+    }
+};
