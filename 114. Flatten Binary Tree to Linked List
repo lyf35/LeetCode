@@ -1,0 +1,42 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        //相当于把树的前序遍历转化为一棵一直沿着右侧长大的树
+        stack<TreeNode*> right_nodes;
+        auto temp=root;
+        while(true)
+        {
+            if(temp&&temp->right) //如果有右子树就暂时保存起来
+            {
+                right_nodes.push(temp->right);
+            }
+            if(temp&&temp->left) //如果有左子树，就把左子树接到右子树上面接着判断
+            {
+                auto left=temp->left; //先将左子树保存起来 
+                temp->left=nullptr;
+                temp->right=left;
+                temp=temp->right;
+            }
+            else if(right_nodes.size())//如果没有左子树，就需要从栈中弹出元素。如果栈中没有元素，会自动退出
+            {
+                auto right_elem=right_nodes.top();
+                right_nodes.pop();
+                temp->right=right_elem;
+                temp=temp->right;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+};
