@@ -1,0 +1,111 @@
+//使用动态规划方法，可以避免递归次数过多
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        vector<vector<int>> match_pos(t.size()+1,vector<int>(s.size()+1,0)); //保存t的前i-1个字符串与s的前j-1个字符串可以匹配的数目
+        for(int i=0;i<=s.size();i++) match_pos[0][i]=1; //代表t如果为空则匹配数为1
+        for(int i=1;i<=t.size();i++) 
+        {
+            for(int j=1;j<=s.size();j++)
+            {
+            //如果可以匹配，则包括两种情况：第一种为t匹配此位置，第二种为t不匹配此位置
+                match_pos[i][j]=t[i-1]==s[j-1]? match_pos[i][j-1]+match_pos[i-1][j-1]:match_pos[i][j-1];
+            }
+        }
+        return match_pos[t.size()][s.size()];
+    }
+};
+
+
+//如果使用普通的试探-回溯法，当遇到输入规模较大的时候就会出现超时的情况
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int cnt=0;
+        int s_pos=0,t_pos=0;
+        match_pos(s,t,s_pos,t_pos,cnt);
+        return cnt;
+    }
+    void match_pos(string& s,string& t,int& s_pos,int& t_pos,int& cnt)
+    {
+        //用试探-回溯的办法
+        if(t_pos==t.size())
+        {
+            cnt++;
+            return;
+        }
+        else if(s_pos==s.size())
+        {
+            return;
+        }
+        else
+        {
+            if(s[s_pos]==t[t_pos])
+            {
+                s_pos++;
+                match_pos(s,t,s_pos,t_pos,cnt); //跳过当前位置继续搜索
+                t_pos++;
+                match_pos(s,t,s_pos,t_pos,cnt); //匹配当前位置，并继续搜索  
+                s_pos--;
+                t_pos--;
+            }
+            else
+            {
+                int add=0;
+                while(s_pos<s.size()&&s[s_pos]!=t[t_pos])
+                {
+                    add++;
+                    s_pos++;
+                }
+                match_pos(s,t,s_pos,t_pos,cnt);
+                s_pos-=add;
+            }
+        }
+    }
+};
+
+
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int cnt=0;
+        vector<vector<int>> match_pos(); //保存t中的第i个字符串在s中可以匹配的位置
+        for(auto c: t)
+        {
+            vector<int> match_char;
+            for(auto i=0;i<s.size();i++)
+            {
+                if(s[i]==c)
+                {
+                    match_char.push_back(i);
+                }
+            }
+            match_pos.push_back(match_char);
+        }
+        search_possible_combination(match_pos,-1,0,cnt,s.size(),t.size());
+        return cnt;
+    }
+    void search_possible_combination(vector<vector<int>>& match_pos,int s_pos,int t_pos,int& cnt,int s_size,int t_size)
+    {
+        if(t_pos==t_size)
+        {
+            cnt++;
+            return;
+        }
+        else
+        {
+            int not_match=t_size-t_pos;
+            for(auto elem:match_pos[t_pos])
+            {
+                if(elem+not_match>=s_size)
+                {
+                    return;
+                }
+                if(elem>s_pos)
+                {
+                    search_possible_combination(match_pos,elem,t_pos+1,cnt,s_size,t_size);
+                }
+            }
+        }
+    }
+};
