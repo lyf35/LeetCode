@@ -1,0 +1,30 @@
+//使用动态规划计算，由于上一步的结果仍有用，故需要保存下来
+class Solution {
+public:
+    int minimumTotal(vector<vector<int>>& triangle) {
+        int layers=triangle.size();
+        int min_sum=INT_MAX;
+        if(!layers)
+        {
+            return 0;
+        }
+        vector<int> last_layer_min=triangle[0];
+        for(int i=1;i<layers;i++) //每一层都只保存当前结点所能取得的最小值，其余的值可以不用考虑
+        {
+            vector<int> ith_layer_min;
+            for(int j=0;j<=i;j++)
+            {
+                ith_layer_min.push_back(triangle[i][j]+min(j==i?INT_MAX:last_layer_min[j],j>0?last_layer_min[j-1]:INT_MAX));
+            }
+            last_layer_min=ith_layer_min;
+        }
+        for(auto val:last_layer_min)
+        {
+            if(val<min_sum)
+            {
+                min_sum=val;
+            }
+        }
+        return min_sum;
+    }
+};
