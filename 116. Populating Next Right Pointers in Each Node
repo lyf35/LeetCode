@@ -1,0 +1,60 @@
+//相当于树的层次遍历的变体
+/**
+ * Definition for binary tree with next pointer.
+ * struct TreeLinkNode {
+ *  int val;
+ *  TreeLinkNode *left, *right, *next;
+ *  TreeLinkNode(int x) : val(x), left(NULL), right(NULL), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void connect(TreeLinkNode *root) {
+        queue<TreeLinkNode*> odd_layer;
+        queue<TreeLinkNode*> even_layer;
+        if(root)
+        {
+            odd_layer.push(root);
+        }
+        bool is_odd=1;
+        while(odd_layer.size()||even_layer.size())
+        {
+            if(is_odd)
+            {
+                while(odd_layer.size())
+                {
+                    auto temp=odd_layer.front();
+                    odd_layer.pop();
+                    if(temp->left)
+                    {
+                        even_layer.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        even_layer.push(temp->right);
+                    }
+                    temp->next=odd_layer.size()?odd_layer.front():nullptr;
+                }
+                is_odd=0;
+            }
+            else
+            {
+                while(even_layer.size())
+                {
+                    auto temp=even_layer.front();
+                    even_layer.pop();
+                    if(temp->left)
+                    {
+                        odd_layer.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        odd_layer.push(temp->right);
+                    }
+                    temp->next=even_layer.size()?even_layer.front():nullptr;
+                }
+                is_odd=1;
+            }
+        }
+    }
+};
