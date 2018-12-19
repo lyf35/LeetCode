@@ -1,4 +1,4 @@
-//相当于树的层次遍历的变体
+//相当于树的层次遍历的变体，117题使用同样的代码也可以做
 /**
  * Definition for binary tree with next pointer.
  * struct TreeLinkNode {
