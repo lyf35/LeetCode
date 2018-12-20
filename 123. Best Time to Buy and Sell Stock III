@@ -1,17 +1,42 @@
+/*
+状态机算法：
+We begin at state 0, where we can either rest (i.e. do nothing) or buy stock at a given price.
+
+If we choose to rest, we remain in state 0
+If we buy, we spend some money (price of the stock on that day) and go to state 1
+From state 1, we can once again choose to do nothing or we can sell our stock.
+
+If we choose to rest, we remain in state 1
+If we sell, we earn some money (price of the stock on that day) and go to state 2
+This completes one transaction for us. Remember, we can only do atmost 2 transactions.
+
+From state 2, we can choose to do nothing or buy more stock.
+
+If we choose to rest, we remain in state 2
+If we buy, we go to state 3
+From state 3, we can once again choose to do nothing or we can sell our stock for the last time.
+
+If we choose to rest, we remain in state 3
+If we sell, we have utilized our allowed transactions and reach the final state 4
+*/
+//下面是状态机算法的一个绝妙的解释：
 class Solution {
 public:
     int maxProfit(vector<int>& prices) {
         int sell1 = 0, sell2 = 0, buy1 = INT_MIN, buy2 = INT_MIN;
 		for (int i = 0; i < prices.size(); i++) 
         {
-			buy1 = max(buy1, -prices[i]);
-			sell1 = max(sell1, buy1 + prices[i]);
-			buy2 = max(buy2, sell1 - prices[i]);
-			sell2 = max(sell2, buy2 + prices[i]);
+			buy1 = max(buy1, -prices[i]); //代表第一次买入时的总盈利
+			sell1 = max(sell1, buy1 + prices[i]); //代表第一次卖出时的总盈利
+			buy2 = max(buy2, sell1 - prices[i]); //代表第二次买入时的总盈利，如果只买/卖一次，那么最后sell1和sell2相等
+			sell2 = max(sell2, buy2 + prices[i]); //代表第二次卖出时的总盈利
 		}
 		return sell2;
     }
 };
+
+
+
 
 //使用二维数组的动态规划，这样会导致内存用量超过上限
 class Solution {
