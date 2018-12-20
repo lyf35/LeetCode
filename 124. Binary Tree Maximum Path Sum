@@ -1,0 +1,90 @@
+//这样的递归算法效率高一些，在底层递归的时候就可以对树的值做更新
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int maxPathSum(TreeNode* root) {
+        if(!root) return 0;
+        int max_val = -INT_MAX;
+        dfs(root, max_val);
+        return max_val;
+    }
+    
+    int dfs(TreeNode* root, int &max_val){
+        if(!root) return 0;
+        int left = dfs(root->left, max_val); //left或right是只包含左子路径/右子路径的最大值
+        int right = dfs(root->right, max_val);
+        if(left < 0) left = 0;
+        if(right < 0) right = 0;
+        if(left + root->val + right > max_val) max_val = left+root->val+right; //发现最大值可以做更新，在对每个左子/右子做递归的时候都会做此判断
+        return root->val+max(left,right); //只包含左路或右路的值
+    }  
+};
+
+
+//一个效率较低的算法，因为有大量的重复计算
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int maxPathSum(TreeNode* root) {
+        //路径不可以重复！
+        if(!root)
+        {
+            return 0;
+        }
+        int left_root_path=root->left?max_val_path(root->left):INT_MIN;
+        int right_root_path=root->right?max_val_path(root->right):INT_MIN;
+        int root_max=root->val;
+        root_max+=left_root_path>0?left_root_path:0;
+        root_max+=right_root_path>0?right_root_path:0;
+        int left_max=root->left?maxPathSum(root->left):INT_MIN;
+        int right_max=root->right?maxPathSum(root->right):INT_MIN;
+        return max(root_max,max(left_max,right_max));
+    }
+    int max_val_path(TreeNode* root) //沿着root向下搜索所可以得到的最大值
+    {
+        int max=root->val;
+        int curr_val=max;
+        if(root->left)
+        {
+            dfs(root->left,max,curr_val);
+        }
+        if(root->right)
+        {
+            dfs(root->right,max,curr_val);
+        }
+        return max;
+    }
+    void dfs(TreeNode* root,int& max,int& curr_val) //用深度搜索的方式搜索一个子树里面的最大值路径
+    {
+        curr_val+=root->val;
+        if(curr_val>max)
+        {
+            max=curr_val;
+        }
+        if(root->left)
+        {
+            dfs(root->left,max,curr_val);
+        }
+        if(root->right)
+        {
+            dfs(root->right,max,curr_val);
+        }
+        curr_val-=root->val;
+    }
+};
