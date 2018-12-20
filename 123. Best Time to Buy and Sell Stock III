@@ -1,0 +1,55 @@
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int sell1 = 0, sell2 = 0, buy1 = INT_MIN, buy2 = INT_MIN;
+		for (int i = 0; i < prices.size(); i++) 
+        {
+			buy1 = max(buy1, -prices[i]);
+			sell1 = max(sell1, buy1 + prices[i]);
+			buy2 = max(buy2, sell1 - prices[i]);
+			sell2 = max(sell2, buy2 + prices[i]);
+		}
+		return sell2;
+    }
+};
+
+//使用二维数组的动态规划，这样会导致内存用量超过上限
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int days=prices.size();
+        if(days<2)
+        {
+            return 0;
+        }
+        vector<vector<int>> profits(days,vector<int>(days,0)); //代表在一个时间段内只交易一次所取得的最大收益
+        int profit=0;
+        for(int i=1;i<days;i++) //代表买卖的天数间隔
+        {
+            for(int j=0;j<days-i;j++) //代表第j~j+i这段时间内只交易一次的最大收益
+            {
+                profits[j][j+i]=max(prices[j+i]-prices[j],profits[j][j+i-1]);
+                profit=profit>profits[j][j+i]?profit:profits[j][j+i];
+            }
+        } //先计算得到一次交易所能得到的最大收益
+        if(profit==0) //如果只交易一次没有任何收益，可以直接退出
+        {
+            return 0;
+        }
+        vector<vector<int>> profits_twice(days,vector<int>(days,0)); 
+        for(int i=0;i<days-3;i++) //代表从第i天开始
+        {
+            for(int j=3;j<days-i;j++) //代表间隔为j天
+            {
+                int max_val=0;
+                for(int k=i+1;k<i+j;k++)
+                {
+                    max_val=profits[i][k]+profits[k+1][i+j]>max_val?profits[i][k]+profits[k+1][i+j]:max_val;
+                }
+                profits_twice[i][i+j]=max_val;
+                profit=max_val>profit?max_val:profit;
+            }
+        } //计算交易两次的最大收益
+        return profit;
+    }
+};
