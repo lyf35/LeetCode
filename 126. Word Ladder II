@@ -1,0 +1,171 @@
+//使用map和set，可以加快寻找相邻字符串的速度，使得复杂度从O(n)->O(log n)，从而节约时间
+class Solution {
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        vector<vector<string>> res;
+        unordered_set<string> dict;
+        for (auto word : wordList) {
+            dict.insert(word);
+        }
+        
+        if (dict.count(endWord) == 0) {
+            return res;
+        }
+        
+        queue<string> q;
+        unordered_set<string> visit;
+        q.push(beginWord);
+        visit.insert(beginWord);
+        int pre = 1, cur = 0, level = 1, minLevel = INT_MAX;
+        unordered_map<string, vector<string>> parent;
+        while (!q.empty()) {
+            string s = q.front();
+            q.pop();
+            pre--;
+            if (level > minLevel) {
+                break;
+            }
+                 
+            for (int i = 0; i < s.size(); i++) {
+                string st = s;
+                char co = st[i];
+                for (char c = 'a'; c <= 'z'; c++) { //穷举每一种可能的替换法，并在字符串表中查找是否有该元素存在
+                    if (co != c) {
+                        st[i] = c;
+                        if (st == endWord) {
+                            minLevel = level;
+                            parent[st].push_back(s);
+                        } else {
+                            if (dict.count(st) != 0) {
+                                if (visit.count(st) == 0) {
+                                  q.push(st);
+                                  cur++;
+                                  visit.insert(st);
+                                }
+                                parent[st].push_back(s);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (pre == 0) {
+                for (auto e : visit) {
+                    dict.erase(e);
+                }
+                visit.clear();
+                pre = cur;
+                cur = 0;
+                level++;
+            }
+        }
+        
+        vector<string> vi;
+        vi.push_back(endWord);
+        dfs(res, parent, vi, beginWord, endWord);
+        for (auto& vec : res) {
+            reverse(vec.begin(), vec.end());
+        }
+
+        return res;
+    }
+    
+    void dfs(vector<vector<string>>& res, unordered_map<string, vector<string>>& parent, vector<string>& vi, string beginWord, string endWord) {
+        if (endWord == beginWord) {
+            res.push_back(vi);
+            return;
+        }
+        
+        for (auto e : parent[endWord]) {
+            vi.push_back(e);
+            dfs(res, parent, vi, beginWord, e);
+            vi.pop_back();
+        }
+        
+    }
+};
+
+
+//一个效率较低的办法，用二维vector保存字符之间的距离
+class Solution {
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        vector<vector<string>> result;
+        int end_pos=-1;
+        for(int i=0;i<wordList.size();i++)
+        {
+            if(wordList[i]==endWord)
+            {
+                end_pos=i;
+                break;
+            }
+        }
+        if(end_pos<0) //如果列表中没有结束单词，可以直接退出
+        {
+            return result;
+        }
+        vector<vector<int>> str_diff_table(wordList.size()+1,vector<int>(wordList.size()+1,0)); //代表wordlist中的两个元素之间所相差的字符数，下标0代表beginWord，其余为wordlist中的字符
+        for(int i=1;i<=wordList.size();i++)
+        {
+            for(int j=0;j<beginWord.size();j++)
+            {
+                str_diff_table[0][i]+=beginWord[j]!=wordList[i-1][j];
+            }
+        }
+        for(int i=1;i<=wordList.size();i++)
+        {
+            for(int j=i+1;j<=wordList.size();j++)
+            {
+                for(int k=0;k<beginWord.size();k++)
+                {
+                    str_diff_table[i][j]+=wordList[i-1][k]!=wordList[j-1][k];
+                }
+                str_diff_table[j][i]=str_diff_table[i][j];
+            }
+        }
+        vector<bool> has_visited(wordList.size(),0);
+        list<int> ladder_seq;
+        int len=wordList.size();
+        bfs(str_diff_table,result,wordList,ladder_seq,has_visited,end_pos+1,beginWord,len);
+        return result;
+    }
+    void bfs(vector<vector<int>>& diff_table,vector<vector<string>>& result,vector<string>& wordList,list<int>& ladder_seq,vector<bool>& visited, int curr_pos,string beg,int& curr_len)
+    {
+        if(curr_pos==0)
+        {
+            if(ladder_seq.size()>curr_len) //如果找到的字符串长度大于目前的最小长度，不必再添加到结果
+            {
+                return;
+            }
+            if(ladder_seq.size()<curr_len) //如果找到更短的字符串，需要将目前的结果全部清空
+            {
+                curr_len=ladder_seq.size();
+                result.clear();
+            }
+            vector<string> temp;
+            temp.push_back(beg);
+            for(auto i:ladder_seq)
+            {
+                temp.push_back(wordList[i]);
+            }
+            result.push_back(temp);
+        }
+        else
+        {
+            visited[curr_pos-1]=1;
+            ladder_seq.insert(ladder_seq.begin(),curr_pos-1);
+            if(ladder_seq.size()<=curr_len)
+            {
+                for(auto i=0;i<=wordList.size();i++)
+                {
+                    if(diff_table[i][curr_pos]==1&&(i==0||!visited[i-1]))
+                    {
+                        bfs(diff_table,result,wordList,ladder_seq,visited,i,beg,curr_len);
+                    }
+                }
+            }
+            ladder_seq.erase(ladder_seq.begin());
+            visited[curr_pos-1]=0;
+        }
+    }
+};
