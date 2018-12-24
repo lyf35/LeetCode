@@ -1,0 +1,52 @@
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_map<int,pair<bool,bool>> interval; //两个bool类型变量代表它前后是否还有元素存在
+        for(auto num:nums)
+        {
+            interval[num]=make_pair(0,0);
+            if(interval.find(num-1)!=interval.end())
+            {
+                interval[num].first=1;
+                interval[num-1].second=1;
+            }
+            if(interval.find(num+1)!=interval.end())
+            {
+                interval[num].second=1;
+                interval[num+1].first=1;
+            }
+        }
+        int max_int=0;
+        for(auto num:nums)
+        {
+            if(interval.find(num)!=interval.end())
+            {
+                int num_cnt=1;
+                bool left=interval[num].first;
+                bool right=interval[num].second;
+                interval.erase(num);
+                int left_num=num;
+                int right_num=num;
+                while(left)
+                {
+                    num_cnt++;
+                    left_num--;
+                    left=interval[left_num].first;
+                    interval.erase(left_num);
+                }
+                while(right)
+                {
+                    num_cnt++;
+                    right_num++;
+                    right=interval[right_num].second;
+                    interval.erase(right_num);
+                }
+                if(num_cnt>max_int)
+                {
+                    max_int=num_cnt;
+                }
+            }
+        }
+        return max_int;
+    }
+};
