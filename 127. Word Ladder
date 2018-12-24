@@ -1,0 +1,49 @@
+//使用BFS的思想进行查找
+class Solution {
+public:
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> word_list; //用一个集合保存字符，方便查找
+        for(auto str:wordList)
+        {
+            word_list.insert(str);
+        }
+        if(word_list.find(endWord)==word_list.end())
+        {
+            return 0;
+        }
+        int layers=2;
+        queue<string> layer_strs; //用queue保存bfs时搜索到的“结点”
+        layer_strs.push(beginWord);
+        while(layer_strs.size())
+        {
+            int nums=layer_strs.size();
+            for(int i=0;i<nums;i++)
+            {
+                string front=layer_strs.front();
+                layer_strs.pop();
+                word_list.erase(front);
+                for(int x=0;x<front.size();x++)
+                {
+                    char c=front[x];
+                    for(int y=0;y<26;y++)
+                    {
+                        front[x]='a'+y; //此处最好不要新建一个临时变量，否则不能充分利用程序的局部性，会严重拖延时间
+                        if(word_list.find(front)!=word_list.end())
+                        {
+                            layer_strs.push(front);
+                            word_list.erase(front); //此处最好在BFS搜索到之后就删去。否则，之后从queue中弹出时再删去的话，因set中的元素较多，删除效率很低
+                        }
+                        if(front==endWord)
+                        {
+                            goto end;
+                        }
+                    }
+                    front[x]=c;
+                }
+            }
+            layers++;
+        }
+        end:
+        return layer_strs.size()?layers:0;  //最后根据如何退出来判断返回值
+    }
+};
