@@ -7,6 +7,7 @@
  *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
  * };
  */
+ //用递归算法，很容易求解
 class Solution {
 public:
     int sumNumbers(TreeNode* root) {
