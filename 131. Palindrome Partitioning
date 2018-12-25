@@ -1,0 +1,47 @@
+public:
+    vector<vector<string>> partition(string s) {
+        int len=s.size();
+        vector<vector<string>> result;
+        if(!len)
+        {
+            result.push_back(vector<string>());
+            return result;
+        }
+        vector<vector<bool>> is_palindrome(len,vector<bool>(len,0)); //保存i，j范围内的字符串是否是水仙花数
+        for(int i=0;i<len-1;i++) //先初始化长度为1或2的位置
+        {
+            is_palindrome[i][i]=1;
+            is_palindrome[i][i+1]=s[i]==s[i+1];    
+        }
+        is_palindrome[len-1][len-1]=1;
+        for(int i=2;i<len;i++)
+        {
+            for(int j=0;j<len-i;j++)
+            {
+                is_palindrome[j][j+i]=is_palindrome[j+1][j+i-1]&&s[j]==s[j+i];
+            }
+        }
+        vector<string> container;
+        dfs(result,is_palindrome,container,s,0,len);
+        return result;
+    }
+    void dfs(vector<vector<string>>& result,vector<vector<bool>>& is_palindrome,vector<string>& container,string s,int i,int size)
+    {
+        if(i==size)
+        {
+            result.push_back(container);
+        }
+        else
+        {
+            for(auto j=i;j<size;j++)
+            {
+                if(is_palindrome[i][j])
+                {
+                    container.push_back(s.substr(i,j-i+1));
+                    dfs(result,is_palindrome,container,s,j+1,size);
+                    container.pop_back();
+                }
+            }
+        }
+    }
+};
