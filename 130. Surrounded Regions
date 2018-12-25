@@ -1,0 +1,64 @@
+//巧妙地借用了第三种字符来表示已经访问过，比使用一个集合来保存已经访问过的元素要节省不少的时间
+
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        //只要一个“O”无法通过上下左右移动（不能斜走）到达边上的O，则一定能被消去，因此可以通过BFS搜索与一个O相连的任意的O
+        int height=board.size();
+        if(height==0)
+        {
+            return;
+        }
+        int width=board.begin()->size();
+        for(auto i=0;i<width;i++) //先处理上下两条边上的
+        {
+            if(board[0][i]=='O')
+            {
+                bfs(board,0,i,width,height);
+            }
+            if(board[height-1][i]=='O')
+            {
+                bfs(board,height-1,i,width,height);
+            }
+        }
+        for(auto i=1;i<height-1;i++) //处理左右两条边
+        {
+            if(board[i][0]=='O')
+            {
+                bfs(board,i,0,width,height);
+            }
+            if(board[i][width-1]=='O')
+            {
+                bfs(board,i,width-1,width,height);
+            }
+        }
+        for(auto i=0;i<height;i++)
+        {
+            for(auto j=0;j<width;j++)
+            {
+                board[i][j]=board[i][j]=='O'?'X':board[i][j];   
+                board[i][j]=board[i][j]=='A'?'O':board[i][j];
+            }
+        }
+    }
+    void bfs(vector<vector<char>>& board,int i,int j,int& width,int& height)
+    {
+        board[i][j]='A';
+        if(i-1>=0&&board[i-1][j]=='O')
+        {
+            bfs(board,i-1,j,width,height);
+        }
+        if(i+1<height&&board[i+1][j]=='O')
+        {
+            bfs(board,i+1,j,width,height);
+        }
+        if(j-1>=0&&board[i][j-1]=='O')
+        {
+            bfs(board,i,j-1,width,height);
+        }
+        if(j+1<width&&board[i][j+1]=='O')
+        {
+            bfs(board,i,j+1,width,height);
+        }
+    }
+};
