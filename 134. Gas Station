@@ -1,0 +1,72 @@
+//由于结果唯一，因此可以对算法做简化
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int length=gas.size();
+        if(!length)
+        {
+            return 0;
+        }
+        int sum=0; //代表从某个位置开始时的余量
+        int remains=0; //代表从第一个位置开始时的余量
+        int pos=0;
+        for(int i=0;i<length;i++)
+        {
+            remains+=gas[i]-cost[i];
+            sum+=gas[i]-cost[i];
+            //如果从错误的位置开始，那么在中途可能会终止。如果在某个位置处终止，说明上一中断点到这一中断点之间的所有点肯定都不可能是正确位置
+            (因为两点之间的消耗大于增加，而上一中断点处一定是增加或抵消，由此可慢慢向后推断出这些点都不可能成立)
+            //如果是从正确位置开始，则这一循环一定可以走到最后
+            if(sum<0) 
+            {
+                sum=0;
+                pos=i+1;
+            }
+            //如果最后pos=length，那么说明到了最后一个点处仍是支出大于收入，remain一定小于0，因此返回时不用考虑pos越界的情况
+        }
+        return remains>=0?pos:-1; //最后还要再确认所有点的总收支是否平衡
+    }
+};
+
+
+//适用于一般情况，如果有多个结果这一套算法也可以使用
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int length=gas.size();
+        if(!length)
+        {
+            return 0;
+        }
+        vector<int> remains(length,0);
+        vector<int> possible_place;
+        for(int i=0;i<length;i++)
+        {
+            remains[i]=gas[i]-cost[i];
+            if(remains[i]>=0)
+            {
+                possible_place.push_back(i);
+            }
+        }
+        for(auto start_pos:possible_place)
+        {
+            int remain_gas=0;
+            int cnt=0;
+            while(cnt!=length)
+            {
+                int pos=start_pos+cnt<length?start_pos+cnt:start_pos+cnt-length;
+                cnt++;
+                remain_gas+=remains[pos];
+                if(remain_gas<0)
+                {
+                    break;
+                }
+            }
+            if(remain_gas>=0)
+            {
+                return start_pos;
+            }
+        }
+        return -1;
+    }
+};
