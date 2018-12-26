@@ -1,0 +1,57 @@
+class Solution {
+public:
+    int minCut(string s) {
+    //使用动态规划时，动态规划的顺序会影响最后如何得到结果
+        int len=s.size();
+        if(!len)
+        {
+            return -1;
+        }
+        vector<int> cuts(len+1,INT_MAX); //保存从第一个字符到第i个字符的最小切割数
+        cuts[0]=-1;
+        vector<vector<bool>> is_palindrome(len,vector<bool>(len,0)); //保存i，j范围内的字符串是否是水仙花数
+        for(int i=0;i<len;i++) //代表结束位置
+        {
+            for(int j=0;j<=i;j++) //代表开始位置
+            {
+                if(s[i]==s[j]&&(i-j<2||is_palindrome[j+1][i-1]))
+                {
+                    is_palindrome[j][i]=1;
+                    cuts[i+1]=min(cuts[i+1],1+cuts[j]); //在构造二维数组的同时，也构造最小切割，对for循环的顺序做调整可以使二者同时进行
+                }
+            }
+        }
+        return cuts[len];
+    }
+};
+
+
+
+//之前的尝试：先构造出dp的数组，然后做dfs或bfs会耗费掉大量的时间。贪心算法无法证明子问题的最优解可以推广至整个问题的最优解
+class Solution {
+public:
+    int minCut(string s) {
+        int len=s.size();
+        if(!len)
+        {
+            return -1;
+        }
+        vector<vector<bool>> is_palindrome(len,vector<bool>(len,0)); //保存i，j范围内的字符串是否是水仙花数
+        for(int i=0;i<len-1;i++) //先初始化长度为1或2的位置
+        {
+            is_palindrome[i][i]=1;
+            is_palindrome[i][i+1]=s[i]==s[i+1];
+            
+        }
+        is_palindrome[len-1][len-1]=1;
+        for(int i=2;i<len;i++)
+        {
+            for(int j=0;j<len-i;j++)
+            {
+                is_palindrome[j][j+i]=is_palindrome[j+1][j+i-1]&&s[j]==s[j+i]; 
+            }
+        }
+        int cuts=-1;
+        return cuts;
+    }
+};
