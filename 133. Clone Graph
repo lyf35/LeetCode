@@ -1,0 +1,48 @@
+/**
+ * Definition for undirected graph.
+ * struct UndirectedGraphNode {
+ *     int label;
+ *     vector<UndirectedGraphNode *> neighbors;
+ *     UndirectedGraphNode(int x) : label(x) {};
+ * };
+ */
+class Solution {
+public:
+    UndirectedGraphNode *cloneGraph(UndirectedGraphNode *node) {
+        //由于node的label是独立的，因此可以用一个map保存所有结点的相邻结点信息，同时用一个map保存新结点的信息。由于可能出现指向自己的边，因此在处理结点的时候需要考虑两种情况
+        if(!node)
+        {
+            return nullptr;
+        }
+        queue<UndirectedGraphNode*> nodes;
+        unordered_map<int,UndirectedGraphNode*> newnodes; //用node的lable进行node的索引
+        nodes.push(node);
+        unordered_map<int,vector<int>> node_neighbors; //用node的label来索引所有与它相邻结点的lebel
+        unordered_set<int> visited;
+        while(nodes.size()) //用bfs遍历所有结点
+        {
+            auto tempnode=nodes.front(); //代表当前处理的结点
+            nodes.pop();
+            visited.insert(tempnode->label);
+            newnodes[tempnode->label]=new UndirectedGraphNode(tempnode->label);
+            for(auto neigh:tempnode->neighbors)
+            {
+                if(visited.find(neigh->label)==visited.end()) //如果某个标签还没有被访问
+                {
+                    nodes.push(neigh);
+                    visited.insert(neigh->label);
+                }
+                node_neighbors[tempnode->label].push_back(neigh->label); //将结点的所有邻接点的值放入相应的vector
+            }
+        }
+        for(auto iter=newnodes.begin();iter!=newnodes.end();iter++) //构造结点的邻接矩阵
+        {
+            vector<int> neigh=node_neighbors[iter->first];
+            for(auto val:neigh)
+            {
+                (iter->second)->neighbors.push_back(newnodes[val]);
+            }
+        }
+        return newnodes[node->label];
+    }
+};
