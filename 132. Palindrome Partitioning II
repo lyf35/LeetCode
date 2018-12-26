@@ -17,7 +17,8 @@ public:
                 if(s[i]==s[j]&&(i-j<2||is_palindrome[j+1][i-1]))
                 {
                     is_palindrome[j][i]=1;
-                    cuts[i+1]=min(cuts[i+1],1+cuts[j]); //在构造二维数组的同时，也构造最小切割，对for循环的顺序做调整可以使二者同时进行
+                    cuts[i+1]=min(cuts[i+1],1+cuts[j]); //在构造二维数组的同时，也构造最小切割，对for循环的顺序做调整可以使二者同时进行。
+                    //在构造cuts[i+1]的时候，在之前的循环过程中以及将cuts[j]构造好
                 }
             }
         }
@@ -25,6 +26,32 @@ public:
     }
 };
 
+//消耗的空间可以进一步优化至O(n)
+class Solution {
+public:
+    int minCut(string s) {
+        int sz = s.size();
+        vector<int> min_cut(sz + 1, sz - 1);
+        vector<bool> palin_prev(sz, false);
+
+        min_cut[0] = -1;
+
+        for(int idx1 = 0; idx1 < sz; ++idx1)
+        {
+            vector<bool> palin_curr(sz, false);
+            for(int idx2 = 0; idx2 <= idx1; ++idx2)
+            {
+                if(s[idx2] == s[idx1] && (idx1 - idx2 < 2 || palin_prev[idx2 + 1]))
+                {
+                    palin_curr[idx2] = true;
+                    min_cut[idx1 + 1] = min(min_cut[idx1 + 1], min_cut[idx2] + 1);
+                }
+            }
+            swap(palin_curr, palin_prev);
+        }
+        return min_cut[sz];
+    }
+};
 
 
 //之前的尝试：先构造出dp的数组，然后做dfs或bfs会耗费掉大量的时间。贪心算法无法证明子问题的最优解可以推广至整个问题的最优解
