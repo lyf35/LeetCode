@@ -1,0 +1,56 @@
+/**
+ * Definition for singly-linked list with a random pointer.
+ * struct RandomListNode {
+ *     int label;
+ *     RandomListNode *next, *random;
+ *     RandomListNode(int x) : label(x), next(NULL), random(NULL) {}
+ * };
+ */
+ //与之前一道复制图的题目类似，也是使用一个map保存已经创建过的结点，每次需要先在map中寻找这个结点，如果map中没有再创建新的结点
+class Solution {
+public:
+    RandomListNode *copyRandomList(RandomListNode *head) {
+        if(!head)
+        {
+            return nullptr;
+        }
+        unordered_map<int,RandomListNode*> nodes;
+        RandomListNode* ret=new RandomListNode(head->label);
+        auto newnode=ret;
+        auto oldnode=head;
+        while(oldnode)
+        {
+            if(oldnode->random)
+            {
+                RandomListNode* temp=nullptr;
+                if(nodes.find(oldnode->random->label)==nodes.end())
+                {
+                    temp=new RandomListNode(oldnode->random->label);
+                    nodes[temp->label]=temp;
+                }
+                else
+                {
+                    temp=nodes[oldnode->random->label];
+                }
+                newnode->random=temp;
+            }
+            if(oldnode->next)
+            {
+                RandomListNode* temp=nullptr;
+                if(nodes.find(oldnode->next->label)==nodes.end())
+                {
+                    temp=new RandomListNode(oldnode->next->label);
+                    nodes[temp->label]=temp;
+                }
+                else
+                {
+                    temp=nodes[oldnode->next->label];
+                }
+                newnode->next=temp;
+            }
+            oldnode=oldnode->next;
+            newnode=newnode->next;
+        }
+        return ret;
+    }
+};
