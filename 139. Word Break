@@ -1,4 +1,5 @@
-//使用动态规划则避免了dfs中可能会多次对一个子字符串做重复判断，降低了重复操作的次数，可以节省大量的时间
+//使用动态规划则避免了dfs中可能会多次对一个子字符串做重复判断，降低了重复操作的次数
+//而且因为结果只需要判断可行性，因此使用dp也可以省去一些操作
 class Solution {
 public:
     bool wordBreak(string s, vector<string>& wordDict) {
