@@ -1,0 +1,105 @@
+//可以先用动态规划保存每一个位置是否成立以及可以在哪一个位置进行划分，最后再用dfs构造结果
+class Solution {
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        vector<bool> is_seperatable(s.size()+1,0); //保存某位置是否可以插入的信息
+        is_seperatable[0]=1;
+        vector<vector<int>> break_pos(s.size()+1,vector<int>{}); //存放插入空格的位置，索引位置代表这一位置可能的插入空格方式
+        unordered_set<string> word_list;
+        for(auto str:wordDict)
+        {
+            word_list.insert(str);
+        }
+        for(auto i=1;i<=s.size();i++) //代表要判断的子字符串的长度
+        {
+            for(auto j=0;j<=i;j++) //代表子字符串要切割的地方
+            {
+                string substring=s.substr(j,i-j);
+                if(word_list.find(substring)!=word_list.end()&&is_seperatable[j]) //代表某个位置可以做切割
+                {
+                    is_seperatable[i]=1;
+                    break_pos[i].push_back(j);
+                }
+            }
+        }
+        if(!is_seperatable[s.size()])
+        {
+            return vector<string>{};
+        }
+        else
+        {
+            vector<string> results;
+            dfs(s,break_pos,s.size(),results);
+            return results;
+        }
+    }
+    void dfs(string s,vector<vector<int>>& break_pos,int start_pos,vector<string>& results)
+    {
+        auto former_pos=break_pos[start_pos];
+        for(auto i:former_pos)
+        {
+            if(i==0)
+            {
+                results.push_back(s);
+            }
+            else
+            {
+                string temp=s;
+                temp.insert(temp.begin()+i,' ');
+                dfs(temp,break_pos,i,results);
+            }
+        }
+    }
+};
+
+
+
+
+//与139题一样，如果直接使用dfs会超时
+class Solution {
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        //字典中的单词可以重复使用
+        unordered_set<string> word_list; //将所有的单词保存在字典中，这样可以方便查找
+        for(auto str:wordDict)
+        {
+            word_list.insert(str);
+        }
+        vector<vector<string>> str_combination;
+        vector<string> container; 
+        dfs(word_list,0,s,container,str_combination);
+        vector<string> results;
+        for(auto strs:str_combination)
+        {
+            string one_result;
+            for(auto i:strs)
+            {
+                one_result+=i;
+                one_result+=" ";
+            }
+            one_result.erase(one_result.size()-1);
+            results.push_back(one_result);
+        }
+        return results;
+    }
+    void dfs(unordered_set<string>& word_list,int beg,string& s,vector<string>& container,vector<vector<string>>& result)
+    {
+        if(beg==s.size())
+        {
+            result.push_back(container);
+        }
+        else
+        {
+            for(auto i=1;i<=s.size()-beg;i++)
+            {
+                string substring=s.substr(beg,i);
+                if(word_list.find(substring)!=word_list.end())
+                {
+                    container.push_back(substring);
+                    dfs(word_list,beg+i,s,container,result);
+                    container.pop_back();
+                }
+            }
+        }
+    }
+};
