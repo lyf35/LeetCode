@@ -1,0 +1,63 @@
+//使用动态规划则避免了dfs中可能会多次对一个子字符串做重复判断，降低了重复操作的次数，可以节省大量的时间
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        //字典中的单词可以重复使用
+        unordered_set<string> word_list; //将所有的单词保存在字典中，这样可以方便查找
+        int max_length=0;
+        for(auto str:wordDict)
+        {
+            word_list.insert(str);
+        }
+        vector<bool> make_valid_str(s.size()+1,0);
+        make_valid_str[0]=1;
+        for(int i=1;i<=s.size();i++) //代表字符串的结束位置+1
+        {
+            for(int j=i-1;j>=0;j--)
+            {
+                if(word_list.find(s.substr(j,i-j))!=word_list.end()&&make_valid_str[j])
+                {
+                    make_valid_str[i]=1;
+                    break;
+                }
+            }
+        }
+        return make_valid_str[s.size()];
+    }
+};
+
+
+//使用dfs搜索，如果遇到同一字符串重复多次的时候会超时
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+        //字典中的单词可以重复使用
+        unordered_set<string> word_list; //将所有的单词保存在字典中，这样可以方便查找
+        for(auto str:wordDict)
+        {
+            word_list.insert(str);
+        }
+        bool ret=0;
+        dfs(word_list,0,s,ret);
+        return ret;
+    }
+    void dfs(unordered_set<string>& word_list,int beg,string s,bool& mark)
+    {
+        if(beg==s.size())
+        {
+            mark=1;
+            return;
+        }
+        else
+        {
+            for(auto i=1;i<=s.size()-beg;i++)
+            {
+                string substring=s.substr(beg,i);
+                if(word_list.find(substring)!=word_list.end())
+                {
+                    dfs(word_list,beg+i,s,mark);
+                }
+            }
+        }
+    }
+};
