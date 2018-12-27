@@ -1,0 +1,87 @@
+//使用从前往后以及从后往前两次扫描，效率提高了不少
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int length=ratings.size();
+        vector<int> candies(length,1);
+        for(int i=0;i<length-1;i++) //第一遍从前往后扫描，处理某一处的评分小于下一处的情况
+        {
+            if(ratings[i]<ratings[i+1]) //如果发现某一处的评分小于下一处，需要增加其评分
+            {
+                candies[i+1]=candies[i]+1;
+            }
+        }
+        for(int i=length-1;i>0;i--) //第二遍倒序扫描，处理某一处评分小于前一处，但是糖果数却不满足要求的情况
+        {
+            if(ratings[i-1]>ratings[i]&&candies[i-1]<=candies[i])
+            {
+                candies[i-1]=candies[i]+1;
+            }
+        }
+        return accumulate(candies.begin(),candies.end(),0);
+    }
+};
+
+
+//另一种方法，只需要遍历一次数组，根据数组中元素的上升/下降来确定糖果数
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size();
+        if (n <= 1) return n;
+
+        bool increased = true;
+        int dec_num, peak_height = 1, sum = 1;
+
+        for (int i = 1; i < n; ++i) {
+            if (ratings[i] > ratings[i-1]) {
+                if (increased) {
+                    peak_height += 1;
+                } else {
+                    increased = true;
+                    peak_height = 2;
+                }
+                sum += peak_height;
+            } else if (ratings[i] < ratings[i-1]) {
+                if (increased) {
+                    increased = false;
+                    dec_num = 1;
+                } else {
+                    dec_num += 1;
+                }
+                sum += dec_num >= peak_height ? dec_num + 1 : dec_num;
+            } else {
+                increased = true;
+                peak_height = 1;
+                sum += 1;
+            }
+        }
+        return sum;
+    }
+};
+
+//这一算法效率很低，在评分递减排列的情况下每一次都需要往回追溯，因此最坏的时间复杂度为O(n^2)
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int length=ratings.size();
+        vector<int> candies(length,1);
+        for(int i=0;i<length-1;i++)
+        {
+            if(ratings[i]<ratings[i+1]) //如果发现某一处的评分小于下一处，需要增加其评分
+            {
+                candies[i+1]=candies[i]+1;
+            }
+            else //如果某一处评分大于下一处，但是糖果数却不多余下一处，则需要往前追溯进行修改
+            {
+                int j=i;
+                while(j>=0&&ratings[j]>ratings[j+1]&&candies[j]<=candies[j+1])
+                {
+                    candies[j]=candies[j+1]+1;
+                    j--;
+                }
+            }
+        }
+        return accumulate(candies.begin(),candies.end(),0);
+    }
+};
