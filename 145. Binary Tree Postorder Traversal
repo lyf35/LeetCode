@@ -1,0 +1,44 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> postorderTraversal(TreeNode* root) {
+        //后序遍历，由于没有指向根节点的指针，因此不能通过找到最左结点然后一步步向上追溯的方法来构造后序遍历
+        vector<int> result;
+        stack<pair<TreeNode*,bool>> container; //用布尔值保存这个结点的左/右子是否处理过
+        if(root)
+        {
+            container.push(make_pair(root,0));
+        }
+        while(container.size())
+        {
+            auto temp=container.top();
+            container.pop();
+            if(!temp.second)  //某结点的左/右子还没处理过
+            {
+                auto node=temp.first;
+                container.push(make_pair(node,1));
+                if(node->right)
+                {
+                    container.push(make_pair(node->right,0));
+                }
+                if(node->left)
+                {
+                    container.push(make_pair(node->left,0));
+                }              
+            }
+            else //某结点的左/右子已经处理过
+            {
+                result.push_back(temp.first->val);
+            }
+        }
+        return result;
+    }
+};
