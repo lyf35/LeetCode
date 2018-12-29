@@ -1,0 +1,102 @@
+方法一：使用额外的空间，通过数组的辅助来完成
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+        if(!head)
+        {
+            return;
+        }
+        vector<ListNode*> node_table;
+        auto temp=head;
+        while(temp)
+        {
+            node_table.push_back(temp);
+            temp=temp->next;
+        }
+        int size=node_table.size();
+        for(auto i=0;i<size/2;i++)
+        {
+            node_table[i]->next=node_table[size-1-i];
+            node_table[size-1-i]->next=node_table[i+1];
+        }
+        node_table[size/2]->next=nullptr;
+    }
+};
+
+方法二：将list拆成两个，前半部分的为一个，后半部分的为一个。然后再将后半部分位的list倒置再与前半部分的穿插排列，这样只需要常数大小的额外的存储空间
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+        if(!head)
+        {
+            return;
+        }
+        ListNode* former_list=head;
+        ListNode* latter_list;
+        auto temp=head;
+        int cnt=-1;
+        while(temp)  //将链表拆分为前后两部分
+        {
+            temp=temp->next;
+            cnt++;
+        }
+        if(cnt==0)
+        {
+            return;
+        }
+        temp=head;
+        for(int i=0;i<cnt/2;i++)
+        {
+            temp=temp->next;
+        }
+        latter_list=temp->next;
+        temp->next=nullptr;
+        //将后半部分链表翻转
+        ListNode* reverse_beg=latter_list;
+        temp=latter_list->next;
+        reverse_beg->next=nullptr;
+        while(temp)
+        {
+            auto prev=temp;
+            temp=temp->next;
+            prev->next=reverse_beg;
+            reverse_beg=prev;
+        }
+        //将前半部分和翻转链表交叉合并
+        int pos=1;
+        temp=former_list;
+        former_list=former_list->next;
+        while(pos<=cnt)
+        {
+            if(!(pos%2)) //奇数位，注意！的运算优先级比%要高
+            {
+                temp->next=former_list;
+                former_list=former_list->next;
+            }
+            else  //偶数位
+            {
+                temp->next=reverse_beg;
+                reverse_beg=reverse_beg->next;
+            }
+            temp=temp->next;
+            pos++;
+        }
+    }
+};
+
