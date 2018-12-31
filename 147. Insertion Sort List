@@ -1,0 +1,71 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* insertionSortList(ListNode* head) {
+        if(!head)
+        {
+            return nullptr;
+        }
+        int cnt=2;
+        ListNode* temp_next=head->next; //代表每次要插入的那个
+        ListNode* temp=head; //待插入元素的前一个元素
+        if(!temp_next)
+        {
+            return head;
+        }
+        bool is_sorted=false;
+        while(!is_sorted)
+        {
+            if(temp->val<=temp_next->val) //判断此处是否需要插入排序，如果不需要可以直接进入下一个位置
+            {
+                temp=temp->next;
+                temp_next=temp_next->next;
+                is_sorted=temp_next?false:true;
+                cnt++;
+                continue;
+            }
+             //先把待插入结点取出来，并保持链表的顺序
+            if(!temp_next->next) //代表到了最后一个结点
+            {
+                is_sorted=true;
+                temp->next=nullptr;
+            }
+            else
+            {
+                temp->next=temp_next->next;
+            }
+            int pos=0;
+            ListNode* pos_ptr=head; 
+            ListNode* pos_ptr_next=head->next; //代表待插入位置的后一个元素
+            if(pos_ptr->val>temp_next->val) //代表插入首端
+            {
+                head=temp_next;
+                temp_next->next=pos_ptr;
+            }
+            else //寻找待插入位置
+            {
+                while(pos<=cnt&&pos_ptr_next->val<temp_next->val)
+                {
+                    pos_ptr=pos_ptr_next;
+                    pos_ptr_next=pos_ptr_next->next;
+                    pos++;
+                }
+                pos_ptr->next=temp_next;
+                temp_next->next=pos_ptr_next;
+            }
+            if(!is_sorted)
+            {
+                temp_next=temp->next;
+                cnt++;
+            }
+        }
+        return head;
+    }
+};
