@@ -1,0 +1,100 @@
+/*
+实现LRU缓存的方式：
+1.用一个数组来存储数据，给每一个数据项标记一个访问时间戳，每次插入新数据项的时候，先把数组中存在的数据项的时间戳自增，并将新数据项的时间戳置为0并插入到数组中。每次访问数组中的数据项的时候，将被访问的数据项的时间戳置为0。当数组空间已满时，将时间戳最大的数据项淘汰。
+2.利用一个链表来实现，每次新插入数据的时候将新数据插到链表的头部；每次缓存命中（即数据被访问），则将数据移到链表头部；那么当链表满的时候，就将链表尾部的数据丢弃。
+3.利用链表和hashmap。当需要插入新的数据项的时候，如果新数据项在链表中存在（一般称为命中），则把该节点移到链表头部，如果不存在，则新建一个节点，放到链表头部，若缓存满了，则把链表最后一个节点删除即可。在访问数据的时候，如果数据项在链表中存在，则把该节点移到链表头部，否则返回-1。这样一来在链表尾部的节点就是最近最久未访问的数据项。
+*/
+
+
+//照搬别人的办法：
+class LRUCache{
+    size_t m_capacity;
+    unordered_map<int,  list<pair<int, int>>::iterator> m_map; //m_map_iter->first: key, m_map_iter->second: list iterator;
+    list<pair<int, int>> m_list;                               //m_list_iter->first: key, m_list_iter->second: value;
+public:
+    LRUCache(size_t capacity):m_capacity(capacity) {
+    }
+    int get(int key) {
+        auto found_iter = m_map.find(key);
+        if (found_iter == m_map.end()) //key doesn't exist
+            return -1;
+        m_list.splice(m_list.begin(), m_list, found_iter->second); //move the node corresponding to key to front
+        return found_iter->second->second;                         //return value of the node
+    }
+    void put(int key, int value) {
+        auto found_iter = m_map.find(key);
+        if (found_iter != m_map.end()) //key exists
+        {
+            m_list.splice(m_list.begin(), m_list, found_iter->second); //move the node corresponding to key to front
+            found_iter->second->second = value;                        //update value of the node
+            return;
+        }
+        if (m_map.size() == m_capacity) //reached capacity
+        {
+           int key_to_del = m_list.back().first; 
+           m_list.pop_back();            //remove node in list;
+           m_map.erase(key_to_del);      //remove key in map
+        }
+        m_list.emplace_front(key, value);  //create new node in list
+        m_map[key] = m_list.begin();       //create correspondence between key and node
+    }
+};
+
+
+
+
+
+
+/*
+自己开始时的错误思路。如果list中只保存key，则无法从unordered_map中删除正确的元素，因此以下的方法会发生运行时错误
+*/
+class LRUCache {
+private:
+    int size;
+    int cap;
+    list<int> elem;
+    unordered_map<int,list<int>::iterator> hash_map; //第一个是key，第二个代表value的指针
+public:
+    LRUCache(int capacity) {
+        size=0;
+        cap=capacity;
+    }
+    
+    int get(int key) {
+        if(hash_map.find(key)!=hash_map.end())
+        {
+            int return_val=*hash_map[key];
+            elem.erase(hash_map[key]);
+            elem.push_front(return_val);
+            hash_map[key]=elem.begin();
+            return return_val;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    
+    void put(int key, int value) {
+        if(size==cap) //如果数组中元素数目已经达到了容量，需要用LRU策略替换掉元素
+        {
+            hash_map.erase(elem.back()); //用elem.back()得到的是value的值，不是key的值！
+            elem.pop_back(); 
+            elem.push_front(value);
+            hash_map[key]=elem.begin();
+        }
+        else //如果数组中元素个数没有达到容量，可以直接在数组后面加入元素
+        {
+            elem.push_front(value);
+            hash_map[key]=elem.begin();
+            size++;
+        }
+    }
+};
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
