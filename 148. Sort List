@@ -1,0 +1,122 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* sortList(ListNode* head) {
+        //要求O(nlgn)的复杂度，且要求使用常数大小的额外空间，可以使用快排
+        if(!head)
+        {
+            return nullptr;
+        }
+        int size=0;
+        ListNode* temp=head;
+        while(temp)
+        {
+            size++;
+            temp=temp->next;
+        }
+        quicksort(nullptr,head,head,size);
+        return head;
+    }
+    void quicksort(ListNode* prev, ListNode* head,ListNode*& start,int n) //代表从head开始n个数字，start是整个链表的开始位置
+    {
+        ListNode* pivot=head;
+        ListNode* pivot_start=head;
+        ListNode* smaller=nullptr;
+        ListNode* smaller_start=nullptr;
+        ListNode* larger=nullptr;
+        ListNode* larger_start=nullptr;
+        ListNode* temp=head->next;
+        int cnt=1;
+        int smaller_cnt=0;
+        int larger_cnt=0;
+        while(temp&&cnt<n)
+        {
+            auto node=temp;
+            temp=temp->next;
+            node->next=nullptr;
+            cnt++;
+            if(node->val<pivot->val)
+            {
+                smaller_cnt++;
+                if(smaller)
+                {
+                    smaller->next=node;
+                    smaller=smaller->next;
+                }
+                else
+                {
+                    smaller=node;
+                    smaller_start=node;
+                }
+            }
+            else if(node->val>pivot->val)
+            {
+                larger_cnt++;
+                if(larger)
+                {
+                    larger->next=node;
+                    larger=larger->next;
+                }
+                else
+                {
+                    larger=node;
+                    larger_start=larger;
+                }
+            }
+            else
+            {
+                pivot->next=node;
+                pivot=pivot->next;
+            }
+        }
+        //cout<<"s "<<smaller_cnt<<endl;
+        //cout<<"l "<<larger_cnt<<endl;
+        if(smaller) 
+        {
+            smaller->next=pivot_start;
+            if(!prev)
+            {
+               start=smaller_start; 
+            }  
+            else
+            {
+                prev->next=smaller_start;
+            }
+        }
+        else
+        {
+            if(!prev)
+            {
+                start=pivot_start;
+            }
+            else
+            {
+                prev->next=pivot_start;
+            }
+        }
+        if(larger)
+        {
+            pivot->next=larger_start;
+            larger->next=temp;
+        }
+        else
+        {
+            pivot->next=temp;
+        }
+        if(smaller_start)
+        {
+            quicksort(prev,smaller_start,start,smaller_cnt);
+        }
+        if(larger_start)
+        {
+            quicksort(pivot,larger_start,start,larger_cnt);
+        }
+    }
+};
