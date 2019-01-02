@@ -1,0 +1,29 @@
+//借助堆栈求逆波兰表达式的值，比较容易
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<int> numbers;
+        string s="+-*/";
+        for(auto str:tokens)
+        {
+            if(str.size()==1&&str.find_first_of(s)==0)  //代表找到一个运算符
+            {
+                int val_2=numbers.top();
+                numbers.pop();
+                int val_1=numbers.top();
+                numbers.pop();
+                int result=0;
+                if(str=="+")    result=val_1+val_2;
+                if(str=="-")    result=val_1-val_2;
+                if(str=="*")    result=val_1*val_2;
+                if(str=="/")    result=val_1/val_2;
+                numbers.push(result);
+            }
+            else
+            {
+                numbers.push(stoi(str));
+            }
+        }
+        return numbers.top();
+    }
+};
