@@ -1,0 +1,21 @@
+//一维的峰值查找算法
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        int min=0;
+        int max=nums.size()-1;
+        while(min<max)
+        {
+            int mid=(min+max)/2;
+            if(nums[mid]<nums[mid+1])
+            {
+                min=mid+1;
+            }
+            else
+            {
+                max=mid;
+            }
+        }
+        return min;
+    }
+};
