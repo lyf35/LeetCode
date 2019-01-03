@@ -1,0 +1,29 @@
+//与153题不同的是，此时在使用二分查找的时候需要跳过相等的元素
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int min=0;
+        int max=nums.size()-1;
+        while(min<max)
+        {
+            while(nums[min]==nums[min+1])
+            {
+                min++;
+            }
+            while(nums[max]==nums[max-1])
+            {
+                max--;    
+            }
+            int mid=(min+max)/2;
+            if(nums[mid]>nums[max])
+            {
+                min=mid+1;
+            }
+            else
+            {
+                max=mid;
+            }
+        }
+        return nums[min];
+    }
+};
