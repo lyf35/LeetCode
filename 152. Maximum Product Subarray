@@ -1,0 +1,47 @@
+/*从头部和尾部分别扫描，时间复杂度为O（n）
+证明其正确性：
+（1）先证明没有零的情况：
+假设问题的答案是整个向量中间的一段（即头尾还有一段没有取）
+那么如果左边有一个正数，可以向左延长一个位置；右边有一个正数，可以向右延长一个位置
+如果左右为两个负数，可以左右各延长一个位置
+利用这一策略，可以将答案延长至整个向量的左/右边界处
+因此假设是错误的，即子向量开始的位置一定是整个向量的边界处
+（2）再证明有零的情况：
+根据（1）中的结论，可以很容易推测出此时子向量的某一侧一定是0，或者是整个向量的边界
+此时只需要在搜索的时候对0处进行特殊处理即可
+*/
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        const int n = nums.size();
+        int ans = INT_MIN;
+        int front = 0;
+        int back = 0;
+        for (int i=0; i<n; i++) 
+        {
+            front = front ? front*nums[i] : nums[i];
+            back = back ? back*nums[n-1-i] : nums[n-1-i];
+            ans = max(ans, max(front, back));
+        }
+        return ans;
+    }
+};
+
+
+//较简单的动态规划算法，虽然容易想出来，但是时间复杂度为O（n^2），会超出时间界限
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        vector<int> product=nums; //为了防止超出内存上限，用一个一位数组保存结果
+        int max_num=*max_element(nums.begin(),nums.end());
+        for(int i=1;i<nums.size();i++)  //代表向量长度
+        {
+            for(int j=0;j<nums.size()-i;j++)  //代表向量的开始位置
+            {
+                product[j]=product[j]*nums[j+i];
+                max_num=max(max_num,product[j]);
+            }
+        }
+        return max_num;
+    }
+};
