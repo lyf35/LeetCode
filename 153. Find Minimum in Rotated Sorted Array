@@ -1,0 +1,25 @@
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        return nums[find_descendent_pos(nums,0,nums.size()-1)];
+    }
+    int find_descendent_pos(vector<int>& nums,int m,int n)
+    {
+        if(m==n)
+        {
+            return m;
+        }
+        else
+        {
+            int mid=(m+n)/2;
+            if(nums[mid]>nums[n]) //代表这中间某一处发生了突跳
+            {
+                return find_descendent_pos(nums,mid+1,n);
+            }
+            else //代表没有发生突跳，需要在上半部分进行搜索
+            {
+                return find_descendent_pos(nums,m,mid);
+            }
+        }
+    }
+};
