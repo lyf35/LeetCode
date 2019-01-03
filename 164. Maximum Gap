@@ -1,0 +1,118 @@
+//使用桶排序，也可以将复杂度变为O(n)
+class Solution {
+public:
+class Bucket {
+public:
+    bool used = false;
+    int minval = numeric_limits<int>::max();        // same as INT_MAX
+    int maxval = numeric_limits<int>::min();        // same as INT_MIN
+};
+
+int maximumGap(vector<int>& nums)
+{
+    if (nums.empty() || nums.size() < 2)
+        return 0;
+
+    int mini = *min_element(nums.begin(), nums.end()),
+        maxi = *max_element(nums.begin(), nums.end());
+
+    int bucketSize = max(1, (maxi - mini) / ((int)nums.size() - 1));        // bucket size or capacity
+    int bucketNum = (maxi - mini) / bucketSize + 1;                         // number of buckets
+    vector<Bucket> buckets(bucketNum);
+
+    for (auto&& num : nums) {
+        int bucketIdx = (num - mini) / bucketSize;                          // locating correct bucket
+        buckets[bucketIdx].used = true;
+        buckets[bucketIdx].minval = min(num, buckets[bucketIdx].minval);
+        buckets[bucketIdx].maxval = max(num, buckets[bucketIdx].maxval);
+    }
+
+    int prevBucketMax = mini, maxGap = 0;
+    for (auto&& bucket : buckets) {
+        if (!bucket.used)
+            continue;
+
+        maxGap = max(maxGap, bucket.minval - prevBucketMax);
+        prevBucketMax = bucket.maxval;
+    }
+
+    return maxGap;
+}
+};
+
+
+
+//使用基数排序，可以将时间复杂度变为O(32n)
+class Solution {
+public:
+    int maximumGap(vector<int>& nums) {
+        int size_num=nums.size();
+        if(size_num<2)
+        {
+            return 0;
+        }
+        int return_val=INT_MIN;
+        radix_sort(nums);
+        for(int i=0;i<size_num-1;i++)
+        {
+            return_val=max(return_val,nums[i+1]-nums[i]);
+        }
+        return return_val;
+    }
+    void radix_sort(vector<int>& nums) //对int类型数字进行基数排序的算法
+    {
+        for(int i=0;i<31;i++)  //由于使用补码，因此最后一位需要特殊处理
+        {
+            vector<int> zeros;
+            vector<int> ones;
+            for(auto num:nums)
+            {
+                if(num&(1<<i))
+                {
+                    ones.push_back(num);
+                }
+                else
+                {
+                    zeros.push_back(num);
+                }
+            }
+            zeros.insert(zeros.end(),ones.begin(),ones.end());
+            nums=zeros;
+        }
+        vector<int> zeros;
+        vector<int> ones;
+        for(auto num:nums)
+        {
+            if(num&(1<<31))
+            {
+                ones.push_back(num);
+            }
+            else
+            {
+                zeros.push_back(num);
+            }
+        }
+        ones.insert(ones.end(),zeros.begin(),zeros.end());
+        nums=ones;
+    }
+};
+
+
+//一个时间复杂度为O（nlgn）的算法
+class Solution {
+public:
+    int maximumGap(vector<int>& nums) {
+        int size_num=nums.size();
+        if(size_num<2)
+        {
+            return 0;
+        }
+        sort(nums.begin(),nums.end());
+        int return_val=0;
+        for(int i=0;i<nums.size()-1;i++)
+        {
+            return_val=max(return_val,nums[i+1]-nums[i]);
+        }
+        return return_val;
+    }
+};
