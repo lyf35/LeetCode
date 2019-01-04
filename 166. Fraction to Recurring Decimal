@@ -1,0 +1,92 @@
+class Solution {
+public:
+    string fractionToDecimal(int numerator, int denominator) {
+        if(numerator==0)
+        {
+            return string("0");
+        }
+        if(denominator==0)
+        {
+            return string("NaN");
+        }
+        bool is_negative=0;
+        long numerator_l=numerator;
+        long denominator_l=denominator;
+        if(numerator_l<0)
+        {
+            numerator_l=-numerator_l;
+            is_negative=!is_negative;
+        }
+        if(denominator_l<0)
+        {
+            denominator_l=-denominator_l;
+            is_negative=!is_negative;
+        }
+        long gcd_twonum=gcd(numerator_l,denominator_l);
+        numerator_l/=gcd_twonum;
+        denominator_l/=gcd_twonum; //先对分数进行约分
+        string result;
+        if(is_negative)
+        {
+            result.push_back('-');
+        }
+        result+=to_string(numerator_l/denominator_l); //构造整数部分
+        numerator_l%=denominator_l;
+        if(numerator_l==0)
+        {
+            return result;
+        }
+        result+=".";
+        bool repeat=is_repeating(denominator_l);
+        if(!repeat) //如果最终不是循环小数，则很容易
+        {
+            while(numerator_l!=0)
+            {
+                numerator_l*=10;
+                result+=to_string(numerator_l/denominator_l);
+                numerator_l%=denominator_l;
+            }
+        }
+        else //如果是循环小数，则需要做特殊处理
+        {
+            vector<long> remainders;
+            while(find(remainders.begin(),remainders.end(),numerator_l)==remainders.end()) //余数不出现重复，说明循环小数的循环位还没计算完；如果余数开始重复，说明循环位以及循环完
+            {
+                remainders.push_back(numerator_l);
+                numerator_l*=10;
+                result+=to_string(numerator_l/denominator_l);
+                numerator_l%=denominator_l;
+            }
+            result.insert(result.end()-(remainders.end()-find(remainders.begin(),remainders.end(),numerator_l)),'(');
+            result.insert(result.end(),')');
+        }
+        return result;
+    }
+    long gcd(long m,long n)
+    {
+        if(m<n)
+        {
+            swap(m,n);
+        }
+        if(n==0)
+        {
+            return m;
+        }
+        else
+        {
+            return gcd(n,m%n);
+        }
+    }
+    bool is_repeating(long denominator) //判断是否是循环小数，由于10=2*5，因此只有当分母能被表示为2^x*5^y的形式时才可以得到非循环小数
+    {
+        while(denominator%2==0)
+        {
+            denominator/=2;
+        }
+        while(denominator%5==0)
+        {
+            denominator/=5;
+        }
+        return denominator!=1;
+    }
+};
