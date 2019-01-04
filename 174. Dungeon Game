@@ -1,0 +1,61 @@
+//使用动态规划算法，但是此时从开始位置往后推至终点的时候，动态规划的子问题的结果无法推演至全局结果
+//因此从终点往前推，即可将子问题推演至全局结果
+class Solution {
+public:
+    int calculateMinimumHP(vector<vector<int>>& dungeon) {
+        int row=dungeon.size();
+        int column=dungeon.begin()->size();
+        vector<vector<int>> minhps(row+1,vector<int>(column+1,INT_MAX)); //保存从某一步走到终点时需要的最低hp
+        minhps[row-1][column]=minhps[row][column-1]=1;
+        for(int i=row-1;i>=0;i--)
+        {
+            for(int j=column-1;j>=0;j--)
+            {
+                int need_hp=min(minhps[i+1][j],minhps[i][j+1])-dungeon[i][j]; //代表某一步需要的HP值
+                minhps[i][j]=need_hp>0? need_hp:1; //如果某一步需要的HP值是负的，也就是说明这一步是增加HP操作，因此将这一步需要的HP值设为1
+            }
+        }
+        return minhps[0][0];
+    }
+};
+
+
+
+//使用dfs搜索算法，虽然可行但是当计算规模变大的时候会耗费大量的时间
+class Solution {
+public:
+    int calculateMinimumHP(vector<vector<int>>& dungeon) {
+        int total_min=INT_MIN;
+        int right=0;
+        int down=0;
+        int row=dungeon.size();
+        int column=dungeon.begin()->size();
+        dfs(dungeon,right,down,row-1,column-1,total_min,0,0);
+        return -total_min+1;
+    }
+    void dfs(vector<vector<int>>& dungeon,int& right,int& down,int row_max,int col_max,int& total_min,int curr_hp,int curr_min)
+    {
+        if(right==col_max&&down==row_max)
+        {
+            curr_hp+=dungeon[row_max][col_max];
+            total_min=max(total_min,min(curr_hp,curr_min));
+        }
+        else
+        {
+            curr_hp+=dungeon[down][right];
+            curr_min=min(curr_hp,curr_min);
+            if(right<col_max)
+            {
+                right++;
+                dfs(dungeon,right,down,row_max,col_max,total_min,curr_hp,curr_min);
+                right--;
+            }
+            if(down<row_max)
+            {
+                down++;
+                dfs(dungeon,right,down,row_max,col_max,total_min,curr_hp,curr_min);
+                down--;
+            }
+        }
+    }
+};
