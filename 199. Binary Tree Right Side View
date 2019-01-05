@@ -1,0 +1,56 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        bool is_even=0;
+        queue<TreeNode*> odd_layer;
+        queue<TreeNode*> even_layer;
+        if(root)
+        {
+            odd_layer.push(root);
+        }
+        vector<int> rightside_view;
+        while(odd_layer.size()||even_layer.size())
+        {
+            if(is_even)
+            {
+                while(even_layer.size())
+                {
+                    auto node=even_layer.front();
+                    if(node->left) odd_layer.push(node->left);
+                    if(node->right) odd_layer.push(node->right);
+                    if(even_layer.size()==1)
+                    {
+                        rightside_view.push_back(node->val);
+                    }
+                    even_layer.pop();
+                }
+                is_even=false;
+            }
+            else
+            {
+                while(odd_layer.size())
+                {
+                    auto node=odd_layer.front();
+                    if(node->left) even_layer.push(node->left);
+                    if(node->right) even_layer.push(node->right);
+                    if(odd_layer.size()==1)
+                    {
+                        rightside_view.push_back(node->val);
+                    }
+                    odd_layer.pop();                     
+                }
+                is_even=true;
+            }
+        }
+        return rightside_view;
+    }
+};
