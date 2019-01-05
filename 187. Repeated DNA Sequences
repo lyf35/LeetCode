@@ -1,0 +1,194 @@
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        //用0，1，2，3来分别表示字母A,C,G,T，这样由于要寻找的字符串长度为10，可以用一个int值表示字符串，对于一个唯一的字符串对应的值也是相同的
+        //由于每次循环都会用到相同的值，如果每次都重复计算一遍会浪费大量时间，因此可以拿一个数组将这些值保存起来
+        //而且这样可以直接保留相同的数直接寻找相同的字符串，不必拿字符串来相比
+        int length=s.size();
+        unsigned int str_num=0;
+        unordered_map<char,int> letter_val;
+        letter_val['A']=0;
+        letter_val['C']=1;
+        letter_val['G']=2;
+        letter_val['T']=3;
+        vector<string> result;
+        vector<unsigned int> substr_vals;
+        if(length<10)
+        {
+            return result;
+        }
+        for(int i=0;i<10;i++)
+        {
+            str_num*=10;
+            str_num+=letter_val[s[i]];
+        }
+        for(int i=0;i<=length-10;i++)
+        {
+            substr_vals.push_back(str_num);
+            str_num%=1000000000;
+            str_num*=10;
+            str_num+=letter_val[s[i+10]];
+        }
+        sort(substr_vals.begin(),substr_vals.end());
+        vector<unsigned> dup_vals;
+        for(int i=0;i<substr_vals.size()-1;i++)
+        {
+            if(substr_vals[i]==substr_vals[i+1])
+            {
+                dup_vals.push_back(substr_vals[i]);
+                while(substr_vals[i]==substr_vals[i+1])
+                {
+                    i++;
+                }
+            }
+        }
+        for(auto val:dup_vals)
+        {
+            result.push_back(val_str(val));
+        }
+        return result;
+    }
+    string val_str(unsigned int val)
+    {
+        string result;
+        unsigned int temp=1000000000;
+        for(int i=0;i<10;i++)
+        {
+            unsigned int digit_val=val/temp;
+            if(digit_val==0) result+='A';
+            if(digit_val==1) result+='C';
+            if(digit_val==2) result+='G';
+            if(digit_val==3) result+='T';
+            val%=temp;
+            temp/=10;
+        }
+        return result;
+    }
+};
+
+
+//另一种思路：将A，C，G，T分别表示为00，01，10，11，然后用一个20个bit的数即可表示所有10个字符的子串。对所有情况进行穷举，然后在字符串中查找是否能够匹配
+//经过对比，这种办法效率更高一些
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        int length = s.length();
+        if (length < 10) {
+            return {};
+        }
+
+        bitset<1 << 20> flag;
+        bitset<1 << 20> dupflag;
+
+        int code = encode(s[0]);
+        for (int i = 1; i < 10; i++) {
+            code = (code << 2) | encode(s[i]);
+        }
+        flag.set(code);
+
+        vector<string> result;
+        int mask = (1 << 20) - 1;
+        for (int i = 10; i < length; i++) {
+            code = ((code << 2) & mask) | encode(s[i]);
+            if (dupflag[code]) {
+                continue; // occurred in this loop multiple times before. do nothing.
+            }
+            else {
+                if (flag[code]) {
+                    dupflag.set(code);
+                    result.push_back(s.substr(i - 9, 10)); // second time occurred in this loop. add to result.
+                }
+                else {
+                    flag.set(code); // first time occurred in this loop.
+                }
+            }
+        }
+
+        return result;
+    }
+    
+private:
+    int encode(char c)
+    {
+        switch (c) {
+        case 'A':
+            return 0;
+        case 'T':
+            return 1;
+        case 'C':
+            return 2;
+        case 'G':
+            return 3;
+        }
+    }
+};
+
+//用子字符串直接去比较的算法会慢一些
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        int length=s.size();
+        unsigned int str_num=0;
+        vector<string> result;
+        vector<string> substring;
+        if(length<10)
+        {
+            return result;
+        }
+        for(int i=0;i<=length-10;i++)
+        {
+            substring.push_back(s.substr(i,10));
+        }
+        sort(substring.begin(),substring.end());
+        for(int i=0;i<substring.size()-1;i++)
+        {
+            if(substring[i]==substring[i+1])
+            {
+                result.push_back(substring[i]);
+                while(substring[i]==substring[i+1])
+                {
+                    i++;
+                }
+            }
+        }
+        return result;
+    }
+};
+
+
+//用子字符串直接去比较，且不保存中间结果的方法慢得多，最终超过时间上限
+class Solution {
+public:
+    vector<string> findRepeatedDnaSequences(string s) {
+        vector<string> result;
+        unordered_set<string> visited;
+        int length=s.size();
+        if(length<10)
+        {
+            return result;
+        }
+        for(int i=0;i<=length-10;i++)
+        {
+            string sub_dna=s.substr(i,10);
+            if(visited.find(sub_dna)==visited.end())
+            {
+                auto temp=sub_dna;
+                for(int j=i+1;j<=length-10;j++)
+                {
+                    temp.erase(temp.begin());
+                    temp.push_back(s[j+9]);
+                    if(sub_dna==temp)
+                    {
+                        visited.insert(sub_dna);
+                        break;
+                    }
+                }
+            }
+        }
+        for(auto iter=visited.begin();iter!=visited.end();iter++)
+        {
+            result.push_back(*iter);
+        }
+        return result;
+    }
+};
