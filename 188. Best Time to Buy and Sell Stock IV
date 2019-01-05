@@ -1,0 +1,60 @@
+//分两种情况来考虑，可以使得计算速度大大提高
+class Solution {
+public:
+    int maxProfit(int k, vector<int>& prices) {
+        if(k==0||prices.size()<2)
+        {
+            return 0;
+        }
+        if(k>prices.size()) //代表如果允许交易次数大于prices的最大规模，则可以得到的最大利润
+        {
+            int total=0;
+            for(int i=1;i<prices.size();i++)
+            {
+                total+=max(0,prices[i]-prices[i-1]);
+            }
+            return total;
+        }
+        vector<int> sells(k,INT_MIN); //代表第i次卖出时的总收入
+        vector<int> buys(k,INT_MIN); //代表第i次买入时的总收入
+        for(int i=0;i<prices.size();i++)
+        {
+            for(int j=0;j<k;j++)
+            {
+                buys[j]=max(j>0?sells[j-1]-prices[i]:-prices[i],buys[j]);
+                sells[j]=max(prices[i]+buys[j],sells[j]);
+            }
+        }
+        return *(sells.end()-1);
+    }
+};
+
+//利用状态转换机算法来做这道题，但是这样实现会使得所需时间变得很长
+class Solution {
+public:
+    int maxProfit(int k, vector<int>& prices) {
+        if(k==0||prices.size()<2)
+        {
+            return 0;
+        }
+        vector<int> sells(2,0); //代表第i次卖出时的总收入
+        vector<int> buys(3,0); //代表第i次买入时的总收入
+        buys[1]=buys[2]=INT_MIN;
+        for(int i=0;i<prices.size();i++)
+        {
+            for(int j=1;j<sells.size();j++) //由于k值可能会很大，因此可能会导致浪费许多时间。可以等到需要添加元素的时候再加入到vector中
+            {
+                buys[j]=max(sells[j-1]-prices[i],buys[j]);
+                sells[j]=max(prices[i]+buys[j],sells[j]);
+            }
+            buys[sells.size()]=max(sells[sells.size()-1]-prices[i],buys[sells.size()]);
+            int temp=prices[i]+buys[sells.size()];
+            if(temp>sells[sells.size()-1]&&sells.size()<=k)
+            {
+                sells.push_back(temp);
+                buys.push_back(INT_MIN);
+            }
+        }
+        return *(sells.end()-1);
+    }
+};
