@@ -1,0 +1,37 @@
+//与130题类似，用一个特殊字符来替换掉已经搜索到的字符
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int return_val=0;
+        int row=grid.size();
+        if(row==0)
+        {
+            return return_val;
+        }
+        int column=grid.begin()->size();
+        if(column==0)
+        {
+            return return_val;
+        }
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<column;j++)
+            {
+                if(grid[i][j]=='1')
+                {
+                    return_val++;
+                    bfs(grid,i,j,row,column);
+                }
+            }
+        }
+        return return_val;
+    }
+    void bfs(vector<vector<char>>& grid,int i,int j,const int& row,const int& column)
+    {
+        grid[i][j]='*';
+        if(i>0&&grid[i-1][j]=='1') bfs(grid,i-1,j,row,column);
+        if(i<row-1&&grid[i+1][j]=='1') bfs(grid,i+1,j,row,column);
+        if(j>0&&grid[i][j-1]=='1') bfs(grid,i,j-1,row,column);
+        if(j<column-1&&grid[i][j+1]=='1') bfs(grid,i,j+1,row,column);
+    }
+};
