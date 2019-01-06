@@ -1,0 +1,41 @@
+//一个更简单的算法
+class Solution {
+public:
+    int rangeBitwiseAnd(int m, int n) {
+        int i = 0;
+        while(m != n){ //对m和n一直做右移操作，直至二者相等，相等部分便为做and运算时能保留下来的部分
+            m >>= 1;
+            n >>= 1;
+            i++;
+        }
+        return n << i;
+    }
+};
+
+class Solution {
+public:
+    int rangeBitwiseAnd(int m, int n) {
+        int result=m;
+        if(m==0) //两个if语句处理两种特殊情况
+        {
+            return 0;
+        }
+        if(m==n)
+        {
+            return m;
+        }
+        if((int)(log(m)/log(2))<(int)(log(n)/log(2))) //判断是否在同一个2^n的区间内
+        {
+            return 0;
+        }
+        else
+        {  
+            for(auto i=m+1;i<n;i++) //此处不用i<=n是为了防止超过上界
+            {
+                result&=i;
+            }
+            result&=n;
+        }
+        return result;
+    }
+};
