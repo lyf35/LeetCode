@@ -1,0 +1,101 @@
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) {
+        vector<int> hash_in(numCourses, 0);
+        vector<vector<int>> hash_out(numCourses, vector<int>());
+        for(auto prerequisite : prerequisites)
+        {
+            hash_in[prerequisite.first]++; //计算某个结点的出结点个数
+            hash_out[prerequisite.second].push_back(prerequisite.first); //存储某个结点的入结点
+        }
+        stack<int> topology_sort;
+        int arranged = 0;
+        for(int i = 0; i < numCourses; i++)
+        {
+            if(hash_in[i] == 0) //如果某个结点没有出结点，则说明这一定是拓扑排序的终点
+            {
+                topology_sort.push(i);
+                hash_in[i] = -1;
+            }
+        }
+        while(!topology_sort.empty())
+        {
+            int index_arrange = topology_sort.top();
+            topology_sort.pop();
+            arranged++;
+            for(auto index_out : hash_out[index_arrange]) //相当于用bfs沿着逆方向搜索
+            {
+                hash_in[index_out]--; //代表某条边已经搜索完成
+                if(hash_in[index_out] == 0) //如果形成环，则这一步不会为真
+                    topology_sort.push(index_out);
+            }
+        }
+        return numCourses == arranged;
+    }
+};
+
+
+//先构造邻接矩阵，然后用dfs即可，根据dfs的结果判断是否可以发生拓扑排序
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) {
+        //只要所有的结点能进行拓扑排序，则代表可以安排出一个上课顺序
+        //进行拓扑排序，可以用dfs，只要在搜索的时候没有发现后向边即可
+        vector<vector<bool>> adj_graph(numCourses,vector<bool>(numCourses,0));
+        for(auto val:prerequisites)
+        {
+            adj_graph[val.first][val.second]=1;
+        }
+        vector<bool> has_visited(numCourses,0);
+        for(auto i=0;i<numCourses;i++)
+        {
+            if(!has_visited[i])
+            {
+                for(auto j=0;j<numCourses;j++)
+                {
+                    if(adj_graph[i][j])
+                    {
+                        auto val=dfs(adj_graph,has_visited,i,numCourses);
+                        if(!val)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    bool dfs(vector<vector<bool>>& adj_graph,vector<bool>& has_visited,int m,int num) //m代表进行dfs时要访问的结点
+    {
+        vector<bool> visit_dfs(num,0); //第一次搜索到一个结点的时候，先将此处设置为1
+        stack<int> visited_pts;
+        visited_pts.push(m);
+        while(visited_pts.size()) //先沿着一条路径寻找
+        {
+            int i=0;
+            for(;i<num;i++)
+            {
+                if(adj_graph[visited_pts.top()][i]&&!has_visited[i])
+                {
+                    if(!visit_dfs[i]) //代表这一条路径上的dfs搜索还没有经过这个结点
+                    {
+                        visit_dfs[i]=1;
+                        visited_pts.push(i);
+                    }
+                    else //代表这条路径上的dfs搜索已经搜索到这个结点，说明这条边是后向边，可以直接返回
+                    {
+                        return 0;
+                    }
+                    break;
+                }
+            }
+            if(i==num)
+            {
+                has_visited[visited_pts.top()]=1;
+                visited_pts.pop();
+            }
+        }
+        return 1;
+    }
+};
