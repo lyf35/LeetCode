@@ -1,0 +1,72 @@
+struct TriesNode
+{
+    vector<TriesNode*> nodes;
+    bool is_elem; //用于判断一个中间结点是否是元素
+    TriesNode():nodes(26,nullptr),is_elem(0){};
+};
+
+class Trie {
+private:
+    TriesNode* root;
+public:
+    /** Initialize your data structure here. */
+    Trie() {
+        root=new TriesNode();
+    }
+    
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+        auto temp=root;
+        for(auto c:word)
+        {
+            if(temp->nodes[c-'a'])
+            {
+                temp=temp->nodes[c-'a'];
+            }
+            else
+            {
+                temp->nodes[c-'a']=new TriesNode();
+                temp=temp->nodes[c-'a'];
+            }
+        }
+        temp->is_elem=true;
+    }
+    
+    /** Returns if the word is in the trie. */
+    bool search(string word) {
+        auto temp=root;
+        for(auto c:word) //对word中的元素逐一做查找
+        {
+            if(temp->nodes[c-'a']) temp=temp->nodes[c-'a'];
+            else return false;
+        }
+        return temp->is_elem;
+    }
+    
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    bool startsWith(string prefix) {
+        auto temp=root;
+        for(auto c:prefix)
+        {
+            if(temp->nodes[c-'a']) temp=temp->nodes[c-'a'];
+            else return false;
+        }
+        return true;
+    }
+};
+
+auto delsync = []() //accelerate
+{
+    std::ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    return 0;
+}();
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * bool param_2 = obj.search(word);
+ * bool param_3 = obj.startsWith(prefix);
+ */
