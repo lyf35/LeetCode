@@ -1,0 +1,38 @@
+//用2 pointers即可很容易地求解
+class Solution {
+public:
+    int minSubArrayLen(int s, vector<int>& nums) {
+        int length=nums.size();
+        if(!length)
+        {
+            return 0;
+        }
+        int ptr_head=0;
+        int ptr_tail=0;
+        int sum=nums[0];
+        int min_length=INT_MAX;
+        while(true)
+        {
+            if(sum<s)
+            {
+                ptr_head++;
+                if(ptr_head<length) sum+=nums[ptr_head];
+                else break;
+            }
+            else
+            {
+                min_length=min(min_length,ptr_head-ptr_tail+1);
+                sum-=nums[ptr_tail];
+                ptr_tail++;
+            }
+        }
+        if(min_length==INT_MAX) //可能所有的数字凑起来都到不了s，此时min_length的值不会被修改
+        {
+            return 0;
+        }
+        else
+        {
+            return min_length;
+        }
+    }
+};
