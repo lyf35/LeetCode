@@ -1,3 +1,57 @@
+//这种算法效率比dfs要高
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) {
+        //根据每个结点的入度来进行拓扑排序
+        vector<int> result;
+        vector<bool> has_found(numCourses,0);
+        vector<unordered_set<int>> out_pts(numCourses,unordered_set<int>());
+        vector<int> indegree(numCourses,0);
+        for(auto i:prerequisites) //构造每个结点的出结点集合，以及每个结点的入结点数
+        {
+            out_pts[i.second].insert(i.first);
+            indegree[i.first]++;
+        }
+        bool mark=true;
+        while(mark)
+        {
+            queue<int> zero_indegree;
+            for(int i=0;i<numCourses;i++)
+            {
+                if(!has_found[i]&&indegree[i]==0)
+                {
+                    zero_indegree.push(i);
+                    has_found[i]=1;
+                    for(auto iter=out_pts[i].begin();iter!=out_pts[i].end();iter++)
+                    {
+                        indegree[(*iter)]--;
+                    }
+                    out_pts[i].clear();
+                }
+            }
+            if(zero_indegree.size())
+            {
+                while(zero_indegree.size())
+                {
+                    result.push_back(zero_indegree.front());
+                    zero_indegree.pop();
+                }
+            }
+            else
+            {
+                mark=false;
+            }
+        }
+        if(result.size()<numCourses)
+        {
+            result.clear();
+        }
+        return result;
+    }
+};
+
+
+//用dfs的方法来搜索，效率较低
 class Solution {
 public:
     vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) {
@@ -8,7 +62,7 @@ public:
             adj_graph[val.second][val.first]=1;
         }
         vector<int> dfs_start(numCourses,0);
-        vector<int> dfs_end(numCourses,0);
+        vector<bool> dfs_end(numCourses,0);
         vector<int> result;
         int cnt=1;
         for(auto i=0;i<numCourses;i++)
@@ -18,39 +72,42 @@ public:
                 bool mark=dfs(adj_graph,dfs_start,dfs_end,i,numCourses,cnt,result);
                 if(mark==0)
                 {
-                    result.clear();
                     return result;
                 }
             }
         }
         return result;
     }
-    bool dfs(vector<vector<bool>>& adj_graph,vector<int>& start,vector<int>& end,int m,int num,int& cnt,vector<int>& result) //m代表进行dfs时要访问的结点
+    bool dfs(vector<vector<bool>>& adj_graph,vector<int>& start,vector<bool>& end,int m,int num,int& cnt,vector<int>& result) //m代表进行dfs时要访问的结点
     {
         stack<int> visited_pts;
         start[m]=cnt++;
         visited_pts.push(m);
         while(visited_pts.size()) //先沿着一条路径寻找
         {
+            int start_pos=visited_pts.top();
             int i=0;
             for(;i<num;i++)
             {
-                if(adj_graph[visited_pts.top()][i]&&start[i]==0)
+                if(adj_graph[start_pos][i]) 
                 {
-                    start[i]=cnt;
-                    visited_pts.push(i);
-                    break;
-                }
-                else if(adj_graph[visited_pts.top()][i]&&start[visited_pts.top()]>start[i]&&end[i]==0)//遇到后向边
-                {
-                    result.clear();
-                    return 0;
+                    if(start[i]==0) //前向边
+                    {
+                        start[i]=cnt;
+                        visited_pts.push(i);
+                        break;
+                    }
+                    else if(start[start_pos]>start[i]&&!end[i])//遇到后向边
+                    {
+                        result.clear();
+                        return 0;
+                    }
                 }
             }
             if(i==num)
             {
-                end[visited_pts.top()]=cnt;
-                result.insert(result.begin(),visited_pts.top());
+                end[start_pos]=1;
+                result.insert(result.begin(),start_pos);
                 visited_pts.pop();
             }
             cnt++;
