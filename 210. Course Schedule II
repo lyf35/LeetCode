@@ -1,0 +1,60 @@
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) {
+        //将每个结点dfs的结束顺序按照从大到小排列即可
+        vector<vector<bool>> adj_graph(numCourses,vector<bool>(numCourses,0));
+        for(auto val:prerequisites)
+        {
+            adj_graph[val.second][val.first]=1;
+        }
+        vector<int> dfs_start(numCourses,0);
+        vector<int> dfs_end(numCourses,0);
+        vector<int> result;
+        int cnt=1;
+        for(auto i=0;i<numCourses;i++)
+        {
+            if(dfs_start[i]==0)
+            {
+                bool mark=dfs(adj_graph,dfs_start,dfs_end,i,numCourses,cnt,result);
+                if(mark==0)
+                {
+                    result.clear();
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+    bool dfs(vector<vector<bool>>& adj_graph,vector<int>& start,vector<int>& end,int m,int num,int& cnt,vector<int>& result) //m代表进行dfs时要访问的结点
+    {
+        stack<int> visited_pts;
+        start[m]=cnt++;
+        visited_pts.push(m);
+        while(visited_pts.size()) //先沿着一条路径寻找
+        {
+            int i=0;
+            for(;i<num;i++)
+            {
+                if(adj_graph[visited_pts.top()][i]&&start[i]==0)
+                {
+                    start[i]=cnt;
+                    visited_pts.push(i);
+                    break;
+                }
+                else if(adj_graph[visited_pts.top()][i]&&start[visited_pts.top()]>start[i]&&end[i]==0)//遇到后向边
+                {
+                    result.clear();
+                    return 0;
+                }
+            }
+            if(i==num)
+            {
+                end[visited_pts.top()]=cnt;
+                result.insert(result.begin(),visited_pts.top());
+                visited_pts.pop();
+            }
+            cnt++;
+        }
+        return 1;
+    }
+};
