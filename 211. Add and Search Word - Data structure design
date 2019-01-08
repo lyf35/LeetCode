@@ -1,0 +1,92 @@
+//用tries树，遇到dot的时候在树中做bfs即可
+struct TriesNode
+{
+    vector<TriesNode*> nodes;
+    bool is_elem; //用于判断一个中间结点是否是元素
+    TriesNode():nodes(26,nullptr),is_elem(0){};
+};
+
+class Trie { 
+public:
+    /** Initialize your data structure here. */
+    TriesNode* root;
+    Trie() {
+        root=new TriesNode();
+    }
+    
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+        auto temp=root;
+        for(auto c:word)
+        {
+            if(temp->nodes[c-'a'])
+            {
+                temp=temp->nodes[c-'a'];
+            }
+            else
+            {
+                temp->nodes[c-'a']=new TriesNode();
+                temp=temp->nodes[c-'a'];
+            }
+        }
+        temp->is_elem=true;
+    }
+};
+
+class WordDictionary {
+    friend class Trie;
+    friend struct TriesNode;
+private:
+    Trie words;
+public:
+    /** Initialize your data structure here. */
+    WordDictionary():words() {};
+    
+    /** Adds a word into the data structure. */
+    void addWord(string word) {
+        words.insert(word);    
+    }
+    
+    /** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
+    bool search(string word) {
+        return search_from_node(word,words.root);
+    }
+    
+    bool search_from_node(string word,TriesNode* node)
+    {
+        bool result=false;
+        auto temp=node;
+        for(int i=0;i<word.size();i++) //对word中的元素逐一做查找
+        {
+            if(word[i]=='.')
+            {
+                for(auto j=0;j<26;j++)
+                {
+                    if(temp->nodes[j])
+                    {
+                        result=result||search_from_node(word.substr(i+1,INT_MAX),temp->nodes[j]);
+                    }
+                }
+                return result;
+            }
+            else if(temp->nodes[word[i]-'a']) temp=temp->nodes[word[i]-'a'];
+            else return false;
+        }
+        return temp->is_elem;
+    }
+};
+
+auto delsync = []() //accelerate
+{
+    std::ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    return 0;
+}();
+
+/**
+ * Your WordDictionary object will be instantiated and called as such:
+ * WordDictionary obj = new WordDictionary();
+ * obj.addWord(word);
+ * bool param_2 = obj.search(word);
+ */
