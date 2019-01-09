@@ -1,0 +1,143 @@
+//使用trie树，而且将思路调整为：用board中的每一个字符在trie树中做搜索
+class TrieNode{
+public:
+    bool is_end;
+    vector<TrieNode*> children;
+    TrieNode(){
+        is_end=false;
+        children=vector<TrieNode*>(26, NULL);
+    }   
+};
+
+class Trie{
+public:
+    TrieNode* getRoot(){return root;}
+    Trie(vector<string>& words){
+        root=new TrieNode();
+        for(int i=0; i<words.size(); ++i)
+            addWord(words[i]);
+    }
+    void addWord(const string& word){
+        TrieNode* cur=root;
+        for(int i=0; i<word.size(); ++i){
+            int index=word[i]-'a';
+            if(cur->children[index]==NULL)   
+               cur->children[index]=new TrieNode();
+            cur=cur->children[index];    
+        }
+        cur->is_end=true;
+    }
+private:
+    TrieNode* root;
+};
+
+class Solution {
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        Trie* trie = new Trie(words);
+        TrieNode* root=trie->getRoot();
+        set<string> result_set;
+        for(int x=0; x<board.size(); ++x)
+            for(int y=0; y<board[0].size(); ++y)
+                findWords(board, x, y, root, "", result_set);
+        
+        vector<string> result;
+        for(auto it:result_set)    result.push_back(it);
+        return result;        
+    }
+private:
+    void findWords(vector<vector<char>>& board, int x, int y, TrieNode* root, string word, set<string>& result){
+        if(x<0||x>=board.size()||y<0||y>=board[0].size() || board[x][y]==' ') return;
+        
+        if(root->children[board[x][y]-'a'] != NULL){
+            word=word+board[x][y];
+            root=root->children[board[x][y]-'a']; 
+            if(root->is_end) result.insert(word);
+            char c=board[x][y];
+            board[x][y]=' ';
+            findWords(board, x+1, y, root, word, result);
+            findWords(board, x-1, y, root, word, result);
+            findWords(board, x, y+1, root, word, result);
+            findWords(board, x, y-1, root, word, result);
+            board[x][y]=c;        
+        }
+    }
+};
+
+
+//对每一个string都使用dfs搜索的办法，效率很低
+class Solution {
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        sort(words.begin(),words.end());
+        auto iter=unique(words.begin(),words.end());
+        words.erase(iter,words.end());
+        vector<string> result;
+        vector<vector<bool>> used(board.size(),vector<bool>(board.begin()->size(),0));
+        for(auto word:words)
+        {
+            for(auto i=0;i<board.size();i++)
+            {
+                for(auto j=0;j<board.begin()->size();j++)
+                {
+                    if(word[0]==board[i][j])
+                    {
+                        used[i][j]=1;
+                        bool temp=dfs(result,board,word,i,j,1,used);
+                        used[i][j]=0;
+                        if(temp)
+                        {
+                            goto next;
+                        }
+                    }
+                }
+            }
+            next:
+            ;
+        }
+        return result;
+    }
+    bool dfs(vector<string>& result,vector<vector<char>>& board,string word,int m,int n,int l,vector<vector<bool>>& used) //m和n对应于board中的位置，l对应于string的第几个字符
+    {
+        if(l==word.size())
+        {
+            result.push_back(word);
+            return 1;
+        }
+        else
+        {
+            int height=board.size();
+            int length=board.begin()->size();
+            bool return_val=0;
+            if(m-1>=0&&!used[m-1][n]&&board[m-1][n]==word[l])
+            {
+                used[m-1][n]=1;
+                return_val|=dfs(result,board,word,m-1,n,l+1,used);
+                used[m-1][n]=0; 
+                if(return_val==1) return true;
+            }
+            if(m+1<height&&!used[m+1][n]&&board[m+1][n]==word[l])
+            {
+                used[m+1][n]=1;
+                return_val|=dfs(result,board,word,m+1,n,l+1,used);
+                used[m+1][n]=0; 
+                if(return_val==1) return true;
+            }
+            if(n-1>=0&&!used[m][n-1]&&board[m][n-1]==word[l])
+            {
+                used[m][n-1]=1;
+                return_val|=dfs(result,board,word,m,n-1,l+1,used);
+                used[m][n-1]=0;  
+                if(return_val==1) return true;
+            }
+            if(n+1<length&&!used[m][n+1]&&board[m][n+1]==word[l])
+            {
+                used[m][n+1]=1;
+                return_val|=dfs(result,board,word,m,n+1,l+1,used);
+                used[m][n+1]=0; 
+                if(return_val==1) return true;
+            }
+            return return_val;
+        }
+    }
+};
