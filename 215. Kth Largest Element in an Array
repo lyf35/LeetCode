@@ -1,0 +1,82 @@
+//可以用基于partition的选择算法
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        return selection(nums,0,nums.size()-1,k-1);
+    }
+    int selection(vector<int>& nums,int m,int n,int k) //基于partition的选择算法
+    {
+        int pivot=nums[n];
+        int less=0;
+        int greater=0;
+        int equal=1;
+        int upper_bound=n;
+        for(int i=m;i<upper_bound;i++) //做partition
+        {
+            if(nums[i]>pivot)
+            {
+                swap(nums[m+greater],nums[i]);
+                greater++;
+            }
+            else if(nums[i]<pivot)
+            {
+                less++;
+            }
+            else //需要对相等元素做另外的处理
+            {
+                swap(nums[i],nums[upper_bound-1]);
+                upper_bound--;
+                equal++;
+                i--;
+            }
+        }
+        nums.erase(nums.begin()+upper_bound,nums.begin()+n+1);
+        nums.insert(nums.begin()+m+greater,equal,pivot);
+        if(m+greater>k)
+        {
+            return selection(nums,m,m+greater-1,k);
+        }
+        else if(m+greater+equal-1<k)
+        {            
+            return selection(nums,m+greater+equal,n,k);
+        }
+        else
+        {
+            return pivot;
+        }
+    }
+};
+
+
+//用基数排序，可以在O(n)时间解决
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        radix_sort(nums);
+        return nums[k-1];
+    }
+    void radix_sort(vector<int>& nums) //由于vector中全部是整数，因此可以使用基数排序按照从大到小排
+    {
+        for(auto i=0;i<31;i++)
+        {
+            vector<int> temp_0;
+            vector<int> temp_1;
+            for(auto num:nums)
+            {
+                if(num&(1<<i)) temp_1.push_back(num);
+                else temp_0.push_back(num);
+            }
+            nums=temp_1;
+            nums.insert(nums.end(),temp_0.begin(),temp_0.end());
+        }
+        vector<int> temp_0;
+        vector<int> temp_1;
+        for(auto num:nums)
+        {
+            if(num&(1<<31)) temp_1.push_back(num);
+            else temp_0.push_back(num);
+        }
+        nums=temp_0;
+        nums.insert(nums.end(),temp_1.begin(),temp_1.end());
+    }
+};
