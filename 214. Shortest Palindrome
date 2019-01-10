@@ -1,0 +1,43 @@
+class Solution {
+public:
+    string shortestPalindrome(string s) {
+        int length=s.size();
+        if(length<2)
+        {
+            return s;
+        }
+        int min_length=INT_MAX;
+        int min_pos=0;
+        //由于只能在字符串前面补充字符，因此“水仙花”字符串的对称位置一定在前半部分
+        for(int i=1;i<=length/2;i++) 
+        {
+            //先判断以i为中心对称的情况
+            int j=0;
+            for(;j<i;j++)
+            {
+                if(s[j]!=s[2*i-j]) break;
+            }
+            if(j==i&&min_length>2*(length-i)-1) //代表以i为中心可以对称
+            {
+                min_pos=i;
+                min_length=2*(length-i)-1;
+            }
+            int k=0;
+            for(;k<i;k++)
+            {
+                if(s[k]!=s[2*i-1-k]) break;
+            }
+            if(k==i&&min_length>2*(length-i))
+            {
+                min_pos=i;
+                min_length=2*(length-i);
+            }
+        }
+        int i=min_pos+min_length%2;
+        string result=s.substr(i,length);
+        reverse(result.begin(),result.end());
+        if(min_length%2) result+=s[min_pos];
+        result+=s.substr(i,length);
+        return result;
+    }
+};
