@@ -1,0 +1,167 @@
+//可以在分割字符串的同时进行计算，加快速度
+class Solution {
+public:
+    int calculate(string s) {
+        //先将中序表达式转化为逆波兰表达式
+        unsigned int pos=s.find_first_of(" ");
+        while(pos<s.size())
+        {
+            s.erase(pos,1);
+            pos=s.find_first_of(" ");
+        } //先清除掉所有的空格
+        stack<char> operators;
+        stack<int> reverse_poland_exp;
+        for(int i=0;i<s.size();i++) //将中序表达式转换为逆波兰表达式
+        {
+            if(s[i]<'0'||s[i]>'9')
+            {
+                if(s[i]!=')') //处理运算符和左括号的情况
+                {
+                    if(s[i]!='(')
+                    {
+                        int latter=reverse_poland_exp.top();
+                        reverse_poland_exp.pop();
+                        int former=reverse_poland_exp.top();
+                        reverse_poland_exp.pop();
+                        reverse_poland_exp.push(calculate(former,latter,operators.top()));
+                        operators.pop();
+                    }
+                    operators.push(s[i]);
+                }
+                else //处理右括号的情况
+                {
+                    while(operators.top()!='(')
+                    {
+                        int latter=reverse_poland_exp.top();
+                        reverse_poland_exp.pop();
+                        int former=reverse_poland_exp.top();
+                        reverse_poland_exp.pop();
+                        reverse_poland_exp.push(calculate(former,latter,operators.top()));
+                        operators.pop();
+                    }
+                    operators.pop();
+                }
+            }
+            else
+            {
+                int op_pos=s.find_first_not_of("12345657890",i);
+                reverse_poland_exp.push(stoi(s.substr(i,op_pos-i)));
+                i=op_pos!=-1?op_pos-1:s.size();
+            }
+        }
+        while(operators.size())
+        {
+            if(operators.top()!='(')
+            {
+                int latter=reverse_poland_exp.top();
+                reverse_poland_exp.pop();
+                int former=reverse_poland_exp.top();
+                reverse_poland_exp.pop();
+                reverse_poland_exp.push(calculate(former,latter,operators.top()));
+            }
+            operators.pop();
+        }
+        return reverse_poland_exp.top();
+    }
+    
+    int calculate(int former,int latter,char op)
+    {
+        switch(op)
+        {
+            case '+':
+                return former+latter;
+            case '-':
+                return former-latter;
+        }
+    }
+};
+
+
+
+/*
+将一个普通的中序表达式转换为逆波兰表达式的一般算法是：
+首先需要分配2个栈，一个作为临时存储运算符的栈S1（含一个结束符号），一个作为输入逆波兰式的栈S2（空栈），S1栈可先放入优先级最低的运算符#，注意，中缀式应以此最低优先级的运算符结束。可指定其他字符，不一定非#不可。从中缀式的左端开始取字符，逐序进行如下步骤：
+（1）若取出的字符是操作数，则分析出完整的运算数，该操作数直接送入S2栈
+（2）若取出的字符是运算符，则将该运算符与S1栈栈顶元素比较，如果该运算符优先级大于S1栈栈顶运算符优先级，则将该运算符进S1栈，否则，将S1栈的栈顶运算符弹出，送入S2栈中，直至S1栈栈顶运算符低于（不包括等于）该运算符优先级，则将该运算符送入S1栈。
+（3）若取出的字符是“（”，则直接送入S1栈栈顶。
+（4）若取出的字符是“）”，则将距离S1栈栈顶最近的“（”之间的运算符，逐个出栈，依次送入S2栈，此时抛弃“（”。
+（5）重复上面的1~4步，直至处理完所有的输入字符
+（6）若取出的字符是“#”，则将S1栈内所有运算符（不包括“#”），逐个出栈，依次送入S2栈。
+*/
+class Solution {
+public:
+    int calculate(string s) {
+        //先将中序表达式转化为逆波兰表达式
+        unsigned int pos=s.find_first_of(" ");
+        while(pos<s.size())
+        {
+            s.erase(pos,1);
+            pos=s.find_first_of(" ");
+        } //先清除掉所有的空格
+        stack<char> operators;
+        vector<string> reverse_poland_exp;
+        for(int i=0;i<s.size();i++) //将中序表达式转换为逆波兰表达式
+        {
+            if(s[i]<'0'||s[i]>'9')
+            {
+                if(s[i]!=')') 
+                {
+                    if(s[i]!='(')
+                    {
+                        while(operators.size()&&operators.top()!='(')
+                        {
+                            reverse_poland_exp.emplace_back(1,operators.top());
+                            operators.pop();
+                        }
+                    }
+                    operators.push(s[i]);
+                }
+                else
+                {
+                    while(operators.top()!='(')
+                    {
+                        reverse_poland_exp.emplace_back(1,operators.top());
+                        operators.pop();
+                    }
+                    operators.pop();
+                }
+            }
+            else
+            {
+                int op_pos=s.find_first_not_of("12345657890",i);
+                reverse_poland_exp.push_back(s.substr(i,op_pos-i));
+                i=op_pos!=-1?op_pos-1:s.size();
+            }
+        }
+        while(operators.size())
+        {
+            if(operators.top()!='(') reverse_poland_exp.emplace_back(1,operators.top());
+            operators.pop();
+        }
+        stack<int> result;
+        for(int i=0;i<reverse_poland_exp.size();i++)
+        {
+            if(reverse_poland_exp[i]=="+")
+            {
+                auto latter=result.top();
+                result.pop();
+                auto former=result.top();
+                result.pop();
+                result.push(former+latter);
+            }
+            else if(reverse_poland_exp[i]=="-")
+            {
+                auto latter=result.top();
+                result.pop();
+                auto former=result.top();
+                result.pop();
+                result.push(former-latter);
+            }
+            else
+            {
+                result.push(stoi(reverse_poland_exp[i]));
+            }
+        }
+        return result.top();
+    }
+};
