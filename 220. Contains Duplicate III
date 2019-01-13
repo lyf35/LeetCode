@@ -1,0 +1,31 @@
+//一个效率较高的方法是用set保存k个数字，每一步都删除set中的一个元素，并比较添加元素与已有元素的大小
+bool containsNearbyAlmostDuplicate(vector<int> &nums, int k, int t) {
+        set<long> window;      
+        for (int i = 0; i < nums.size(); ++i) {
+            long n = nums[i];           
+            if (i > k)
+                window.erase(nums[i-k-1]);        
+            auto pos = window.lower_bound(n - t);
+            if (pos != window.end() && (*pos - n) <= t)
+                return true;
+            window.insert(n);
+        }
+        return false;
+    }
+    
+//或：将原数组构造成一个pair，用其下标作为原数据的卫星数据，然后对数组排序，排序完成之后从前向后进行检查
+
+//一个效率较低的办法，时间复杂度为O（kn）
+class Solution {
+public:
+    bool containsNearbyAlmostDuplicate(vector<int>& nums, int k, int t) {
+        for(int i=1;i<=k;i++)
+        {
+            for(int j=0;j<nums.size()-i;j++)
+            {
+                if(abs((long)nums[j]-(long)nums[j+i])<=t) return true;
+            }
+        }
+        return false;
+    }
+};
