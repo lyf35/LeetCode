@@ -1,0 +1,70 @@
+class Solution {
+public:
+    int calculate(string s) {
+        //与224题类似，但是此时不用考虑括号，而是考虑四则运算的先后顺序
+        stack<int> result;
+        stack<char> operators;
+        unsigned int length=s.size();
+        if(!length) return 0;
+        unsigned int pos=0;
+        while(pos<length)
+        {
+            if(s[pos]==' ') pos++;
+            else if(s[pos]<'0'||s[pos]>'9')
+            {
+                if(!operators.size()) operators.push(s[pos]);
+                else  //如果运算符的栈非空，则查看堆栈顶部的运算符，将堆顶与当前运算符优先级相同的运算符全部计算
+                {
+                    while(operators.size())
+                    {
+                        if(((s[pos]=='*'||s[pos]=='/')&&(operators.top()=='*'||operators.top()=='/'))||((s[pos]=='+'||s[pos]=='-')))
+                        {
+                            int latter=result.top(); result.pop();
+                            int former=result.top(); result.pop();
+                            char op=operators.top(); operators.pop();
+                            result.push(calculate(former,latter,op));
+                        }
+                        else break;
+                    }
+                    operators.push(s[pos]);
+                }
+                pos++;
+            }
+            else
+            {
+                unsigned int next_pos=s.find_first_not_of("1234567890",pos);
+                result.push(stoi(s.substr(pos,next_pos-pos)));
+                pos=next_pos;
+            }
+        }
+        while(operators.size())
+        {
+            int latter=result.top(); result.pop();
+            int former=result.top(); result.pop();
+            char op=operators.top(); operators.pop();
+            result.push(calculate(former,latter,op));
+        }
+        return result.top();
+    }
+    
+    int calculate(int former,int latter,char op)
+    {
+        int result=0;
+        switch(op)
+        {
+            case '+':
+                result=former+latter;
+                break;
+            case '-':
+                result=former-latter;
+                break;
+            case '*':
+                result=former*latter;
+                break;
+            case '/':
+                result=former/latter;
+                break;
+        }
+        return result;
+    }
+};
