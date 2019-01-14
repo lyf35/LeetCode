@@ -1,0 +1,27 @@
+class Solution {
+public:
+    int computeArea(int A, int B, int C, int D, int E, int F, int G, int H) {
+        //先检查两个长方形的相对位置，保证A的横坐标小于E
+        if(A>E) //必要情况下做交换
+        {
+            swap(A,E);
+            swap(B,F);
+            swap(C,G);
+            swap(D,H);
+        }
+        int two_area_total=(C-A)*(D-B)+(G-E)*(H-F);
+        if(C<=E) //代表左边长方形的最右侧仍小于右边长方形的最左侧，这种情况下一定没有交点
+        {
+            return two_area_total;
+        }
+        if(D<=F||B>=H) //代表两个长方形在高度方向上一个完全高于另一个
+        {
+            return two_area_total;
+        }
+        int left=max(A,E); //寻找两长方形重合部分的四个端点
+        int right=min(C,G); 
+        int down=max(B,F);
+        int up=min(D,H);
+        return two_area_total-(right-left)*(up-down);
+    }
+};
