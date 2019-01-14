@@ -1,0 +1,40 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int countNodes(TreeNode* root) {
+        //由于整棵树是完全树，因此如果出现结点高度不同的地方也只有在最底下一层
+        if(!root) return 0;
+        queue<TreeNode*> layer_node;
+        auto temp=root;
+        int layers=0;
+        while(temp) //先检查这棵树有几层
+        {
+            layers++;
+            temp=temp->left;
+        }
+        int nodes=pow(2,layers-1)-1; //先计算除去最后一层满二叉树的结点个数
+        int curr_layer=1;
+        layer_node.push(root);
+        while(curr_layer<layers)
+        {
+            int nodes=pow(2,curr_layer-1);
+            for(int i=0;i<nodes;i++)
+            {
+                auto temp=layer_node.front();
+                if(temp->left) layer_node.push(temp->left);
+                if(temp->right) layer_node.push(temp->right);
+                layer_node.pop();
+            }
+            curr_layer++;
+        }
+        return nodes+layer_node.size();
+    }
+};
