@@ -1,0 +1,26 @@
+class Solution {
+public:
+    vector<string> summaryRanges(vector<int>& nums) {
+        int lower_bound=0;
+        int upper_bound=0;
+        int size=nums.size();
+        vector<string> result;
+        while(lower_bound<size)
+        {
+            if(upper_bound+1<size&&nums[upper_bound+1]==nums[upper_bound]+1) upper_bound++;
+            else
+            {
+                string range;
+                range+=to_string(nums[lower_bound]);
+                if(lower_bound!=upper_bound)
+                {
+                    range+="->";
+                    range+=to_string(nums[upper_bound]);
+                }
+                result.push_back(range);
+                lower_bound=++upper_bound;
+            }
+        }
+        return result;
+    }
+};
