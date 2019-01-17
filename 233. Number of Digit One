@@ -1,0 +1,35 @@
+class Solution {
+public:
+    int countDigitOne(int n) {
+        //注意是统计1出现的次数，而不是含有数字1的个数
+        if(n==0) return 0;
+        int digit_length=cal_digit_length(n);
+        int total_num=0;
+        for(int i=digit_length-1;i>=0;i--) //按位数进行统计
+        {
+            int curr_digit=n/int(pow(10,i));
+            if(curr_digit>1) 
+            {
+                total_num+=int(pow(10,i)); //加上最高位是1的所有最高位的1
+                total_num+=(curr_digit)*digit_ones(i); //加上最高位不大于curr_digit的所有数字中所有的1
+            }
+            else if(curr_digit==1) 
+            {
+                total_num+=(n-int(pow(10,i)))+1; //加上最高位是1的所有最高位的1
+                total_num+=digit_ones(i); //加上最高位不大于curr_digit的所有数字中所有的1
+            }
+            n%=int(pow(10,i));
+        }
+        return total_num;
+    }
+    int digit_ones(int digit)
+    {
+        return digit*(int)(pow(10,digit-1));   
+    }
+    int cal_digit_length(int n)
+    {
+        int digit=1;
+        while(n/=10) digit++;
+        return digit;
+    }
+};
