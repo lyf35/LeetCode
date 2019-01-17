@@ -1,0 +1,86 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        map<TreeNode*,pair<TreeNode*,int>> parents;
+        queue<TreeNode*> odd_nodes;
+        queue<TreeNode*> even_nodes;
+        odd_nodes.push(root);
+        int level=2;
+        while(odd_nodes.size()||even_nodes.size()) //存储每个结点的层数和父结点信息
+        {
+            if(level%2==0) //代表处理偶数层
+            {
+                while(odd_nodes.size())
+                {
+                    auto temp=odd_nodes.front();
+                    odd_nodes.pop();
+                    if(temp->left)
+                    {
+                        parents[temp->left]=make_pair(temp,level);
+                        even_nodes.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        parents[temp->right]=make_pair(temp,level);
+                        even_nodes.push(temp->right);
+                    }
+                }
+            }
+            else //处理奇数层
+            {
+                while(even_nodes.size())
+                {
+                    auto temp=even_nodes.front();
+                    even_nodes.pop();
+                    if(temp->left)
+                    {
+                        parents[temp->left]=make_pair(temp,level);
+                        odd_nodes.push(temp->left);
+                    }
+                    if(temp->right)
+                    {
+                        parents[temp->right]=make_pair(temp,level);
+                        odd_nodes.push(temp->right);
+                    }
+                }              
+            }
+            level++;
+        }
+        pair<TreeNode*,int> p_parent; 
+        if(p->left) p_parent=parents[p->left]; //为了在接下来对结点进行比较，对p和q采取一些处理，从而得到p和q的层数
+        else if(p->right) p_parent=parents[p->right];
+        else p_parent=parents[p]; //说明p为叶结点，此时上升一层不会影响最后结果
+        pair<TreeNode*,int> q_parent; //与p同理
+        if(q->left) q_parent=parents[q->left];
+        else if(q->right) q_parent=parents[q->right];
+        else q_parent=parents[q];
+        while(p_parent.second>q_parent.second) p_parent=parents[p_parent.first]; //先把两个结点的层数变为相同
+        while(p_parent.second<q_parent.second) q_parent=parents[q_parent.first];
+        while(p_parent.first!=q_parent.first)
+        {
+            p_parent=parents[p_parent.first];
+            q_parent=parents[q_parent.first];
+        }
+        return p_parent.first;
+    }
+};
+
+//使用简单的递归算法也可以解决问题
+class Solution {
+public:
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (!root || root == p || root == q) return root;
+    TreeNode* left = lowestCommonAncestor(root->left, p, q);
+    TreeNode* right = lowestCommonAncestor(root->right, p, q);
+    return !left ? right : !right ? left : root;
+}
+};
