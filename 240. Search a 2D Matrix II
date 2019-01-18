@@ -1,0 +1,88 @@
+//此时最快的方法不是二分查找，而是从右上角开始往左下角的方向进行搜索，如果大于目标值就往左，小于目标值就往下，这样会以目标值构成一条曲折的分界线
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size();
+        if (m == 0) return false;
+        int n = matrix[0].size();
+        int i = 0, j = n - 1;
+        while (i < m && j >= 0) 
+        {
+            if (matrix[i][j] == target) return true;
+            else if (matrix[i][j] > target) j--;
+            else i++;
+        }
+        return false; 
+    }
+};
+
+static int fast=[](){ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0); return 0 ;}() ;
+
+
+
+
+//按行查找，这样比二维矩阵的二分查找快一些，但还是比较慢
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        if(!matrix.size()||!matrix.begin()->size()) return false;
+        int row=matrix.size();
+        int column=matrix.begin()->size();
+        bool result=0;
+        for(int i=0;i<row;i++)
+        {
+            if(matrix[i][0]<=target&&matrix[i][column-1]>=target) result|=search_in_row(matrix,target,i,0,column-1);
+        }
+        return result;
+    }
+    bool search_in_row(vector<vector<int>>& matrix, int target,int row,int i,int j) //在一行里面做搜索
+    {
+        if(i==j) return matrix[row][i]==target;
+        int mid=matrix[row][(i+j)/2];
+        if(mid==target) return true;
+        else if(mid>target) return search_in_row(matrix,target,row,i,(i+j)/2);
+        else return search_in_row(matrix,target,row,(i+j)/2+1,j);
+    }
+};
+
+
+
+//在二维矩阵里面做二分查找，每次要分左右和上下分别进行拆分，效率很低
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        if(!matrix.size()||!matrix.begin()->size()) return false;
+        return binary_search_2d(matrix,0,matrix.size()-1,0,matrix.begin()->size()-1,target);
+    }
+    bool binary_search_2d(vector<vector<int>>& matrix,int i,int j,int x,int y,int target) //ij和xy分别对应于行和列方向
+    {
+        if(i==j&&x==y)
+        {
+            return matrix[i][x]==target;
+        }
+        int mid_val=matrix[(i+j)/2][(x+y)/2];
+        if(mid_val==target)
+        {
+            return true;
+        }
+        else
+        {
+            if(mid_val<target)
+            {
+                bool right=0;
+                bool down=0;
+                if(i<j) down=binary_search_2d(matrix,(i+j)/2+1,j,x,y,target);
+                if(x<y) right=binary_search_2d(matrix,i,j,(x+y)/2+1,y,target);
+                return down||right;
+            }
+            else
+            {
+                bool left=0;
+                bool up=0;
+                if(i<j) up=binary_search_2d(matrix,i,(i+j)/2-1,x,y,target);
+                if(x<y) left=binary_search_2d(matrix,i,j,x,(x+y)/2-1,target);
+                return up||left;
+            }
+        }
+    }
+};
