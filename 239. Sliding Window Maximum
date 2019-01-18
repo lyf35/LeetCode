@@ -1,0 +1,39 @@
+//借助deque，可以使得复杂度变为O(n)
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> result;
+        if(!nums.size()) return result; 
+        if(k==1) return nums; //两个特殊情况可以直接返回
+        deque<int> buffer; //保存较大值的备选值
+        for(int i=0;i<nums.size();i++)
+        {
+            while(buffer.size()&&nums[buffer.front()]<nums[i]) buffer.pop_front(); //buffer中保存的位置对应的数字从前到后越来越大，且序号从前往后越来越小
+            buffer.push_front(i);
+            if(i>=k-1) result.push_back(nums[buffer.back()]);
+            if(buffer.back()<=i-k+1) buffer.pop_back(); //检查后面序号较小者是否需要删掉
+        }
+        return result;
+    }
+};
+
+
+//用一个set保存数字，这样时间效率为O(nlogK)，达不到线性的要求
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> result;
+        if(!nums.size()) return result; 
+        if(k==1) return nums; //两个特殊情况可以直接返回
+        multiset<int> nums_in_window;
+        for(int i=0;i<k;i++) nums_in_window.insert(nums[i]);
+        result.push_back(*(--nums_in_window.end()));
+        for(int i=k;i<nums.size();i++)
+        {
+            nums_in_window.insert(nums[i]);
+            nums_in_window.erase(nums_in_window.find(nums[i-k]));
+            result.push_back(*(--nums_in_window.end()));
+        }
+        return result;
+    }
+};
