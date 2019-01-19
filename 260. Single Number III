@@ -5,6 +5,7 @@ public:
         //如果要使用常数大小的空间，需要使用异或运算做帮助。
         int aXorb = 0;  // the result of a xor b;
         for (auto item : nums) aXorb ^= item;
+        //本题的最核心代码就在这一行处
         int lastBit =aXorb & (-aXorb);  // the last bit that a diffs b
         int intA = 0, intB = 0;
         for (auto item : nums) 
