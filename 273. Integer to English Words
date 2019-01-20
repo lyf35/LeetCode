@@ -1,0 +1,57 @@
+class Solution {
+public:
+    string numberToWords(int num) {
+        if(num==0) return "Zero"; //注意0这个特殊情况
+        vector<string> words_within_20={"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"};
+        vector<string> words_tens={"Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"};
+        string result;
+        if(num/1000000000)
+        {
+            result+=number_thousand(num/1000000000,words_within_20,words_tens);
+            result+=" Billion";
+            num=num%1000000000;
+            if(num) result+=" ";
+        }
+        if(num/1000000)
+        {
+            result+=number_thousand(num/1000000,words_within_20,words_tens);
+            result+=" Million";
+            num=num%1000000;
+            if(num) result+=" ";
+        }
+        if(num/1000)
+        {
+            result+=number_thousand(num/1000,words_within_20,words_tens);
+            result+=" Thousand";
+            num=num%1000;
+            if(num) result+=" ";
+        }
+        result+=number_thousand(num,words_within_20,words_tens);
+        return result;
+    }
+    string number_thousand(int num,vector<string>& words_within_20,vector<string>& words_tens)
+    {
+        string result;
+        if(num/100)
+        {
+            result+=words_within_20[num/100-1];
+            result+=" Hundred";
+            num%=100;
+            if(num) result+=" ";
+        }
+        if(num/10<=1)
+        {
+            if(num) result+=words_within_20[num-1]; //此处也要注意处理0的情况
+        }
+        else
+        {
+            result+=words_tens[num/10-2];
+            if(num%10) 
+            {
+                result+=" ";
+                result+=words_within_20[num%10-1]; //注意此处必须在个位有数字才处理                
+            }
+        }
+        return result;
+    }
+};
