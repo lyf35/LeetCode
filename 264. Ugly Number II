@@ -1,0 +1,19 @@
+class Solution {
+public:
+    int nthUglyNumber(int n) {
+        vector<int> result(n,0);
+        result[0]=1;
+        int x=0; //用三个数字，分别记录乘2，乘3，乘5所能取得的大于当前位置的ugly number的最小值
+        int y=0;
+        int z=0;
+        for(int i=1;i<n;i++)
+        {
+            int next=min(result[x]*2,min(result[y]*3,result[z]*5));
+            result[i]=next;
+            if(next==result[x]*2) x++;
+            if(next==result[y]*3) y++;
+            if(next==result[z]*5) z++;
+        }
+        return result[n-1];
+    }
+};
