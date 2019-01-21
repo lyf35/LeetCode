@@ -1,0 +1,53 @@
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        //这一问题中已经排好序，但是需要在对数时间复杂度内解决问题
+        //根据h指数的计算公式：在每一个位置处取引用数与大于这个引用数文献数量这二者的最小值，每个位置的h指数应该是先升后减，因此可以用峰值查找的方式来寻找
+        if(!citations.size()) return 0;
+        return find_peak_hIndex(citations,0,citations.size()-1);
+    }
+    int find_peak_hIndex(vector<int>& citations,int i,int j)
+    {
+        if(i==j)
+        {
+            return min(citations[i],(int)citations.size()-i);
+        }
+        int mid=(i+j)/2;
+        int left=mid;
+        int right=mid;
+        int mid_index=min(citations[mid],(int)citations.size()-mid);
+        int right_index=mid_index;
+        int left_index=mid_index;
+        while(left>i&&left_index==mid_index) //跳过相等的部分
+        {
+            left--;
+            left_index=min(citations[left],(int)citations.size()-left);
+        }
+        while(right<j&&right_index==mid_index) //跳过相等的部分
+        {
+            right++;
+            right_index=min(citations[right],(int)citations.size()-right);
+        }
+        //此处要尤其注意条件语句的写法
+        if(mid_index>=left_index&&mid_index<right_index) return find_peak_hIndex(citations,right,j);
+        else if(mid_index<left_index&&mid_index>=right_index) return find_peak_hIndex(citations,i,left);
+        else return mid_index;
+    }
+};
+
+//用另一种方式去理解：
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        //数组中的引用次数越来越高，而对应每个位置上大于它引用数的文献越来越少，因此用二分查找寻找二者的交点即可
+        int left=0, len = citations.size(), right= len-1,  mid;
+        while(left<=right)
+        {
+            mid=(left+right)>>1;
+            if(citations[mid]== (len-mid)) return citations[mid];
+            else if(citations[mid] > (len-mid)) right = mid - 1;
+            else left = mid + 1;
+        }
+        return len - (right+1);
+    }
+};
