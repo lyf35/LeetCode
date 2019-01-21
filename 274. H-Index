@@ -1,0 +1,15 @@
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        //h指数即一个人至少有h篇文章的引用次数不小于h
+        sort(citations.begin(),citations.end());
+        int return_val=0;
+        int length=citations.size();
+        for(auto i=0;i<length;i++)
+        {
+            //根据H指数的计算方法，按照公式计算即可
+            return_val=max(return_val,min(citations[i],length-i));
+        }
+        return return_val;
+    }
+};
