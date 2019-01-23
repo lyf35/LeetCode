@@ -1,3 +1,4 @@
+//287题的解题思路与此题类似
 /**
  * Definition for singly-linked list.
  * struct ListNode {
