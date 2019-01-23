@@ -32,3 +32,40 @@ public:
         return nullptr;
     }
 };
+
+
+//另一种做法，用双指针，效率更高
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        if(!head||!head->next||!head->next->next)
+        {
+            return nullptr;
+        }
+        ListNode* fast=head->next->next;
+        ListNode* slow=head->next;
+        while(fast!=slow)
+        {
+            if(fast->next) fast=fast->next;
+            else return nullptr;
+            if(fast->next) fast=fast->next;
+            else return nullptr;
+            slow=slow->next;
+        }
+        slow=head;
+        while(fast!=slow)
+        {
+            fast=fast->next;
+            slow=slow->next;
+        }
+        return slow;
+    }
+};
