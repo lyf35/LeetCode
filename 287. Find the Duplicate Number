@@ -1,0 +1,54 @@
+//要求：不能修改原数组（即不能排序），使用常数的空间，时间复杂度不大于O(n^2)
+
+//时间复杂度为O(n)的算法，效率较高
+class Solution {
+public:
+    int findDuplicate(vector<int>& nums) {
+        //重复的数字出现至少两次，且其它的数字全部都在1-n(n指的是nums的大小再减1)之间且没有重复
+        //要求只使用常数大小的额外空间
+	    if (nums.size() > 1)
+	    {
+            //可以认为nums中每个数字的大小对应于一个指向nums中对应位置的“指针”
+            //使用fast和slow两个指针，fast每次走两步，slow每次走一步
+            //由于存在至少两个相同数字，因此可以认为这一链表构成环
+		    int slow = nums[0];
+		    int fast = nums[nums[0]]; 
+            //找到二者第一次相遇的位置，第一次相遇的位置一定位于链表中构成环的环上面
+		    while (slow != fast) 
+		    {
+			    slow = nums[slow];
+			    fast = nums[nums[fast]];
+		    }
+            //然后将两个指针的步调设置为一致
+            //此时，在环上的指针在之后仍然是一直在环上移动
+            //两指针相遇的位置即为重复的那个元素
+		    fast = 0;
+		    while (fast != slow)
+		    {
+			    fast = nums[fast];
+			    slow = nums[slow];
+		    }
+		    return slow;
+	    }
+        //这一问题类似于物理中的追击相遇问题
+        return -1;
+    }
+};
+
+
+//时间复杂度为O(n^2)的算法，效率较低
+class Solution {
+public:
+    int findDuplicate(vector<int>& nums) {
+        int length=nums.size();
+        for(int i=0;i<length;i++)
+        {
+            int val=nums[i];
+            for(int j=i+1;j<length;j++)
+            {
+                if(val==nums[j]) return val;
+            }
+        }
+        return 0;
+    }
+};
