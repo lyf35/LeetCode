@@ -1,0 +1,144 @@
+//一个效率较高的回溯法
+class Solution {
+public:
+    vector<string> addOperators(string num, int target) {
+        vector<string> ans;
+        if (num.size() == 0) return ans;
+        string exp(num.size()*2, '\0');
+        dfs(num, target, 0, exp, 0, 0, 0, ans);
+        return ans;
+    }
+    
+    void dfs(const string& num, const int target, int pos, string& expr, int len, long prev, long curr, vector<string>& ans){
+        if (pos == num.size()) 
+        {
+            if (curr == target) ans.push_back(expr.substr(0, len));
+            return;
+        }
+        long val = 0;
+        int start = pos, l = len;
+        if (start != 0) ++len; // 需要放op,真正放数字的地方需要+1
+        while(pos < num.size()) {
+            val = val*10 + (num[pos] - '0');
+            if (num[start] == '0' && (pos-start) > 0) break;
+            if (val > INT_MAX) break;
+            expr[len++] = num[pos++];
+            if (start == 0) {
+                dfs(num, target, pos, expr, len, val, val, ans);
+                continue;
+            }
+            expr[l] = '+'; dfs(num, target, pos, expr, len, val, curr + val, ans);
+            expr[l] = '-'; dfs(num, target, pos, expr, len, -val, curr - val, ans);
+            expr[l] = '*'; dfs(num, target, pos, expr, len, prev*val, curr - prev + prev*val, ans);
+        }
+    }
+};
+
+//一个效率较低的办法，用试探-回溯策略
+class Solution {
+public:
+    vector<string> addOperators(string num, int target) {
+        //在两个数字之间，要么有运算符，要么没有运算符，可以通过穷举的方法来构造出所有的可能表达式
+        vector<string> result;
+        if(!num.size()) return result;
+        vector<int> ops;
+        dfs(num,ops,target,result);
+        return result;
+    }
+    void dfs(string num,vector<int>& ops,int target,vector<string>& result)
+    {
+        if(ops.size()==num.size()-1)
+        {
+            auto expr=construct_string(num,ops);
+            if(expr.size()&&calculate(expr)==target) result.push_back(expr);
+        }
+        else
+        {
+            for(int i=1;i<=4;i++)
+            {
+                ops.push_back(i);
+                dfs(num,ops,target,result);
+                ops.pop_back();
+            }
+        }
+    }
+    string construct_string(string num,vector<int> ops)
+    {
+        string result;
+        result+=num[0];
+        //构造表达式
+        for(int i=1;i<num.size();i++)
+        {
+            switch(ops[i-1])
+            {
+                case 1:
+                    result+='*';
+                    break;
+                case 2:
+                    result+='+';
+                    break;
+                case 3:
+                    result+='-';
+                    break;
+                default:
+                    break;
+            }
+            result+=num[i];
+        }
+        //由于表达式中数字开头不能为0，因此最后需要再做一次检查
+        int i=0;
+        bool is_beg_zero=false;
+        while(i<result.size())
+        {
+            if(!is_beg_zero&&result[i]=='0'&&(i==0||result[i-1]<'0'||result[i-1]>'9')) //遇到运算符后面的第一个数字
+            {
+                is_beg_zero=1;
+            }
+            else if(is_beg_zero&&result[i]>='0'&&result[i]<='9')
+            {
+                return string("");
+            }
+            if(result[i]<'0'||result[i]>'9') is_beg_zero=0;
+            i++;
+        }
+        return result;
+    }
+    int calculate(string s) 
+    {
+        int result = 0, cur_res = 0;
+        char op = '+';
+        for(int pos = s.find_first_not_of(' '); pos < s.size(); pos = s.find_first_not_of(' ', pos)) 
+        {
+            if(isdigit(s[pos])) 
+            {
+                int tmp = s[pos] - '0';
+                while(++pos < s.size() && isdigit(s[pos]))
+                {
+                    //要判断数字是否越界
+                    if(((long)(tmp*10)+(long)(s[pos]-'0'))>0&&tmp*10 + (s[pos] - '0')<0)
+                    {
+                        return 0; 
+                    }
+                    tmp = tmp*10 + (s[pos] - '0');                    
+                }
+                switch(op) 
+                {
+                    case '+' : cur_res += tmp; break;
+                    case '-' : cur_res -= tmp; break;
+                    case '*' : cur_res *= tmp; break;
+                    case '/' : cur_res /= tmp; break;
+                }
+            }
+            else 
+            {
+                if(s[pos] == '+' || s[pos] == '-') 
+                {
+                    result += cur_res;
+                    cur_res = 0;
+                }
+                op = s[pos++];
+            }
+        }
+        return result + cur_res;
+    }
+};
