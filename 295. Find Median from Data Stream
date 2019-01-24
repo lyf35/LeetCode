@@ -1,0 +1,49 @@
+//这道题也可以用其它的数据结构，如：
+//1. STL自带的set，再结合一个指向set中间位置的指针
+//2. 使用一个最小堆和最大堆，并保持两个堆中的元素相对平衡
+class MedianFinder {
+private:
+    vector<int> nums;
+public:
+    /** initialize your data structure here. */
+    MedianFinder(): nums(){
+        
+    }
+    
+    void addNum(int num) {
+        if(!nums.size())
+        {
+            nums.push_back(num);
+            return;
+        }
+        if(nums.back()<=num) //如果大于原数组的最大值，就可以直接插入
+        {
+            nums.push_back(num);
+            return;
+        }
+        //代表需要查找，插入位置在函数返回值的前面
+        int insert_pos=find_insert_place(num,0,nums.size()-1);
+        nums.insert(nums.begin()+insert_pos,num);
+    }
+    
+    double findMedian() {
+        if(nums.size()%2) return nums[nums.size()/2];
+        else return double(nums[nums.size()/2]+nums[nums.size()/2-1])/2.0;
+    }
+    
+    int find_insert_place(int num,int m,int n)
+    {
+        if(m==n) return m;
+        int mid=(m+n)/2;
+        if(nums[mid]<num) return find_insert_place(num,mid+1,n);
+        else if(nums[mid]>num) return find_insert_place(num,m,mid);
+        else return mid;
+    }
+};
+
+/**
+ * Your MedianFinder object will be instantiated and called as such:
+ * MedianFinder obj = new MedianFinder();
+ * obj.addNum(num);
+ * double param_2 = obj.findMedian();
+ */
