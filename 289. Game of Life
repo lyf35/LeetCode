@@ -1,0 +1,29 @@
+class Solution {
+public:
+    void gameOfLife(vector<vector<int>>& board) {
+        //算法要求对board做就地修改
+        int row=board.size();
+        if(!row) return;
+        int column=board[0].size();
+        if(!column) return;
+        auto prev=board;
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<column;j++)
+            {
+                int ones=0;
+                if(i>0&&j>0&&prev[i-1][j-1]) ones++;
+                if(i>0&&prev[i-1][j]) ones++;
+                if(i>0&&j<column-1&&prev[i-1][j+1]) ones++; 
+                if(j>0&&prev[i][j-1]) ones++;
+                if(j<column-1&&prev[i][j+1]) ones++;
+                if(i<row-1&&j>0&&prev[i+1][j-1]) ones++;
+                if(i<row-1&&prev[i+1][j]) ones++;
+                if(i<row-1&&j<column-1&&prev[i+1][j+1]) ones++;
+                if(prev[i][j]&&ones<2) board[i][j]=0;
+                if(prev[i][j]&&ones>3) board[i][j]=0;
+                if(!prev[i][j]&&ones==3) board[i][j]=1;
+            }
+        }
+    }
+};
