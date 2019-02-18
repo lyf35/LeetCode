@@ -1,0 +1,106 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        string result="[";
+        queue<TreeNode*> node_onelayer;
+        node_onelayer.push(root);
+        while(node_onelayer.size()) //对树结构做层次遍历
+        {
+            int size=node_onelayer.size();
+            int null_num=0;
+            for(int i=0;i<size;i++)
+            {
+                TreeNode* node=node_onelayer.front();
+                node_onelayer.pop();
+                if(node!=nullptr) //如果某个结点不是空结点
+                {
+                    result+=to_string(node->val);
+                    result+=",";
+                    node_onelayer.push(node->left);
+                    if(!node->left) null_num++; 
+                    node_onelayer.push(node->right);
+                    if(!node->right) null_num++;
+                }
+                else //如果某个结点是空结点
+                {
+                    result+="null,";
+                    null_num+=2;
+                }
+            }
+            if(null_num==size<<1) //如果某层的下面一层全部是空结点
+            {
+                node_onelayer=queue<TreeNode*>();
+            }
+        }
+        result[result.size()-1]=']';
+        return result;
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        TreeNode* result=new TreeNode(0);
+        data.erase(0,1);
+        data.erase(data.size()-1,1);
+        if(!data.size()||data=="null") //代表根结点为空，可以直接返回
+        {
+            return nullptr;
+        }
+        size_t pos=data.find_first_of(",",0);
+        result->val=stoi(data.substr(0,pos));
+        pos++;
+        int next_layer_num=2;
+        queue<TreeNode*> prev_nodes; //保存上一层的结点
+        prev_nodes.push(result);
+        while(pos>0&&pos<data.size())
+        {
+            int num=0;
+            while(num<next_layer_num&&pos>0&&pos<data.size()) //由于最底层如果靠右的结点为空的时候可以省略，因此此处需要随时对pos的位置做检查
+            {
+                TreeNode* curr_node=prev_nodes.front();
+                prev_nodes.pop();
+                for(int i=0;i<2;i++) //对上一层的每个结点都做左/右结点的两次处理
+                {
+                    size_t next_pos=data.find_first_of(",",pos);
+                    if(data.substr(pos,next_pos-pos)=="null")
+                    {
+                        if(i%2) curr_node->right=nullptr;
+                        else curr_node->left=nullptr;
+                    }
+                    else
+                    {
+                        if(i%2)
+                        {
+                            curr_node->right=new TreeNode(stoi(data.substr(pos,next_pos-pos)));
+                            prev_nodes.push(curr_node->right);
+                        }
+                        else
+                        {
+                            curr_node->left=new TreeNode(stoi(data.substr(pos,next_pos-pos)));
+                            prev_nodes.push(curr_node->left);
+                        }
+                    }
+                    num++;
+                    pos=next_pos;
+                    pos++;
+                }
+            }
+            next_layer_num=prev_nodes.size();
+        }
+        return result;
+    }
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
