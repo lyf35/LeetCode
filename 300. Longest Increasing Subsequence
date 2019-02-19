@@ -1,0 +1,36 @@
+//时间复杂度为O(nlgn)的解法，更加优雅，clrs15-4中的课后练习题也提到过
+class Solution {
+public:
+int lengthOfLIS(vector<int>& nums) {
+    vector<int> res; //用它来保存长度为i的字符串所对应的最后一个数字
+    for(int i=0; i<nums.size(); i++) {
+        auto it = std::lower_bound(res.begin(), res.end(), nums[i]); //在res中寻找不小于它的第一个数字
+        if(it==res.end()) res.push_back(nums[i]); //如果res中的数字都比nums[i]要小，说明最长子串的长度可以+1
+        else *it = nums[i]; //如果res中存在比nums[i]大的数字，说明某个长度的子串所对应的那个最大值可以修改
+    }
+    return res.size();
+}
+};
+
+
+//时间复杂度为O(n^2)的算法，可以通过测试，但是用时较长
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        if(!nums.size()) return 0;
+        int return_val=1;
+        vector<int> incr_length(nums.size(),1); //保存以第i个位置为起始位置所构成的最长递增子序列
+        for(int i=nums.size()-2;i>=0;i--)
+        {
+            for(int j=i+1;j<nums.size();j++)
+            {
+                if(nums[i]<nums[j])
+                {
+                    incr_length[i]=max(incr_length[i],incr_length[j]+1);
+                    return_val=max(return_val,incr_length[i]);
+                }
+            }
+        }
+        return return_val;
+    }
+};
