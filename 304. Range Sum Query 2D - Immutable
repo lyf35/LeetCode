@@ -1,0 +1,91 @@
+//一个效率比较高的办法是计算从(0,0)到(i,j)这个大正方形块的面积并保存下来
+class NumMatrix {
+private:
+    vector<vector<int>> area;
+public:
+    NumMatrix(vector<vector<int>> matrix)
+    {
+        area=matrix;
+        int row=matrix.size();
+        int col=0;
+        if(row) col=matrix.begin()->size();     
+        for(int i=0;i<row;i++) //先计算一行从左到右的累计值
+        {
+            for(int j=1;j<col;j++)
+            {
+                area[i][j]+=area[i][j-1];
+            }
+        }
+        for(int i=1;i<row;i++) //然后计算从原点到某个位置的累计值，按每一行从左到右计算，否则数值就不对了
+        {
+            for(int j=0;j<col;j++)
+            {
+                area[i][j]+=area[i-1][j];
+            }
+        }
+    };
+
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        int result=area[row2][col2];
+        if(row1>0) result-=area[row1-1][col2];
+        if(col1>0) result-=area[row2][col1-1];
+        if(row1>0&&col1>0) result+=area[row1-1][col1-1];
+        return result;
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * int param_1 = obj.sumRegion(row1,col1,row2,col2);
+ */
+
+//每一次都对单个元素做加法，速度较慢
+class NumMatrix {
+private:
+    int* Matrix;
+    int row;
+    int col;
+public:
+    NumMatrix(vector<vector<int>> matrix)
+    {
+        row=matrix.size();
+        if(row>0) col=matrix.begin()->size();
+        else col=0;
+        Matrix=new int[row*col]();
+        int k=0;
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<col;j++)
+            {
+                Matrix[k]=matrix[i][j];
+                k++;
+            }
+        }
+    };
+    ~NumMatrix()
+    {
+        delete[](Matrix);
+    }
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        int sum=0;
+        for(int i=row1;i<=row2;i++)
+        {
+            for(int j=col1;j<=col2;j++)
+            {
+                
+                sum+=Matrix[col*i+j];
+            }
+        }
+        return sum;
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * int param_1 = obj.sumRegion(row1,col1,row2,col2);
+ */
+ 
+ 
+ 
