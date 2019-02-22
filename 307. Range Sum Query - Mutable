@@ -1,0 +1,107 @@
+//使用与构造二叉堆相似的思路，用一个数组来表示二叉树，同时与二叉堆类似，根节点的下标为i时，子结点的下标为2*i和2*i+1
+class NumArray {
+    vector<int> tree; //tree的最后面几个数字代表叶节点，前面的都代表上级结点。对于第i个结点来说，它的子结点分别为2*i和2*i+1，第i个结点保存了所有子结点以及子结点下面所有子结点的累加值
+    vector<int> nums;
+    
+public:
+    NumArray(vector<int> nums) {
+        this->nums = nums;
+        tree = vector<int>(nums.size()*2, 0); //二叉树的总结点数至多为数字个数的2倍
+        buildtree(nums);
+    }
+    
+    void buildtree(vector<int> nums)
+    {
+        for(int i=nums.size(),j=0;i<2*nums.size();i++,j++) 
+        {
+            tree[i]=nums[j];
+        }
+        for(int i=nums.size()-1;i>0;i--)
+        {
+            tree[i]=tree[i*2]+tree[i*2+1];
+        }
+    }
+    
+    void update(int i, int val) {
+        i+=nums.size();
+        tree[i]=val;
+        while(i>0)
+        {
+            int left=i;
+            int right=i;
+            if(i%2==0) right=i+1; //根据叶结点的数量来决定left和right的值
+            else left=i-1;
+            tree[i/2]=tree[left]+tree[right];
+            i/=2;
+        }
+    }
+    
+    int sumRange(int i, int j) {
+        i+=nums.size();
+        j+=nums.size();
+        int sum=0;
+        while(i<=j)
+        {
+            if(i%2==1)
+            {
+                sum+=tree[i];
+                i++;
+            }
+            if(j%2==0)
+            {
+                sum+=tree[j];
+                j--;
+            }
+            j/=2;
+            i/=2;
+        }
+        return sum;
+    }
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
+
+
+
+
+
+//由于数组中的元素可变，因此如果用vector保存累加值则每次更新的时候可能需要对整个vector做遍历，效率较低。当更新次数很多的时候，不如线段树效率高
+class NumArray {
+private:
+    vector<int> sum;
+    vector<int> num;
+public:
+    NumArray(vector<int> nums) {
+        sum=num=nums;
+        for(int i=1;i<sum.size();i++)
+        {
+            sum[i]+=sum[i-1];
+        }
+    }
+    
+    void update(int i, int val) {
+        int diff_num=val-num[i];
+        num[i]=val;
+        for(int j=i;j<sum.size();j++)
+        {
+            sum[j]+=diff_num;
+        }
+    }
+    
+    int sumRange(int i, int j) {
+        if(i>0) return sum[j]-sum[i-1];
+        else return sum[j];
+    }
+};
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
