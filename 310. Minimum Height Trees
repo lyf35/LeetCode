@@ -1,0 +1,93 @@
+//可以将BFS搜索的过程颠倒，即从度为1的结点开始搜索，并在此过程中逐步删除结点直至剩下最后一个结点
+class Solution {
+public:
+    vector<int> findMinHeightTrees(int n, vector<pair<int, int>>& edges) {
+        //可以找到图中的最长路径，然后取最长路径的中间点即可，偶数长度取最中间两个，奇数长度取最中间一个
+        if(n==1) return vector<int>{0};
+        if(n==0) return vector<int>();
+        vector<unordered_set<int>> adjecent_nodes(n,unordered_set<int>()); //保存每个结点的相邻结点
+        for(auto elem:edges)
+        {
+            adjecent_nodes[elem.first].insert(elem.second);
+            adjecent_nodes[elem.second].insert(elem.first);
+        }
+        queue<int> nodes;
+        vector<int> result;
+        vector<int> visited(n,0);
+        while(true) //反向做bfs直至根节点，但是每次需要保证只删除叶节点
+        {
+            for(int i=0;i<n;i++)
+            {
+                if(adjecent_nodes[i].size()==1||(visited[i]==0&&adjecent_nodes[i].size()==0)) nodes.push(i);
+            }
+            int num=nodes.size();
+            if(!num) break;
+            result.clear();
+            for(int i=0;i<num;i++)
+            {
+                int node=nodes.front();
+                result.push_back(node);
+                visited[node]=1;
+                nodes.pop();
+                for(auto iter=adjecent_nodes[node].begin();iter!=adjecent_nodes[node].end();iter++)
+                {
+                    adjecent_nodes[*iter].erase(node);
+                }
+                adjecent_nodes[node].clear();
+            }
+        }
+        return result;
+    }
+};
+
+
+
+//从一个结点开始做广度搜索的方法，虽然可行，但是会超过时间界
+class Solution {
+public:
+    vector<int> findMinHeightTrees(int n, vector<pair<int, int>>& edges) {
+        //找到高度最小的结点，即bfs搜索的时候所需要的循环次数最小
+        unordered_map<int,unordered_set<int>> adjecent_nodes; //保存每个结点的相邻结点
+        for(auto elem:edges)
+        {
+            adjecent_nodes[elem.first].insert(elem.second);
+            adjecent_nodes[elem.second].insert(elem.first);
+        }
+        vector<int> heights(n,0);
+        int min_height=INT_MAX;
+        for(int i=0;i<n;i++)
+        {
+            vector<bool> has_visited(n,0);
+            has_visited[i]=1;
+            queue<int> nodes_one_layer;
+            nodes_one_layer.push(i);
+            int cnt=0;
+            while(nodes_one_layer.size())
+            {
+                int nodes_num=nodes_one_layer.size();
+                for(int j=0;j<nodes_num;j++)
+                {
+                    int curr_node=nodes_one_layer.front();
+                    nodes_one_layer.pop();
+                    for(auto iter=adjecent_nodes[curr_node].begin();iter!=adjecent_nodes[curr_node].end();iter++)
+                    {
+                        if(!has_visited[*iter])
+                        {
+                            has_visited[*iter]=1;
+                            nodes_one_layer.push(*iter);
+                        }
+                    }
+                }
+                cnt++;
+            }
+            heights[i]=cnt;
+            min_height=min(cnt,min_height);
+        }
+        vector<int> result;
+        for(int i=0;i<n;i++)
+        {
+            if(heights[i]==min_height) result.push_back(i);
+        }
+        return result;
+    }
+};
