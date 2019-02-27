@@ -1,0 +1,26 @@
+//与leetcode264题类似
+class Solution {
+public:
+    int nthSuperUglyNumber(int n, vector<int>& primes) {
+        vector<int> numbers(n,0);
+        numbers[0]=1;
+        vector<int> curr_pos(primes.size(),0); //记录用第i位置的质数相乘所能得到的大于当前最大值的最小质数
+        for(int i=1;i<n;i++)
+        {
+            int min=INT_MAX;
+            int min_pos=0;
+            for(int j=0;j<primes.size();j++)
+            {
+                if(primes[j]*numbers[curr_pos[j]]<min)
+                {
+                    min=primes[j]*numbers[curr_pos[j]];
+                    min_pos=j;
+                }
+            }
+            if(min>numbers[i-1]) numbers[i]=min; //由于不同位置的质数得到的结果可能会重复，故需要注意此处的处理方式！
+            else i--;
+            curr_pos[min_pos]++;
+        }
+        return numbers[n-1];
+    }
+};
