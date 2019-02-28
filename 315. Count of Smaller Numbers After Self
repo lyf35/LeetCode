@@ -1,0 +1,73 @@
+//从最后一个元素开始构建BST，并给每个结点都保存一个卫星数据，用于记录左结点的数目
+//这样每次插入的时候就可以直接得到比某个元素小且位于vector右侧的元素（别人的方法）
+struct TNode {
+    int val;
+    TNode * Ptrleft, * Ptrright;
+    int nleft;
+    TNode(int x):val(x), Ptrleft(nullptr), Ptrright(nullptr), nleft(0) {};
+    int addNode(int v) {return addNode(this,v,0);}
+    int addNode(TNode* Ptr, int v, int c){
+        if (v<=Ptr->val) {
+            Ptr->nleft++;
+            if(Ptr->Ptrleft==nullptr) {
+                Ptr->Ptrleft = new TNode(v);
+                return c;
+            } else return addNode(Ptr->Ptrleft, v, c);
+        } else {
+            if(Ptr->Ptrright==nullptr){
+                Ptr->Ptrright = new TNode(v);
+                return c+1+Ptr->nleft;
+            } else return addNode(Ptr->Ptrright, v, c+1+Ptr->nleft);
+        }
+    }
+};
+
+class Solution {
+public:
+    vector<int> countSmaller(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> results(n,0);
+        TNode *root;
+        if(n>0){
+            root = new TNode(nums[n-1]);
+            for(int i=n-2;i>=0;i--)
+                results[i] = root->addNode(nums[i]);
+        }
+        return results;
+    }
+};
+
+//使用一个排序过的vector来储存元素，然后每次做二分查找来寻找，虽然用时稍快，但是因为每次都需要删除vector中的一个元素，所以复杂度还是O(n^2)
+class Solution {
+public:
+    vector<int> countSmaller(vector<int>& nums) {
+        vector<int> remain_nums(nums.begin(),nums.end());
+        vector<int> result;
+        sort(remain_nums.begin(),remain_nums.end());
+        for(int i=0;i<nums.size();i++)
+        {
+            auto iter=lower_bound(remain_nums.begin(),remain_nums.end(),nums[i]); //此处一定可以搜索到
+            result.push_back(iter-remain_nums.begin());
+            remain_nums.erase(iter);
+        }
+        return result;
+    }
+};
+
+//蛮力求解可在O(n^2)的时间内解决问题，但是效率很低
+class Solution {
+public:
+    vector<int> countSmaller(vector<int>& nums) {
+        vector<int> result;
+        for(int i=0;i<nums.size();i++)
+        {
+            int cnt=0;
+            for(int j=i+1;j<nums.size();j++)
+            {
+                if(nums[i]>nums[j]) cnt++;
+            }
+            result.push_back(cnt);
+        }
+        return result;
+    }
+};
