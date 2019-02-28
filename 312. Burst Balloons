@@ -1,0 +1,62 @@
+class Solution {
+public:
+    int maxCoins(vector<int>& nums) {
+        //使用动态规划算法，可以取得较高的效率。大致思想是对于一个子问题来说，选取一个点将其分为三部分，先计算左右两边的子问题，在合并中间问题。实际中相当于先扎破左右两边的气球，再扎破中间的气球，这样就使得扎破中间气球的时候不用考虑左右两边子问题的情形。
+        if(nums.size()==0) return 0;
+        vector<vector<int>> max_val(nums.size(),vector<int>(nums.size(),0));
+        for(int i=1;i<=nums.size();i++) //代表子问题的长度
+        {
+            for(int j=0;j<=nums.size()-i;j++) //代表子字符串的开始位置
+            {
+                int start=j;
+                int end=j+i-1;
+                for(int k=0;k<i;k++) //代表子字符串分割点的位置
+                {
+                    max_val[start][end]=max(max_val[start][end],(j+k-1>=start?max_val[start][j+k-1]:0)+(j+k+1<=end?max_val[j+k+1][end]:0)+(j>0?nums[start-1]:1)*(end<nums.size()-1?nums[end+1]:1)*nums[j+k]);
+                }
+            }
+        }
+        return max_val[0].back();
+    }
+};
+
+
+//使用试探-回溯法效率很低，会超时
+class Solution {
+public:
+    int maxCoins(vector<int>& nums) {
+        //根据题目对于n和nums[i]的限制，返回值不会溢出
+        vector<bool> has_bursted(nums.size(),0); //记录是否已经选择某个气球
+        int max_val=0; //表示最后返回的最大值
+        int visited=0; //表示已经访问过的结点个数
+        find_maxcoins(nums,has_bursted,max_val,0,visited);
+        return max_val;
+    }
+    void find_maxcoins(vector<int>& nums,vector<bool>& has_bursted,int& max_val, int curr_val,int& visited)
+    {
+        if(visited==nums.size()) 
+        {
+            max_val=max(max_val,curr_val);
+            return;
+        }
+        else
+        {
+            for(int i=0;i<nums.size();i++)
+            {
+                if(!has_bursted[i])
+                {
+                    has_bursted[i]=1;
+                    visited++;
+                    int prev=i;
+                    int next=i;
+                    while(prev>=0&&has_bursted[prev]) prev--;
+                    while(next<nums.size()&&has_bursted[next]) next++;
+                    int temp=curr_val+nums[i]*(prev>=0?nums[prev]:1)*(next<nums.size()?nums[next]:1);
+                    find_maxcoins(nums,has_bursted,max_val,temp,visited);
+                    visited--;
+                    has_bursted[i]=0;
+                }
+            }
+        }
+    }
+};
