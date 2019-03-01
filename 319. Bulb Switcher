@@ -1,0 +1,29 @@
+//利用数学规律来推导，可以很容易得到结果
+class Solution {
+public:
+    //对于某个位置的开关而言，它被操作的次数等于它的因子个数。对于一个数q而言，设它的一个因子是p，那么q/p也一定是它的一个因子
+    //因此，只有n^2形式的数字才能被分解成奇数个质数，即最后灯亮
+    //所以只需要求sqrt(n)并将其向下省略即可
+    int bulbSwitch(int n) {
+        return sqrt(n);
+    }
+};
+
+
+//O(n^2)的蛮力算法，效率很低，submit的时候超出时间界限
+class Solution {
+public:
+    int bulbSwitch(int n) {
+        int bulb_on=0;
+        for(auto i=1;i<=n;i++)
+        {
+            int switch_times=1;
+            for(auto j=1;j<=i/2;j++)
+            {
+                if(i%j==0) switch_times++;
+            }
+            bulb_on+=switch_times%2;
+        }
+        return bulb_on;
+    }
+};
