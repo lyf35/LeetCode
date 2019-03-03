@@ -1,0 +1,48 @@
+//将蛮力求解的中间结果保存起来，相当于动态规划算法
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        vector<int> nums(amount+1,amount+1);
+        nums[0]=0;
+        for(int i=1;i<=amount;i++) //代表从1~amount这些数字开始寻找，每次能找零就减少找零的数目
+        {
+            for(int j=0;j<coins.size();j++) //对每一个可以用当前零钱替代的零钱，减少其找零的数目
+            {
+                if(coins[j]<=i)
+                {
+                    nums[i]=min(nums[i],nums[i-coins[j]]+1);
+                }
+            }
+        }
+        return nums[amount]>amount? -1:nums[amount];
+    }
+};
+
+
+//用蛮力求解，因为没有保存中间计算的结果，因此会超出时间界限
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        sort(coins.begin(),coins.end());
+        int number=INT_MAX;
+        get_min_change(coins,coins.size()-1,amount,0,number);
+        return number==INT_MAX?-1:number;
+    }
+    void get_min_change(vector<int>& coins,int pos,int amount,int cnt,int& min_number)
+    {
+        if(pos==-1)
+        {
+            if(amount==0)
+            {
+                min_number=min(min_number,cnt);
+            }
+        }
+        else
+        {
+            for(int j=0;j<=amount/coins[pos];j++)
+            {
+                get_min_change(coins,pos-1,amount-j*coins[pos],cnt+j,min_number);
+            }
+        }
+    }
+};
