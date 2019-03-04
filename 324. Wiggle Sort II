@@ -1,0 +1,38 @@
+class Solution {
+public:
+    void wiggleSort(vector<int>& nums) {
+        auto mid=nums.begin()+nums.size()/2; //相当于是nums的中间位置
+        nth_element(nums.begin(),mid,nums.end()); //以mid为界限做partition，STL自带算法，时间复杂度的期望值为O(n)
+        int mid_num=*mid;
+        //分割开之后，将mid左边，和mid+右边的值交叉放置，交叉放置的时候只使用常数大小的空间
+        //由于分割的时候左右两边可能存在某些数字相等的情况（即左边的最大值和右边的最小值）
+        //在处理的时候，尽量把左边的最大值放在nums的左边，右边的最小值放在nums的右边
+        int i=1;
+        int j=nums.size()%2?nums.size()/2+1:nums.size()/2;
+        if(j%2) j++;
+        while(j<nums.size())
+        {
+            swap(nums[i],nums[j]);
+            i+=2;
+            j+=2;
+        }
+        int left_max=0;
+        for(auto i=0;i<nums.size();i+=2)
+        {
+            if(nums[i]==mid_num)
+            {
+                swap(nums[i],nums[left_max]);
+                left_max+=2;
+            }
+        }
+        int right_max=nums.size()%2? nums.size()-2:nums.size()-1;
+        for(auto i=right_max;i>=0;i-=2)
+        {
+            if(nums[i]==mid_num)
+            {
+                swap(nums[i],nums[right_max]);
+                right_max-=2;
+            }
+        }
+    }
+};
