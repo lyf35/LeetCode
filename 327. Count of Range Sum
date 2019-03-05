@@ -1,0 +1,26 @@
+class Solution {
+public:
+    int countRangeSum(vector<int>& nums, int lower, int upper) {
+        //给定一个sum值的上下界，返回值为nums中某一区间的累加值正好在这一上下界中的区间个数
+        //O(n^2)的算法容易实现，但是要求算法复杂度小于O(n^2)
+        if(!nums.size()) return 0;
+        vector<long> sums(nums.begin(),nums.end());
+        for(auto i=1;i<sums.size();i++) sums[i]+=sums[i-1]; //相当于0-i这一段区间的累加和，用这些累加和相减可以组合出每个区间的累加值
+        return merge(sums,lower,upper,0,sums.size()-1);
+    }
+    int merge(vector<long>& sums,int lower,int upper,int begin,int end)
+    {
+        if(begin==end) return sums[end]>=lower&&sums[end]<=upper;
+        int mid=(begin+end)/2;
+        int sum=merge(sums,lower,upper,begin,mid)+merge(sums,lower,upper,mid+1,end);//先用分治法处理子问题，处理完子问题之后，begin至mid，以及mid+1至end部分已经被排序好。这两部分中，前半部分的最右区间一定小于后半部分的最右区间，因此用后半部分去减前半部分一定能得到一个合法的子区间sum值
+        int m=mid+1,n=mid+1;
+        for(int i =begin; i<= mid; i++)
+        {
+            while(m <= end && sums[m] - sums[i] < lower) m++; //由于begin~mid区间内的值是递增的，因此不必每次都对m和n初始化
+            while(n <= end && sums[n] - sums[i] <= upper) n++; 
+            sum += n - m;
+        }
+        inplace_merge(sums.begin()+begin,sums.begin()+mid+1,sums.begin()+end+1); //注意STL的算法是左闭右开区间
+        return sum;
+    }
+};
