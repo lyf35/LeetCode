@@ -1,0 +1,101 @@
+//用带有记忆的dfs可以节省大量时间消耗
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        //将二维矩阵看成一个有向图，只有从数字较大指向数字较小的有向边
+        //用bfs的方法进行搜索，即可找到最长的边，但是要允许访问过的边能够被再次访问
+        //易证明，只要从peak position开始寻找即可
+        int row=matrix.size();
+        if(!row) return 0;
+        int col=matrix.begin()->size();
+        if(!col) return 0;
+        vector<vector<int>> max_length(row,vector<int>(col,0));
+        int longest_path=1;
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<col;j++)
+            {
+                if(i>0&&matrix[i-1][j]>matrix[i][j]) continue;
+                if(i<row-1&&matrix[i+1][j]>matrix[i][j]) continue;
+                if(j>0&&matrix[i][j-1]>matrix[i][j]) continue;
+                if(j<col-1&&matrix[i][j+1]>matrix[i][j]) continue;
+                longest_path=max(longest_path,dfs(matrix,i,j,max_length));
+            }
+        }
+        return longest_path;
+    }
+    int dfs(vector<vector<int>>& matrix, int i,int j, vector<vector<int>>& max_length)
+    {
+        //如果某个位置之前已经搜索过，就可以直接返回它的dfs长度，充分使用max_length数组节省时间消耗
+        if(max_length[i][j]) return max_length[i][j]; 
+        //如果某个位置之前没有搜索过，就从4个方向进行dfs搜索
+        if(i>0&&matrix[i-1][j]<matrix[i][j])
+        {
+            max_length[i][j]=max(max_length[i][j],dfs(matrix,i-1,j,max_length));
+        }
+        if(i<matrix.size()-1&&matrix[i+1][j]<matrix[i][j])
+        {
+            max_length[i][j]=max(max_length[i][j],dfs(matrix,i+1,j,max_length));
+        }
+        if(j>0&&matrix[i][j-1]<matrix[i][j])
+        {
+            max_length[i][j]=max(max_length[i][j],dfs(matrix,i,j-1,max_length));
+        }
+        if(j<matrix.begin()->size()-1&&matrix[i][j+1]<matrix[i][j])
+        {
+            max_length[i][j]=max(max_length[i][j],dfs(matrix,i,j+1,max_length));
+        }
+        return ++max_length[i][j]; //搜索完成之后，还要加上它自身的长度1
+    }
+};
+
+//用bfs会超出时间界限
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        //将二维矩阵看成一个有向图，只有从数字较大指向数字较小的有向边
+        //用bfs的方法进行搜索，即可找到最长的边，但是要允许访问过的边能够被再次访问
+        //易证明，只要从peak position开始寻找即可
+        int row=matrix.size();
+        if(!row) return 0;
+        int col=matrix.begin()->size();
+        if(!col) return 0;
+        vector<vector<bool>> visited(row,vector<bool>(col,0));
+        int longest_path=0;
+        for(int i=0;i<row;i++)
+        {
+            for(int j=0;j<col;j++)
+            {
+                if(i>0&&matrix[i-1][j]>matrix[i][j]) continue;
+                if(i<row-1&&matrix[i+1][j]>matrix[i][j]) continue;
+                if(j>0&&matrix[i][j-1]>matrix[i][j]) continue;
+                if(j<col-1&&matrix[i][j+1]>matrix[i][j]) continue;
+                bfs(matrix,i,j,longest_path);
+            }
+        }
+        return longest_path;
+    }
+    void bfs(vector<vector<int>>& matrix, int i,int j, int& longest_path)
+    {
+        queue<pair<int,int>> next_nodes;
+        int layers=0;
+        next_nodes.push(make_pair(i,j));
+        while(next_nodes.size())
+        {
+            int nodes_one_layer=next_nodes.size();
+            for(int x=0;x<nodes_one_layer;x++)
+            {
+                auto temp=next_nodes.front();
+                next_nodes.pop();
+                int pos_row=temp.first;
+                int pos_col=temp.second;
+                if(pos_row>0&&matrix[pos_row-1][pos_col]<matrix[pos_row][pos_col]) next_nodes.push(make_pair(pos_row-1,pos_col));
+                if(pos_row<matrix.size()-1&&matrix[pos_row+1][pos_col]<matrix[pos_row][pos_col]) next_nodes.push(make_pair(pos_row+1,pos_col));
+                if(pos_col>0&&matrix[pos_row][pos_col-1]<matrix[pos_row][pos_col]) next_nodes.push(make_pair(pos_row,pos_col-1));
+                if(pos_col<matrix.begin()->size()-1&&matrix[pos_row][pos_col+1]<matrix[pos_row][pos_col]) next_nodes.push(make_pair(pos_row,pos_col+1));
+            }
+            layers++;
+        }
+        longest_path=max(longest_path,layers);
+    }
+};
