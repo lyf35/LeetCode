@@ -1,0 +1,49 @@
+//简化版的写法
+class Solution {
+public:
+    bool increasingTriplet(vector<int>& nums) {
+        int n=nums.size(),i;
+        if(n<=2)
+            return false;
+        
+        int a=2147483647,b=2147483647;
+        for(i=0;i<n;i++)
+        {
+            if(nums[i]<=a)
+                a=nums[i];
+            else if(nums[i]<=b)
+                b=nums[i];
+            else
+                return true;
+        }
+        return false;
+    }
+};
+
+//一个略复杂的算法，但是复杂度仍然是O(n)
+class Solution {
+public:
+    bool increasingTriplet(vector<int>& nums) {
+        //要求在O(n)的时间内完成，且只使用常数大小的空间
+        int ascend_maxnum_1=INT_MAX;
+        int ascend_maxnum_2=INT_MAX;
+        for(int i=1;i<nums.size();i++)
+        {
+            if(nums[i]>nums[i-1]&&ascend_maxnum_2>nums[i]) //遇到第二个数更小的情况之一
+            {
+                ascend_maxnum_1=nums[i-1];
+                ascend_maxnum_2=nums[i];
+            }
+            if(nums[i]<ascend_maxnum_2&&nums[i]>ascend_maxnum_1) //同样是遇到第二个数更小的另一种情况
+            {
+                ascend_maxnum_2=nums[i];
+            }
+            if(nums[i]>ascend_maxnum_2) //代表找到上升的三个数字
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
