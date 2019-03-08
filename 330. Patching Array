@@ -1,0 +1,69 @@
+//用数学规律求解，效率高得多
+class Solution {
+public:
+    int minPatches(vector<int>& nums, int n) {
+        //nums已经是从小到大排序过的
+        //使用贪心算法，只考虑int的32位数字即可
+        //miss-1是nums的前i位数字，以及添加的数字，所能组合出的最大数字
+        long miss = 1, added = 0, i = 0;
+        while (miss <= n) {
+            if (i < nums.size() && nums[i] <= miss) 
+            {
+                miss += nums[i++];
+            } 
+            else //如果当前能组合出的最大数字小于nums中的第i个数字，则添加一个数，大小为miss，这样就能组合出1~miss*2-1的所有数字，这一步是整个算法的最重要部分
+            {
+                miss += miss;
+                added++;
+            }
+        }
+        return added;
+    }
+};
+
+//暴力求解，只适用于n较小的情况
+class Solution {
+public:
+    int minPatches(vector<int>& nums, int n) {
+        vector<bool> construct(n+1,0);
+        construct[0]=1;
+        int remain=n;
+        for(int i=0;i<nums.size();i++)
+        {
+            for(int j=n-nums[i];j>=0;j--)
+            {
+                if(construct[j]&&!construct[j+nums[i]])
+                {
+                    construct[j+nums[i]]=1;
+                    remain--;
+                }
+            }
+        }
+        if(remain==0) return 0;
+        int add_count=0;
+        while(remain)
+        {
+            int min_missing_num=0;
+            for(int i=1;i<=n;i++)
+            {
+                if(!construct[i])
+                {
+                    min_missing_num=i;
+                    construct[i]=1;
+                    remain--;
+                    break;
+                }
+            }
+            add_count++;
+            for(int i=n-min_missing_num;i>0;i--)
+            {
+                if(construct[i]&&!construct[i+min_missing_num])
+                {
+                    construct[i+min_missing_num]=1;
+                    remain--;
+                }
+            }
+        }
+        return add_count;
+    }
+};
