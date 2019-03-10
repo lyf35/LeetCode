@@ -1,0 +1,52 @@
+class Solution {
+public:
+bool isValidSerialization(string preorder) {
+    //这种做法不需要使用栈结构，空间效率更高
+    if (preorder.empty()) return false;
+    preorder+=',';
+    int sz=preorder.size(),idx=0;
+    int capacity=1;
+    for (idx=0;idx<sz;idx++)
+    {
+        if (preorder[idx]!=',') continue;
+        capacity--; //每遇到一个结点，就给capacity-2
+        if (capacity<0) return false; //如果某处可容纳结点数小于0，则这样肯定不能构造树
+        if (preorder[idx-1]!='#') capacity+=2; //如果某处的结点不是#，那么消耗一个容量的同时又加了两个容量
+    }
+    return capacity==0;
+}
+};
+
+
+//用递归的暴力解法会TLE
+class Solution {
+public:
+    bool isValidSerialization(string preorder) {
+        if(preorder.size()==0) return false;
+        else if(preorder=="#") //整个字符串是"#"，则肯定成立
+        {
+            return true;
+        }
+        else //代表不是整个字符串都是"#"
+        {
+            if(preorder[0]=='#') return false; //如果第一个就是#，则肯定不正确
+            else
+            {
+                auto temp=preorder.find_first_of(",");
+                if(temp>preorder.size()) return false;
+                temp++;
+                for(auto i=temp;i<preorder.size()-2;i++) //最后一个字符肯定是“#”，因此循环范围可以缩小
+                {
+                    if(preorder[i]=='#')
+                    {
+                        if(isValidSerialization(preorder.substr(temp,i-temp+1))&&isValidSerialization(preorder.substr(i+2,preorder.size())))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    }
+};
