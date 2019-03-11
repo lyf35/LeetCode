@@ -1,0 +1,22 @@
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int,int> frequencies;
+        for(int i=0;i<nums.size();i++)
+        {
+            frequencies[nums[i]]++;
+        }
+        vector<pair<int,int>> nums_and_freq;
+        for(auto i=frequencies.begin();i!=frequencies.end();i++)
+        {
+            nums_and_freq.push_back(*i);
+        }
+        nth_element(nums_and_freq.begin(),nums_and_freq.end()-k,nums_and_freq.end(),[](pair<int,int> a,pair<int,int> b){return a.second<b.second;});
+        vector<int> result;
+        for(auto iter=nums_and_freq.end()-k;iter!=nums_and_freq.end();iter++)
+        {
+            result.push_back(iter->first);
+        }
+        return result;
+    }
+};
