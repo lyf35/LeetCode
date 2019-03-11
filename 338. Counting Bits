@@ -1,0 +1,29 @@
+//用位运算，代码更简洁一些
+class Solution {
+public:
+    vector<int> countBits(int num) {
+        vector<int> result(num+1,0);
+        for(int i=1;i<=num;i++)
+        {
+            //i&(i-1)代表i从低位开始数第一个1之后，其它剩余的高位数字中1的个数，这部分已经计算过，因此再加上最低位的那个1即可
+            //i和i-1的位表示中，i的最低位1之前的所有数字与i-1是相同的
+            result[i] = result[i&(i-1)] + 1;
+        }
+        return result;
+    }
+};
+
+//借助了math库的log函数
+class Solution {
+public:
+    vector<int> countBits(int num) {
+        vector<int> result(num+1,0);
+        for(int i=1;i<=num;i++)
+        {
+            int temp=i;
+            temp-=pow(2,int(log(temp)/log(2)));
+            result[i]=1+result[temp];
+        }
+        return result;
+    }
+};
