@@ -1,0 +1,32 @@
+class Solution {
+public:
+    //每一次都优先减去3，然后再一步步往下分，直至数字不大于4
+    int integerBreak(int n) {
+        int result=1;
+        if(n==2) return 1;
+        if(n==3) return 2;
+        while(n>4)
+        {
+            result*=3;
+            n-=3;
+        }
+        result*=n;
+        return result;
+    }
+};
+
+class Solution {
+public:
+    //用dp求解，时间复杂度是O(n^2)
+    int integerBreak(int n) {
+        vector<int> result(n+1,1);
+        for(int i=1;i<=n;i++)
+        {
+            for(int j=1;j<i;j++)
+            {
+                result[i]=max(result[i],j*max(result[i-j],i-j));
+            }
+        }
+        return result[n];
+    }
+};
