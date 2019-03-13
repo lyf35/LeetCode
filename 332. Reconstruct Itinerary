@@ -1,0 +1,72 @@
+//一个效率更高的dfs算法
+class Solution {
+private:
+    void visit(string airport,vector<string>& res,unordered_map<string,multiset<string>>&m){
+        while(m[airport].size()>0){
+            string next=*m[airport].begin();
+            m[airport].erase(m[airport].begin());
+            visit(next,res,m);
+        }
+        res.push_back(airport);
+    }
+public:
+    vector<string> findItinerary(vector<pair<string, string>> tickets) {
+        vector<string> res;
+        unordered_map<string,multiset<string>> m;
+        for(auto ticket:tickets){
+            m[ticket.first].insert(ticket.second);
+        }
+        visit("JFK",res,m);
+        return vector<string>(res.rbegin(),res.rend());
+    }
+};
+
+
+
+//一个效率较低的dfs算法
+class Solution {
+public:
+    vector<string> findItinerary(vector<pair<string, string>> tickets) {
+        //由于假定至少构成一条路径，因此不必考虑一些特殊情况
+        unordered_map<string,vector<string>> next_pos;
+        for(auto i:tickets)
+        {
+            next_pos[i.first].push_back(i.second);
+        }
+        for(auto iter=next_pos.begin();iter!=next_pos.end();iter++)
+        {
+            if(iter->second.size()>1)
+            {
+                sort(iter->second.begin(),iter->second.end());
+            }
+        }
+        vector<string> result;
+        result.push_back("JFK");
+        int remains=tickets.size();
+        dfs(result,remains,next_pos,remains+1);
+        return result;
+    }
+    void dfs(vector<string>& result,int remains,unordered_map<string,vector<string>> next_pos,const int length)
+    {
+        if(remains==0)
+        {
+            return;
+        }
+        else
+        {
+            auto last_pos=result.back();
+            for(int i=0;i<next_pos[last_pos].size();i++)
+            {
+                result.push_back(next_pos[last_pos][i]);
+                auto temp=next_pos;
+                temp[last_pos].erase(temp[last_pos].begin()+i);
+                dfs(result,remains-1,temp,length);
+                if(result.size()==length)
+                {
+                    break;
+                }
+                result.pop_back();
+            }
+        }
+    }
+};
