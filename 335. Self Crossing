@@ -1,0 +1,21 @@
+//将交叉的情况分为3类，对三类分别判断
+class Solution {
+public:
+    bool isSelfCrossing(vector<int>& x) {
+        if(x.size()<4) //如果小于4个数字，那么无论如何都无法相交
+        {
+            return 0;
+        }
+        for(int i=3;i<x.size();i++)
+        {
+            //在接下来的判断中，只考虑相对移动的距离即可
+            //连续4步构成交叉的情况（4条线组成一个封闭的长方形）
+            if(x[i]>=x[i-2]&&x[i-3]>=x[i-1]) return true; 
+            //连续5步构成交叉的情况（5条线组成一个封闭的长方形，只是某条边是由两步构成）
+            if(i>=4&&x[i]+x[i-4]>=x[i-2]&&x[i-3]==x[i-1]) return true;
+            //连续6步构成交叉的情况（相当于两个长方形重叠放置的样子）
+            if(i>=5&&x[i-5]>=x[i-3]-x[i-1]&&x[i]>=x[i-2]-x[i-4]&&x[i-1]<=x[i-3]&&x[i-2]>=x[i-4]) return true;
+        }
+        return 0;
+    }
+};
