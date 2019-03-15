@@ -1,0 +1,88 @@
+ //借助一个map保存逆向的字符串，然后用正向字符串查询逆向字符串
+ class Solution {
+ public:
+     vector<vector<int>> palindromePairs(vector<string>& words) {
+         unordered_map<string, int> dict;
+         vector<vector<int>> ans;
+         // build dictionary
+         for(int i = 0; i < words.size(); i++) {
+             string key = words[i];
+             reverse(key.begin(), key.end());
+             dict[key] = i;
+         }
+         // edge case: if empty string "" exists, find all palindromes to become pairs ("", self)
+         if(dict.find("")!=dict.end())
+         {
+             for(int i = 0; i < words.size(); i++)
+             {
+                 if(i == dict[""]) continue;
+                 if(isPalindrome(words[i])) ans.push_back({dict[""], i}); // 1) if self is palindrome, here ans covers concatenate("", self) 
+             }
+         }
+
+         for(int i = 0; i < words.size(); i++) 
+         {
+             for(int j = 0; j < words[i].size(); j++) 
+             {
+                 string left = words[i].substr(0, j);
+                 string right = words[i].substr(j, words[i].size() - j);
+
+                 if(dict.find(left) != dict.end() && isPalindrome(right) && dict[left] != i) 
+                 {
+                     ans.push_back({i, dict[left]});     // 2) when j = 0, left = "", right = self, so here covers concatenate(self, "")
+                 }
+
+                 if(dict.find(right) != dict.end() && isPalindrome(left) && dict[right] != i) 
+                 {
+                     ans.push_back({dict[right], i});
+                 }
+             }
+         }
+
+         return ans;        
+     }
+
+     bool isPalindrome(string str)
+     {
+         int i = 0;
+         int j = str.size() - 1; 
+
+         while(i < j) 
+         {
+             if(str[i++] != str[j--]) return false;
+         }
+
+         return true;
+     }
+ };
+
+//一个超过内存界限的算法
+class Solution {
+public:
+    vector<vector<int>> palindromePairs(vector<string>& words) {
+        vector<vector<int>> result;
+        for(int i=0;i<words.size();i++)
+        {
+            for(int j=0;j<words.size();j++)
+            {
+                if(i!=j&&is_palindrome(words[i]+words[j]))
+                {
+                    result.push_back(vector<int>{i,j});
+                }
+            }
+        }
+        return result;
+    }
+    bool is_palindrome(string s)
+    {
+        int i=0;
+        int j=s.size()-1;
+        while(i<j)
+        {
+            if(s[i]!=s[j]) return false;
+            i++;
+            j--;
+        }
+        return true;
+    }
+};
