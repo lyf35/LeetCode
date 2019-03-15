@@ -1,0 +1,54 @@
+//使用引用传值比起使用数值传值会节省大量的时间
+class Solution {
+public:
+    int tryRob(TreeNode* root, int& l, int& r) {
+        if (!root)
+            return 0;
+            
+        int ll = 0, lr = 0, rl = 0, rr = 0;
+        l = tryRob(root->left, ll, lr);
+        r = tryRob(root->right, rl, rr);
+        
+        return max(root->val + ll + lr + rl + rr, l + r);
+    }
+
+    int rob(TreeNode* root) {
+        int l, r;
+        return tryRob(root, l, r);
+    }
+};
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int rob(TreeNode* root) {
+        if(!root)
+        {
+            return 0;
+        }
+        if(!root->left&&!root->right)
+        {
+            return root->val;
+        }
+        else
+        {
+            int max_contain_root=root->val;
+            if(root->left&&root->left->left) max_contain_root+=rob(root->left->left);
+            if(root->left&&root->left->right) max_contain_root+=rob(root->left->right);
+            if(root->right&&root->right->left) max_contain_root+=rob(root->right->left);
+            if(root->right&&root->right->right) max_contain_root+=rob(root->right->right);
+            int max_not_contain_root=0;
+            if(root->left) max_not_contain_root+=rob(root->left);
+            if(root->right) max_not_contain_root+=rob(root->right);
+            return max(max_contain_root,max_not_contain_root);
+        }
+    }
+};
