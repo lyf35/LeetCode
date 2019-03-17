@@ -1,0 +1,95 @@
+/**
+ * // This is the interface that allows for creating nested lists.
+ * // You should not implement it, or speculate about its implementation
+ * class NestedInteger {
+ *   public:
+ *     // Return true if this NestedInteger holds a single integer, rather than a nested list.
+ *     bool isInteger() const;
+ *
+ *     // Return the single integer that this NestedInteger holds, if it holds a single integer
+ *     // The result is undefined if this NestedInteger holds a nested list
+ *     int getInteger() const;
+ *
+ *     // Return the nested list that this NestedInteger holds, if it holds a nested list
+ *     // The result is undefined if this NestedInteger holds a single integer
+ *     const vector<NestedInteger> &getList() const;
+ * };
+ */
+
+class NestedIterator {
+private:
+    stack<pair<vector<NestedInteger>::iterator,vector<NestedInteger>::iterator>> nested; //栈顶元素如果是数字，则一定是下一个元素；如果不是数字，那么每次处理的时候都由顶到底处理它的下一个元素。第一个元素保存当前vector的iterator，第二个元素是这个vector的end iterator
+public:
+    NestedIterator(vector<NestedInteger> &nestedList) {
+        auto temp=make_pair(nestedList.begin(),nestedList.end());
+        while(true)
+        {
+            if(temp.first!=temp.second&&temp.first->isInteger())
+            {
+                if(temp.first+1!=temp.second) nested.push(make_pair(temp.first+1,temp.second));
+                nested.push(make_pair(temp.first,temp.second));
+                break;
+            }
+            else if(temp.first!=temp.second)
+            {
+                if(temp.first+1!=temp.second) nested.push(make_pair(temp.first+1,temp.second));
+                temp=make_pair(temp.first->getList().begin(),temp.first->getList().end());
+            }
+            else
+            {
+                if(nested.size())
+                {
+                    temp=nested.top();
+                    nested.pop();
+                }
+                else break;
+            }
+        }
+        
+    }
+    
+    int next() {
+        
+        auto temp=nested.top();
+        nested.pop();
+        int return_val=temp.first->getInteger(); //返回栈顶的元素值
+        if(!nested.size()) return return_val;
+        temp=nested.top();
+        nested.pop();
+        while(true) //取出栈顶元素之后，要对栈顶之后的元素做处理
+        {
+            if(temp.first!=temp.second&&temp.first->isInteger())
+            {
+                if(temp.first+1!=temp.second) nested.push(make_pair(temp.first+1,temp.second));
+                nested.push(make_pair(temp.first,temp.second));
+                break;
+            }
+            else if(temp.first!=temp.second)
+            {
+                if(temp.first+1!=temp.second) nested.push(make_pair(temp.first+1,temp.second));
+                temp=make_pair(temp.first->getList().begin(),temp.first->getList().end());
+            }
+            else
+            {
+                if(nested.size())
+                {
+                    temp=nested.top();
+                    nested.pop();
+                }
+                else break;
+            }
+        }
+        return return_val;
+    }
+
+    bool hasNext() {
+        if(nested.size()) return true;
+        else return false;
+    }
+};
+
+/**
+ * Your NestedIterator object will be instantiated and called as such:
+ * NestedIterator i(nestedList);
+ * while (i.hasNext()) cout << i.next();
+ */
