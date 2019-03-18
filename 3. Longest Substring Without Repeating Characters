@@ -1,3 +1,25 @@
+//二刷的时候，使用一个更加简洁的方法
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int max_length=0;
+        vector<int> visited(128,-1); //此处也可以用unordered_map代替
+        int start=-1;
+        for(int i=0;i<s.size();i++)
+        {
+            if(visited[s[i]]>start) //代表从start位置开始，某个元素已经被访问过了，这样就不必将vector重置
+            {
+                start=visited[s[i]];
+            }
+            visited[s[i]]=i;
+            max_length=max(max_length,i-start);
+        }
+        return max_length;
+    }
+};
+
+
+//第一次刷的思路，这种方法浪费的空间太大
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
