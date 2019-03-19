@@ -1,3 +1,42 @@
+//仿照solution自己写的c++版本
+class Solution {
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        if(nums1.size()>nums2.size())
+        {
+            return findMedianSortedArrays(nums2,nums1);
+        }
+        //此处可以假设nums1的数字比nums2要多
+        int size1=nums1.size();
+        int size2=nums2.size();
+        //以pos1和pos2为分界线，如果将两个数组以pos1和pos2为界分开的话，pos1处的值一定小于pos2右侧的值，pos1右侧的值一定大于pos2处的值
+        int min_pos=0,max_pos=size1,halflen=(size1+size2+1)/2; //此处一定注意halflen表达式中的+1，它主要是针对于数字总个数是奇数时的处理
+        while(min_pos<=max_pos)
+        {
+            int i=(min_pos+max_pos)/2; //代表第一个数组的位置，每次用二分法来确定，因此时间复杂度为对数级的
+            int j= halflen-i; //代表第二个数组的位置
+            if(i<max_pos&&nums1[i]<nums2[j-1]) min_pos=i+1; //代表i对应的数字太小
+            else if(i>min_pos&&nums1[i-1]>nums2[j]) max_pos=i-1; //代表i对应的数字太大 
+            else //代表i处对应的数字与j处对应的数字刚好，可以返回
+            {
+                int maxleft=0;
+                if(i==0) maxleft=nums2[j-1];
+                else if(j==0) maxleft=nums1[i-1];
+                else maxleft=max(nums1[i-1],nums2[j-1]);
+                if((size1+size2)%2==1) return maxleft;
+                
+                int minright=0;
+                if(i==size1) minright=nums2[j];
+                else if(j==size2) minright=nums1[i];
+                else minright=min(nums1[i],nums2[j]);
+                return (maxleft+minright)/2.0;
+            }
+        }
+        return 0.0;
+    }
+};
+
+//之前自己写的算法
 class Solution {
 public:
     double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
