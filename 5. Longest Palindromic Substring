@@ -1,3 +1,43 @@
+//一个改进版的Manacher算法，代码简洁
+class Solution {
+public:
+	string longestPalindrome(string s) 
+    {
+        auto length=s.size();
+        int i=0,l=0,r=0,max_beg=0,max_length=0;
+        while(i<length)
+        {
+            l=r=i;
+            while(r+1<length&&s[r]==s[r+1]) r++; 
+            i=r+1; //代表下一次循环的开始搜索位置，因为上一个i到这个i之间全部都是相同的字符，这些字符构成水仙花字符的时候，必定是一起出现的，否则无法对称分布
+            while(l>0&&r<length-1&&s[l-1]==s[r+1]) l--,r++;
+            if(max_length<r-l+1) max_length=r-l+1,max_beg=l;
+        }
+        return s.substr(max_beg,max_length);
+	}
+};
+
+
+//如果用动态规划求解，效率会很低
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        vector<vector<bool>> dp(s.size(),vector<bool>(s.size(),0));
+        string result;
+        for(int i=1;i<=s.size();i++) //代表水仙花数的长度
+        {
+            for(int j=0;j<=s.size()-i;j++) //代表水仙花数的开始位置
+            {
+                dp[j][j+i-1]=(j+1<=j+i-2?dp[j+1][j+i-2]:1)&&(s[j]==s[j+i-1]);
+                if(dp[j][j+i-1]&&result.size()<i) result=s.substr(j,i);
+            }
+        }
+        return result;
+    }
+};
+
+
+//自己一开始写的Manacher算法，代码格式不够简洁
 class Solution {
 public:
     string longestPalindrome(string s) {
