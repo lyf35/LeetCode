@@ -1,3 +1,26 @@
+//可以使用一个向量保存每一行的结果，最后按行相加，但是效率会稍微低一些
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        vector<string> str_row(numRows);
+        if(numRows==1) return s;
+        int pos=0;
+        int period=2*numRows-2;
+        while(pos<s.size())
+        {
+            //把每个2*numRows-2看成一个周期，0~numrows-1代表下行，numrows~2*numrows-3为上行
+            int row=(pos%period>=numRows)? period-pos%period:pos%period;
+            str_row[row]+=s[pos];
+            pos++;
+        }
+        string result;
+        for(auto str:str_row) result+=str;
+        return result;
+    }
+};
+
+
+//直接得到返回值，内存开销小一些
 class Solution {
 public:
     string convert(string s, int numRows) {
