@@ -1,3 +1,23 @@
+//从后向前的匹配过程，这样对特殊符号的处理更加方便一些
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        vector<vector<bool>> is_match(s.size()+1,vector<bool>(p.size()+1,0));
+        is_match[s.size()][p.size()]=1;
+        for(int j=p.size()-1;j>=0;j--)
+        {
+            for(int i=s.size();i>=0;i--)
+            {
+                bool first_match=i<s.size()&&(s[i]==p[j]||p[j]=='.'); //代表某个字符如果是第一次匹配是否能成功
+                if(j+1<p.size()&&p[j+1]=='*') is_match[i][j]=is_match[i][j+2]||first_match&&is_match[i+1][j]; //此处刚好是第一次匹配或者是重复匹配，可以正确匹配的情况也可能需要跳过才能得到正确答案
+                else is_match[i][j]=first_match&&is_match[i+1][j+1]; //代表后面没有“*”字符的情况
+            }
+        }
+        return is_match[0][0];
+    }
+};
+
+//从前向后匹配，比从后向前匹配麻烦一些
 class Solution {
 public:
     bool isMatch(string s, string p) {
