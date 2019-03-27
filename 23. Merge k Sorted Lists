@@ -1,3 +1,47 @@
+//二刷时想到的一个新方法：用multimap来保存每一个链表里当前最小的值，每次从multimap中挑选值
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        multimap<int,int> head_vals; //第一个是数字，第二个是第几个链表
+        int valid_num=0;
+        ListNode* head=new ListNode(INT_MAX);
+        ListNode* curr=head;
+        for(int i=0;i<lists.size();i++)
+        {
+            if(lists[i])
+            {
+                valid_num++;
+                head_vals.insert(make_pair(lists[i]->val,i));
+            }
+        }
+        while(valid_num)
+        {
+            auto temp=head_vals.begin();
+            int value=temp->first;
+            int pos=temp->second;
+            head_vals.erase(temp);
+            curr->next=new ListNode(value);
+            curr=curr->next;
+            if(lists[pos]->next)
+            {
+                lists[pos]=lists[pos]->next;
+                head_vals.insert(make_pair(lists[pos]->val,pos));
+            }
+            else valid_num--; 
+        }
+        return head->next;
+    }
+};
+
+
 /**
  * Definition for singly-linked list.
  * struct ListNode {
