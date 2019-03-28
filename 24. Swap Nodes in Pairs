@@ -1,3 +1,42 @@
+//加入一个辅助的哨兵结点，可以简化代码
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        ListNode* sent=new ListNode(0); //哨兵结点
+        sent->next=head;
+        ListNode* temp=sent;
+        ListNode* prev=temp; //注意此处定义的位置，如果定义在while循环内则会使得程序运行较慢
+        ListNode* first=nullptr;
+        ListNode* second=nullptr;
+        while(true)
+        {
+            if(temp->next&&temp->next->next)
+            {
+                first=temp->next;
+                second=temp->next->next;
+                first->next=second->next;
+                temp->next=second;
+                second->next=first;
+                temp=temp->next->next;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return sent->next;
+    }
+};
+
+
 /**
  * Definition for singly-linked list.
  * struct ListNode {
