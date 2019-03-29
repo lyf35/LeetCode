@@ -1,3 +1,56 @@
+//自己二刷时写的更简单的代码
+class Solution {
+public:
+    vector<int> findSubstring(string s, vector<string>& words) {
+        //注意s中的匹配位置不一定是从words长度的整数倍开始的
+        vector<int> result;
+        if(s.size()==0||words.size()==0) return result;
+        int word_length=words[0].size(); //存储每一个word的长度
+        if(word_length*words.size()>s.size()) return result;
+        unordered_map<string,int> word_count; //保存每一个word的数目
+        for(auto str:words) word_count[str]++;
+        for(int i=0;i<word_length;i++)
+        {
+            int valid_cnt=0;
+            unordered_map<string,int> cnt; //保存从第i个位置开始的字符串结果
+            int beg_pos=i;
+            for(int pos=i;pos<=s.size()-word_length;pos+=word_length)
+            {
+                string temp=s.substr(pos,word_length);
+                
+                if(word_count.count(temp))
+                {
+                    cnt[temp]++;
+                    valid_cnt++;
+                    
+                    while(cnt[temp]>word_count[temp])
+                    {
+                        string temp_str=s.substr(beg_pos,word_length);
+                        cnt[temp_str]--;
+                        valid_cnt--;
+                        beg_pos+=word_length;
+                    }
+                    
+                    if(valid_cnt==words.size())
+                    {
+                        result.push_back(beg_pos);
+                        cnt[s.substr(beg_pos,word_length)]--;
+                        valid_cnt--;
+                        beg_pos+=word_length;
+                    }
+                }
+                else
+                {
+                    cnt.clear();
+                    valid_cnt=0;
+                    beg_pos=pos+word_length;
+                }
+            }
+        }
+        return result;
+    }
+};
+
 //由于题目中设定words中每个字符串的长度都相等，因此使用hashmap可以很容易地解决问题
 class Solution {
 public:
