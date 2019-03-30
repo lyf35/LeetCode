@@ -1,3 +1,22 @@
+//二刷的时候写的更简洁的代码
+class Solution {
+public:
+    void nextPermutation(vector<int>& nums) {
+        //找到最靠后的上升的两个数字，如果没有找到就把nums重排
+        //ascend_pos2代表ascend_pos1后面最小的那个元素
+        int ascend_pos1=-1;
+        int ascend_pos2=-1;
+        for(int i=1;i<nums.size();i++)
+        {
+            if(nums[i-1]<nums[i]) ascend_pos1=i-1,ascend_pos2=i;
+            else if(ascend_pos1>=0&&nums[ascend_pos1]<nums[i]&&nums[ascend_pos2]>nums[i]) ascend_pos2=i;
+        }
+        if(ascend_pos1>=0) swap(nums[ascend_pos1],nums[ascend_pos2]);
+        sort(nums.begin()+ascend_pos1+1,nums.end());
+    }
+};
+
+
 class Solution {
 public:
     void nextPermutation(vector<int>& nums) {
