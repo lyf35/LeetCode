@@ -1,5 +1,46 @@
 class Solution {
 public:
+    vector<int> searchRange(vector<int>& nums, int target) {
+        //此处也可以用C++ stl自带的lower_bound和upper_bound函数
+        vector<int> result{-1,-1};
+        if(nums.size()==0) return result;
+        int lower=find_lower_bound(nums,target,0,nums.size()-1);
+        int upper=find_upper_bound(nums,target,0,nums.size()-1);
+        if(nums[lower]==target) result[0]=lower;
+        if(nums[upper]==target) result[1]=upper;
+        else if(upper>0&&nums[upper-1]==target) result[1]=upper-1;
+        return result;
+    }
+    int find_lower_bound(vector<int>& nums,int target,int i,int j)
+    {
+        if(i==j)
+        {
+            return i;
+        }
+        else 
+        {
+            int mid=(i+j)/2;
+            if(nums[mid]>=target) return find_lower_bound(nums,target,i,mid);
+            else return find_lower_bound(nums,target,mid+1,j);
+        }
+    }
+    int find_upper_bound(vector<int>& nums,int target,int i,int j)
+    {
+        if(i==j)
+        {
+            return i;
+        }
+        else 
+        {
+            int mid=(i+j)/2;
+            if(nums[mid]<=target) return find_upper_bound(nums,target,mid+1,j);
+            else return find_upper_bound(nums,target,i,mid);
+        }
+    }
+};
+
+class Solution {
+public:
     vector<int> searchRange(vector<int>& nums, int target) 
     {
         vector<int> return_val{-1,-1};
