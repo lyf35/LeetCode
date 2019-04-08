@@ -1,3 +1,26 @@
+//二刷，在之前O(n)算法的基础上对程序又做了简化
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        vector<int> water(height.size(),0);
+        int temp=0;
+        for(int i=0;i<height.size();i++) //temp为左侧最高挡板的高度，此时假设最右边有一个无限高的挡板
+        {
+            temp=max(temp,height[i]);
+            water[i]=temp-height[i];
+        }
+        temp=0;
+        for(int i=height.size()-1;i>=0;i--) //temp为右侧最高挡板的高度，此时water是根据左侧挡板的高度计算的，这一步相当于把右端挡板也考虑进去
+        {
+            temp=max(temp,height[i]);
+            water[i]=min(water[i],temp-height[i]);
+        }
+        auto sum=accumulate(water.begin(),water.end(),0);
+        return sum;
+    }
+};
+
+
 //一个比较容易理解的蛮力算法，但是这样会使得最坏情况下的时间复杂度为O(n^2)
 class Solution {
 public:
